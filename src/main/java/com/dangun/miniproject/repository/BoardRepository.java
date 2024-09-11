@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import com.dangun.miniproject.domain.Board;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
+  
+  void deleteByMemberId(Long memberId);
 
  	// 게시글 목록 조회
 	@Query(value = """
@@ -39,4 +41,5 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 			 ORDER BY b.createdAt DESC
 	""")
 	Page<Board> findAllByMyBoard(final Long memberId, final Pageable pageable);
+
 }
