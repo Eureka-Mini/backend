@@ -5,6 +5,8 @@ import com.dangun.miniproject.domain.Member;
 import com.dangun.miniproject.dto.GetAddressRequest;
 import com.dangun.miniproject.dto.GetMemberRequest;
 import com.dangun.miniproject.repository.AddressRepository;
+import com.dangun.miniproject.repository.BoardRepository;
+import com.dangun.miniproject.repository.CommentRepository;
 import com.dangun.miniproject.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final AddressRepository addressRepository;
+    private final BoardRepository boardRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public GetMemberRequest getMember(Long id) {
@@ -56,7 +60,6 @@ public class MemberServiceImpl implements MemberService {
                             .zipcode(address.getZipcode())
                             .build();
 
-                    // MemberDto에 AddressDto를 설정
                     getMemberRequestBuilder.address(getAddressRequest);
                 },
                 () -> {
@@ -64,7 +67,32 @@ public class MemberServiceImpl implements MemberService {
                 }
         );
 
-        // 최종적으로 MemberDto를 빌드하고 반환
         return getMemberRequestBuilder.build();
     }
+
+    @Override
+    public GetMemberRequest updateMember(GetMemberRequest getMemberRequest,Long id) {
+
+        Optional<Member> optionalMember = memberRepository.findById(id);
+
+        if (optionalMember.isPresent()) {
+
+            Member member = optionalMember.get();
+
+            // 수정할 필드만 업데이트 (주소는 수정 X)
+            member.updateMember(getMemberRequest);
+
+            try {
+                memberRepository.save(member);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }else{
+            return null;
+        }
+
+        return getMemberRequest;
+    }
+
 }

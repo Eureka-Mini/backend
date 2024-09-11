@@ -1,5 +1,6 @@
 package com.dangun.miniproject.domain;
 
+import com.dangun.miniproject.dto.GetMemberRequest;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,5 +31,11 @@ public class Member {
         this.email = email;
         this.nickname = nickname;
         this.password = password;
+    }
+
+    public void updateMember(GetMemberRequest getMemberRequest){
+        this.email = getMemberRequest.getEmail();
+        this.password = getMemberRequest.getPassword();
+        this.nickname = getMemberRequest.getNickname();
     }
 }
