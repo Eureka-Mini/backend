@@ -1,11 +1,15 @@
 package com.dangun.miniproject.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dangun.miniproject.domain.Board;
 import com.dangun.miniproject.domain.Comment;
 import com.dangun.miniproject.dto.GetBoardDetailResponse;
+import com.dangun.miniproject.dto.GetBoardResponse;
 import com.dangun.miniproject.dto.GetCommentResponse;
 import com.dangun.miniproject.repository.BoardRepository;
 
@@ -38,6 +42,30 @@ public class BoardServiceImpl implements BoardService {
 		}
 
 		return boardResponse;
+	}
+
+	/**
+	 * 게시글 목록 조회
+	 */
+	@Override
+	public Page<GetBoardResponse> getBoardList(final Pageable pageable) {
+
+		final PageRequest pageRequest = PageRequest.of(0, 10);
+		final Page<Board> boards = boardRepository.findAllWithMember(pageRequest);
+
+		return boards.map(GetBoardResponse::from);
+	}
+
+	/**
+	 * 게시글 키워드 검색
+	 */
+	@Override
+	public Page<GetBoardResponse> getBoardList(final String keyword, final Pageable pageable) {
+
+		final PageRequest pageRequest = PageRequest.of(0, 10);
+		final Page<Board> boards = boardRepository.searchBoardsByKeyword(keyword, pageRequest);
+
+		return boards.map(GetBoardResponse::from);
 	}
 
 	// 게시글 작성자인지 확인
