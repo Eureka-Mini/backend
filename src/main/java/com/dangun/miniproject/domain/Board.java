@@ -27,8 +27,8 @@ public class Board extends BaseEntity {
     @ManyToOne
     private Member member;
 
-    @OneToMany(mappedBy = "board")
-    private List<Comment> comments = new ArrayList<>();
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 
     @Builder
     private Board(String content, Member member, Integer price, BoardStatus boardStatus, String title) {

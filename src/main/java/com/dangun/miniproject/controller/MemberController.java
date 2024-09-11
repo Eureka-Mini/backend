@@ -48,5 +48,16 @@ public class MemberController {
         return memberService.updateMember(getMemberRequest, id);
     }
 
+
+    @DeleteMapping("/{memberId}")
+    public ResponseEntity<String> deleteMember(@PathVariable Long memberId) {
+        boolean isDeleted = memberService.deleteMember(memberId);
+
+        if (isDeleted) {
+            return ResponseEntity.ok("Member deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found.");
+        }
+    }
 }
 

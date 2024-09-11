@@ -95,4 +95,28 @@ public class MemberServiceImpl implements MemberService {
         return getMemberRequest;
     }
 
+    @Override
+    public boolean deleteMember(Long id) {
+        Optional<Member> memberOptional = memberRepository.findById(id);
+
+        if (memberOptional.isPresent()) {
+            Member member = memberOptional.get();
+
+            // 연관된 Comment 삭제
+            commentRepository.deleteByMemberId(id);
+
+            // 연관된 Board 삭제
+            boardRepository.deleteByMemberId(id);
+
+            // 연관된 Address 삭제
+            addressRepository.deleteByMemberId(id);
+
+            // Member 삭제
+            memberRepository.delete(member);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

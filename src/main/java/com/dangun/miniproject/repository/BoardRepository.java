@@ -1,9 +1,8 @@
 package com.dangun.miniproject.repository;
 
-
-import com.dangun.miniproject.domain.Address;
+import com.dangun.miniproject.domain.Board;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AddressRepository extends JpaRepository<Address, Long> {
+public interface BoardRepository  extends JpaRepository<Board, Long> {
     void deleteByMemberId(Long memberId);
 }
