@@ -19,6 +19,7 @@ public class Comment extends BaseEntity {
     private Member member;
 
     @ManyToOne
+    @JoinColumn(name = "board_id")
     private Board board;
 
     @Builder
