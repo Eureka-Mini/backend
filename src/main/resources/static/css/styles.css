@@ -1,0 +1,86 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f0f9f0; /* 연한 초록색 배경 */
+}
+
+.navbar {
+    background-color: #ffffff;
+    padding: 15px;
+    box-shadow: 0 4px 2px -2px gray;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.navbar-logo {
+    font-size: 24px;
+    color: #006400; /* 짙은 초록색 텍스트 */
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    margin-right: 50px;
+}
+
+.navbar-logo img.logo-image {
+    width: 20px; /* 이미지 크기 조절 */
+    height: 20px;
+    margin-right: 10px; /* 텍스트와 이미지 사이 간격 */
+}
+
+.navbar-logo:hover {
+    color: #32cd32; /* 라임 그린색으로 변경 */
+}
+
+.navbar-link {
+    font-size: 24px;
+    color: #006400; /* 짙은 초록색 텍스트 */
+    text-decoration: none;
+    margin-right: 20px;
+}
+
+.navbar-link:hover {
+    color: #32cd32; /* 라임 그린색으로 변경 */
+}
+
+.navbar-search {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    justify-content: flex-end;
+}
+
+#searchInput {
+    padding: 8px 15px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 200px;
+}
+
+#searchButton {
+    padding: 8px 15px;
+    margin-left: 10px;
+    background-color: #32cd32; /* 라임 그린색 버튼 */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#searchButton:hover {
+    background-color: #228b22; /* 포레스트 그린색으로 변경 */
+}
