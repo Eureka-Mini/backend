@@ -1,5 +1,7 @@
 package com.dangun.miniproject.domain;
 
+import static jakarta.persistence.FetchType.*;
+
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +18,7 @@ public class Address {
     private String zipcode;
 
     @MapsId
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
