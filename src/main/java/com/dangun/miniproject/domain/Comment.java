@@ -1,6 +1,7 @@
 package com.dangun.miniproject.domain;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,7 +21,10 @@ public class Comment extends BaseEntity {
     @ManyToOne
     private Board board;
 
-    public Comment(String content) {
+    @Builder
+    private Comment(Board board, String content, Member member) {
+        this.board = board;
         this.content = content;
+        this.member = member;
     }
 }

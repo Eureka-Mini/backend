@@ -1,7 +1,6 @@
 package com.dangun.miniproject.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,10 +15,16 @@ public class Address {
     private String detail;
     private String zipcode;
 
+    @MapsId
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     @Builder
-    private Address(String street, String zipcode, String detail) {
+    private Address(String detail, Member member, String street, String zipcode) {
+        this.detail = detail;
+        this.member = member;
         this.street = street;
         this.zipcode = zipcode;
-        this.detail = detail;
     }
 }

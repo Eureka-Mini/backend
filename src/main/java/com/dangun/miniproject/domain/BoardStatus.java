@@ -1,5 +1,5 @@
 package com.dangun.miniproject.domain;
 
-public enum Status {
+public enum BoardStatus {
     판매중, 판매완료
 }
