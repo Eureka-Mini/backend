@@ -30,4 +30,13 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 	""")
 	Page<Board> searchBoardsByKeyword(@Param("keyword") final String keyword, final Pageable pageable);
 
+	// 작성 게시글 목록 조회
+	@Query(value = """
+			SELECT b
+			  FROM Board b
+			  JOIN FETCH b.member m
+			 WHERE m.id = :memberId
+			 ORDER BY b.createdAt DESC
+	""")
+	Page<Board> findAllByMyBoard(final Long memberId, final Pageable pageable);
 }

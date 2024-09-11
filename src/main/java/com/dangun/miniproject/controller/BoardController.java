@@ -39,4 +39,13 @@ public class BoardController {
 
 		return boardService.getBoardList(pageable);
 	}
+
+	// 작성 게시글 목록 조회
+	@GetMapping("/my-board")
+	public Page<GetBoardResponse> getMyBoardList(
+		@RequestParam("memberId") final Long memberId,
+		final Pageable pageable
+	) {
+		return boardService.getMyBoardList(memberId, pageable);
+	}
 }

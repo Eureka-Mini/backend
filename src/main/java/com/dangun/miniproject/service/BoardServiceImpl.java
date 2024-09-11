@@ -68,6 +68,18 @@ public class BoardServiceImpl implements BoardService {
 		return boards.map(GetBoardResponse::from);
 	}
 
+	/**
+	 * 작성 게시글 목록 조회
+	 */
+	@Override
+	public Page<GetBoardResponse> getMyBoardList(final Long memberId, final Pageable pageable) {
+
+		final PageRequest pageRequest = PageRequest.of(0, 10);
+		final Page<Board> boards = boardRepository.findAllByMyBoard(memberId, pageRequest);
+
+		return boards.map(GetBoardResponse::from);
+	}
+
 	// 게시글 작성자인지 확인
 	private boolean checkBoardWriter(final Board board, final Comment comment) {
 

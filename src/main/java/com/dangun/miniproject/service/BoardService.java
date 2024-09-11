@@ -16,4 +16,7 @@ public interface BoardService {
 
 	// 게시글 키워드 검색
 	Page<GetBoardResponse> getBoardList(final String keyword, final Pageable pageable);
+
+	// 작성 게시글 목록 조회
+	Page<GetBoardResponse> getMyBoardList(final Long memberId, final Pageable pageable);
 }
