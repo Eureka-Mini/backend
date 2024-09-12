@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -138,6 +139,32 @@ public class CommentServiceTest {
             assertThatThrownBy(() -> commentService.updateComment(commentId, invalidBoardId, request, member))
                     .isInstanceOf(NoSuchElementException.class)
                     .hasMessage("Board Not Found");
+        }
+
+        @Test
+        void 다른_사용자가_댓글을_수정하려고_할_때_권한_없음() {
+            // given
+            Long commentId = 10L;
+            Long boardId = 20L;
+            UpdateCommentRequest request = mock(UpdateCommentRequest.class);
+            Member actualMember = mock(Member.class);
+            Member anotherMember = mock(Member.class);
+            Board board = mock(Board.class);
+            Comment comment = Comment.builder()
+                    .content("수정 전 댓글")
+                    .board(board)
+                    .member(actualMember)
+                    .build();
+
+            when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+            when(board.getId()).thenReturn(boardId);
+            when(actualMember.getId()).thenReturn(1L);
+            when(anotherMember.getId()).thenReturn(2L);
+
+            // when, then
+            assertThatThrownBy(() -> commentService.updateComment(commentId, boardId, request, anotherMember))
+                    .isInstanceOf(AccessDeniedException.class)
+                    .hasMessage("You are not the owner of this comment");
         }
     }
 }
