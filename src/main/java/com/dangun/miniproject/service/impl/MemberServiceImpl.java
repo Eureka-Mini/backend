@@ -1,4 +1,4 @@
-package com.dangun.miniproject.service;
+package com.dangun.miniproject.service.impl;
 
 import com.dangun.miniproject.domain.Address;
 import com.dangun.miniproject.domain.Member;
@@ -8,6 +8,7 @@ import com.dangun.miniproject.repository.AddressRepository;
 import com.dangun.miniproject.repository.BoardRepository;
 import com.dangun.miniproject.repository.CommentRepository;
 import com.dangun.miniproject.repository.MemberRepository;
+import com.dangun.miniproject.service.MemberService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
