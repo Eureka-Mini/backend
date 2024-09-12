@@ -3,6 +3,8 @@ package com.dangun.miniproject.service.impl;
 import com.dangun.miniproject.domain.Board;
 import com.dangun.miniproject.domain.Comment;
 import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.dto.UpdateCommentRequest;
+import com.dangun.miniproject.dto.UpdateCommentResponse;
 import com.dangun.miniproject.dto.WriteCommentRequest;
 import com.dangun.miniproject.dto.WriteCommentResponse;
 import com.dangun.miniproject.repository.BoardRepository;
@@ -36,7 +38,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void updateComment(Long commentId, String updatedContent, Member member) {
+    public UpdateCommentResponse updateComment(Long commentId, UpdateCommentRequest request, Member member) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NoSuchElementException("Comment not found"));
 
@@ -44,6 +46,8 @@ public class CommentServiceImpl implements CommentService {
             throw new AccessDeniedException("You are not the owner of this comment");
         }
 
-        comment.updateContent(updatedContent);
+        comment.updateContent(request.getContent());
+
+        return new UpdateCommentResponse(comment.getContent());
     }
 }
