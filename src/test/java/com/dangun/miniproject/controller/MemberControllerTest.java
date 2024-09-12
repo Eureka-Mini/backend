@@ -16,13 +16,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.nio.charset.StandardCharsets;
 
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -48,7 +47,7 @@ public class MemberControllerTest {
         GetMemberRequest mockResponse = new GetMemberRequest(1L, "Hong@test.com", "1234", "Hong", mockAddress);
 
         // when: MemberService의 getMember가 호출될 때, mockResponse를 반환하도록 설정
-        Mockito.when(memberService.getMember(anyLong())).thenReturn(mockResponse);
+        when(memberService.getMember(anyLong())).thenReturn(mockResponse);
 
         // then
         mockMvc.perform(get("/members/1"))
@@ -72,7 +71,7 @@ public class MemberControllerTest {
         GetMemberRequest updatedResponse = new GetMemberRequest(4L, "minah@naver.com", "password4", "minah", mockAddress);
 
         // Mockito 설정
-        Mockito.when(memberService.updateMember(Mockito.any(), Mockito.eq(4L)))
+        when(memberService.updateMember(Mockito.any(), Mockito.eq(4L)))
                 .thenReturn(ResponseEntity.ok(updatedResponse));
 
         // when
@@ -90,4 +89,25 @@ public class MemberControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.nickname").value("minah"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.address.id").value(4L));
     }
+
+    @Test
+    @WithMockUser(username = "user")
+    public void deleteMember() throws Exception {
+        // given
+        Long memberId = 1L;
+        when(memberService.deleteMember(memberId)).thenReturn(true);
+
+        // when
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/members/{memberId}", memberId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("Member deleted successfully."));
+
+        verify(memberService).deleteMember(memberId); // deleteMember 메서드가 호출됐는지 검증
+    }
+
+
 }
