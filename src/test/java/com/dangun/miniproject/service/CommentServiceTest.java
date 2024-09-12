@@ -85,4 +85,31 @@ public class CommentServiceTest {
             ).isInstanceOf(NoSuchElementException.class).hasMessage("Board Not Found.");
         }
     }
+
+    @Nested
+    class updateComment {
+
+        @Test
+        void 유효한_사용자가_본인의_댓글을_수정한다() {
+            // given
+            Long commentId = 1L;
+            String updatedContent = "수정된 댓글 내용";
+            Member member = mock(Member.class);
+            Board board = mock(Board.class);
+            Comment comment = Comment.builder()
+                    .content("수정 전 댓글")
+                    .board(board)
+                    .member(member)
+                    .build();
+
+            // mock comment repository behavior
+            when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+            // when
+            commentService.updateComment(commentId, updatedContent, member);
+
+            // then
+            assertThat(comment.getContent()).isEqualTo(updatedContent);
+        }
+    }
 }
