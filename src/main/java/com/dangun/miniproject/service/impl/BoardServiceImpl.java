@@ -1,20 +1,22 @@
 package com.dangun.miniproject.service.impl;
 
+import com.dangun.miniproject.domain.Board;
+import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.dto.*;
+import com.dangun.miniproject.repository.BoardRepository;
+import com.dangun.miniproject.repository.MemberRepository;
 import com.dangun.miniproject.service.BoardService;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.dangun.miniproject.domain.Board;
 import com.dangun.miniproject.domain.Comment;
 import com.dangun.miniproject.dto.GetBoardDetailResponse;
 import com.dangun.miniproject.dto.GetBoardResponse;
 import com.dangun.miniproject.dto.GetCommentResponse;
-import com.dangun.miniproject.repository.BoardRepository;
-
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -22,16 +24,17 @@ import lombok.RequiredArgsConstructor;
 public class BoardServiceImpl implements BoardService {
 
 	private final BoardRepository boardRepository;
+	private final MemberRepository memberRepository;
 
 	/**
 	 * 게시글 상세 조회
- 	 */
+	 */
 	@Override
 	public GetBoardDetailResponse getBoardDetail(final Long boardId) {
 
 		// TODO: ExceptionHandler 로 예외 처리 수정
 		final Board board = boardRepository.findById(boardId)
-			.orElseThrow(IllegalArgumentException::new);
+				.orElseThrow(IllegalArgumentException::new);
 
 		final GetBoardDetailResponse boardResponse = GetBoardDetailResponse.from(board);
 
@@ -88,6 +91,65 @@ public class BoardServiceImpl implements BoardService {
 		final Long commentWriter = comment.getMember().getId();
 
 		return boardWriter.equals(commentWriter);
+	}
+
+	/**
+	 * 게시글 생성
+	 */
+	@Override
+	@Transactional
+	public BoardResponse createBoard(CreateBoardRequest request) {
+		Member member = (Member) memberRepository.findById(request.getMemberId())
+				.orElseThrow(() -> new RuntimeException("회원을 찾을 수 없음"));
+
+		Board board = Board.builder()
+				.content(request.getContent())
+				.member(member)
+				.price(request.getPrice())
+				.boardStatus(request.getBoardStatus())
+				//.boardStatus(BoardStatus.valueOf(request.getBoardStatus()))
+				.title(request.getTitle())
+				.build();
+
+		Board savedBoard = boardRepository.save(board);
+		return convertToResponse(savedBoard);
+	}
+
+	/**
+	 * 게시글 수정
+	 */
+	@Override
+	@Transactional
+	public BoardResponse updateBoard(Long boardId, UpdateBoardRequest request) {
+		Board existingBoard = boardRepository.findById(boardId)
+				.orElseThrow(() -> new RuntimeException("게시글 찾을 수 없음"));
+
+		existingBoard.updateDetails(request.getTitle(), request.getContent(), request.getPrice(), request.getBoardStatus());
+
+		Board updatedBoard = boardRepository.save(existingBoard);
+		return convertToResponse(updatedBoard);
+	}
+
+	/**
+	 * 게시글 삭제
+	 */
+	@Transactional
+	public void deleteBoard(Long boardId) {
+		Board board = boardRepository.findById(boardId)
+				.orElseThrow(() -> new RuntimeException("게시글 찾을 수 없음"));
+
+		boardRepository.delete(board);
+	}
+
+	private BoardResponse convertToResponse(Board board) {
+		return new BoardResponse(
+				board.getId(),
+				board.getTitle(),
+				board.getContent(),
+				board.getPrice(),
+				board.getBoardStatus(),
+				board.getMember().getId()
+		);
 	}
 
 }

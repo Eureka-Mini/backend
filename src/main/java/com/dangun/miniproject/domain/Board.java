@@ -1,13 +1,14 @@
 package com.dangun.miniproject.domain;
 
-import static jakarta.persistence.FetchType.*;
 
+import static jakarta.persistence.FetchType.*;
 import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 
 @Entity
 @Getter
@@ -41,5 +42,14 @@ public class Board extends BaseEntity {
         this.price = price;
         this.boardStatus = boardStatus;
         this.title = title;
+    }
+
+
+    // 수정 메서드 추가
+    public void updateDetails(String title, String content, Integer price, BoardStatus boardStatus) {
+        this.title = title;
+        this.content = content;
+        this.price = price;
+        this.boardStatus = boardStatus;
     }
 }
