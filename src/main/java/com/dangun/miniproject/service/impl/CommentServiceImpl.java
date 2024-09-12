@@ -38,9 +38,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public UpdateCommentResponse updateComment(Long commentId, UpdateCommentRequest request, Member member) {
+    public UpdateCommentResponse updateComment(Long commentId, Long boardId, UpdateCommentRequest request, Member member) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NoSuchElementException("Comment not found"));
+
+        if(!comment.getBoard().getId().equals(boardId)){
+            throw new NoSuchElementException("Board Not Found");
+        }
 
         if (!comment.getMember().equals(member)) {
             throw new AccessDeniedException("You are not the owner of this comment");

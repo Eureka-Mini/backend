@@ -108,7 +108,7 @@ public class CommentServiceTest {
 
             when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
             when(request.getContent()).thenReturn(updatedContent);
-            when(boardRepository.findById(boardId)).thenReturn(Optional.of(board));
+            when(board.getId()).thenReturn(boardId);
 
             // when
             UpdateCommentResponse response = commentService.updateComment(commentId, boardId, request, member);
