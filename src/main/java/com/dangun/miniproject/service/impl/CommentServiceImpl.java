@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.NoSuchElementException;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
@@ -42,11 +42,11 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NoSuchElementException("Comment not found"));
 
-        if(!comment.getBoard().getId().equals(boardId)){
+        if (!comment.getBoard().getId().equals(boardId)) {
             throw new NoSuchElementException("Board Not Found");
         }
 
-        if (!comment.getMember().equals(member)) {
+        if (!comment.getMember().getId().equals(member.getId())) {
             throw new AccessDeniedException("You are not the owner of this comment");
         }
 
