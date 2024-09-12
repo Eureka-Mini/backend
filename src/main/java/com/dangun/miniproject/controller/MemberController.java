@@ -2,7 +2,6 @@ package com.dangun.miniproject.controller;
 
 import com.dangun.miniproject.dto.GetMemberRequest;
 import com.dangun.miniproject.service.MemberService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,17 +27,10 @@ public class MemberController {
     @PutMapping("/{memberId}")
     public GetMemberRequest updateMember(
             @PathVariable Long memberId,
-            @RequestBody GetMemberRequest getMemberRequest,
-            HttpSession session
+            @RequestBody GetMemberRequest getMemberRequest
     ){
-        // 세션에 memberId를 저장
-        session.setAttribute("memberId", memberId);
 
-        // 이후 세션에서 memberId를 가져옴
-        Long id = (Long) session.getAttribute("memberId");
-
-        // 서비스 로직 호출
-        return memberService.updateMember(getMemberRequest, id);
+        return memberService.updateMember(getMemberRequest, memberId);
     }
 
 
