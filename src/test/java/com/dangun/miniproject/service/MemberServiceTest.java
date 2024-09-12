@@ -2,7 +2,6 @@ package com.dangun.miniproject.service;
 
 import com.dangun.miniproject.domain.Address;
 import com.dangun.miniproject.domain.Member;
-import com.dangun.miniproject.dto.GetAddressRequest;
 import com.dangun.miniproject.dto.GetMemberRequest;
 import com.dangun.miniproject.repository.AddressRepository;
 import com.dangun.miniproject.repository.MemberRepository;
@@ -18,8 +17,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.*;
 
@@ -33,6 +31,7 @@ public class MemberServiceTest {
 
     @InjectMocks
     private MemberServiceImpl memberService;
+
 
     private Member member;
     private Address address;
@@ -107,6 +106,22 @@ public class MemberServiceTest {
             assertEquals("Hong", response.getBody().getNickname());
             // 주소에 대한 검증은 생략
         });
-
     }
+
+    @Test
+    void findAddress() {
+        // given
+        Long memberId = 1L;
+        when(addressRepository.findById(memberId)).thenReturn(Optional.of(address));
+
+        // when
+        Optional<Address> result = addressRepository.findById(memberId);
+
+        // then
+        assertTrue(result.isPresent());
+        assertEquals("123 주요 거리", result.get().getStreet());
+        assertEquals("101동 아파트", result.get().getDetail());
+        assertEquals("14352", result.get().getZipcode());
+    }
+
 }
