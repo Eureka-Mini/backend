@@ -11,6 +11,8 @@ import com.dangun.miniproject.repository.MemberRepository;
 import com.dangun.miniproject.service.MemberService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -72,28 +74,43 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public GetMemberRequest updateMember(GetMemberRequest getMemberRequest,Long id) {
-
+    public ResponseEntity<GetMemberRequest> updateMember(GetMemberRequest getMemberRequest, Long id) {
         Optional<Member> optionalMember = memberRepository.findById(id);
 
         if (optionalMember.isPresent()) {
-
             Member member = optionalMember.get();
-
-            // 수정할 필드만 업데이트 (주소는 수정 X)
             member.updateMember(getMemberRequest);
 
-            try {
-                memberRepository.save(member);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            memberRepository.save(member);
 
-        }else{
-            return null;
+            GetMemberRequest updatedMemberRequest = GetMemberRequest.builder()
+                    .id(member.getId())
+                    .email(member.getEmail())
+                    .password(member.getPassword())
+                    .nickname(member.getNickname())
+                    .address(getAddressRequest(member.getId()))
+                    .build();
+
+            return ResponseEntity.ok(updatedMemberRequest);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
 
-        return getMemberRequest;
+
+    private GetAddressRequest getAddressRequest(Long memberId) {
+        // 주소 정보를 반환하는 메소드 (기본 예시)
+        Optional<Address> addressOptional = addressRepository.findById(memberId);
+        if (addressOptional.isPresent()) {
+            Address address = addressOptional.get();
+            return GetAddressRequest.builder()
+                    .id(address.getId())
+                    .street(address.getStreet())
+                    .detail(address.getDetail())
+                    .zipcode(address.getZipcode())
+                    .build();
+        }
+        return null;
     }
 
     @Override

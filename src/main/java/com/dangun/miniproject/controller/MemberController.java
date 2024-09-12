@@ -25,11 +25,10 @@ public class MemberController {
     }
 
     @PutMapping("/{memberId}")
-    public GetMemberRequest updateMember(
+    public ResponseEntity<GetMemberRequest> updateMember(
             @PathVariable Long memberId,
             @RequestBody GetMemberRequest getMemberRequest
-    ){
-
+    ) {
         return memberService.updateMember(getMemberRequest, memberId);
     }
 
