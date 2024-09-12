@@ -4,5 +4,5 @@ import com.dangun.miniproject.dto.GetMemberRequest;
 
 public interface AuthService {
 
-    void signupMember(GetMemberRequest member);
+    boolean signupMember(GetMemberRequest member);
 }
