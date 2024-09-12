@@ -9,6 +9,7 @@ import com.dangun.miniproject.dto.WriteCommentResponse;
 import com.dangun.miniproject.repository.BoardRepository;
 import com.dangun.miniproject.repository.CommentRepository;
 import com.dangun.miniproject.service.impl.CommentServiceImpl;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,52 +35,54 @@ public class CommentServiceTest {
     @Mock
     private BoardRepository boardRepository;
 
-    @Test
-    void 유효한_사용자가_게시글에_댓글을_생성한다() {
-        // given
-        Member member = Member.builder()
-                .email("asdf@asdf.com")
-                .nickname("test")
-                .password("asdf")
-                .build();
-        Board board = Board.builder()
-                .title("test")
-                .boardStatus(BoardStatus.판매완료)
-                .member(member)
-                .price(10000)
-                .content("팝니다")
-                .build();
+    @Nested
+    class writeComment {
 
-        WriteCommentRequest request = mock(WriteCommentRequest.class);
-        Comment comment = mock(Comment.class);
+        @Test
+        void 유효한_사용자가_게시글에_댓글을_생성한다() {
+            // given
+            Member member = Member.builder()
+                    .email("asdf@asdf.com")
+                    .nickname("test")
+                    .password("asdf")
+                    .build();
+            Board board = Board.builder()
+                    .title("test")
+                    .boardStatus(BoardStatus.판매완료)
+                    .member(member)
+                    .price(10000)
+                    .content("팝니다")
+                    .build();
 
-        when(boardRepository.findById(1L)).thenReturn(Optional.of(board));
-        when(comment.getContent()).thenReturn("댓글 테스트");
-        when(commentRepository.save(any(Comment.class))).thenReturn(comment);
-        when(request.toEntity(member, board)).thenCallRealMethod();
+            WriteCommentRequest request = mock(WriteCommentRequest.class);
+            Comment comment = mock(Comment.class);
 
-        // when
-        WriteCommentResponse response = commentService.writeComment(member, 1L, request);
+            when(boardRepository.findById(1L)).thenReturn(Optional.of(board));
+            when(comment.getContent()).thenReturn("댓글 테스트");
+            when(commentRepository.save(any(Comment.class))).thenReturn(comment);
+            when(request.toEntity(member, board)).thenCallRealMethod();
 
-        // then
-        verify(commentRepository).save(any(Comment.class));
-        assertThat(response).isNotNull();
-        assertThat(response.getContent()).isEqualTo(comment.getContent()).isEqualTo("댓글 테스트");
-    }
+            // when
+            WriteCommentResponse response = commentService.writeComment(member, 1L, request);
 
-    @Test
-    void 존재하지_않는_게시글에_댓글_작성_시도() {
-        // given
-        Member member = mock(Member.class);
-        WriteCommentRequest request = mock(WriteCommentRequest.class);
+            // then
+            verify(commentRepository).save(any(Comment.class));
+            assertThat(response).isNotNull();
+            assertThat(response.getContent()).isEqualTo(comment.getContent()).isEqualTo("댓글 테스트");
+        }
 
-        when(boardRepository.findById(0L)).thenReturn(Optional.empty());
+        @Test
+        void 존재하지_않는_게시글에_댓글_작성_시도() {
+            // given
+            Member member = mock(Member.class);
+            WriteCommentRequest request = mock(WriteCommentRequest.class);
 
-        // when & then
-        assertThatThrownBy(
-                () -> commentService.writeComment(member, 0L, request)
-        ).isInstanceOf(NoSuchElementException.class).hasMessage("Board Not Found.");
+            when(boardRepository.findById(0L)).thenReturn(Optional.empty());
 
-
+            // when & then
+            assertThatThrownBy(
+                    () -> commentService.writeComment(member, 0L, request)
+            ).isInstanceOf(NoSuchElementException.class).hasMessage("Board Not Found.");
+        }
     }
 }
