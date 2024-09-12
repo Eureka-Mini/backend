@@ -94,7 +94,8 @@ public class CommentServiceTest {
         @Test
         void 유효한_사용자가_본인의_댓글을_수정한다() {
             // given
-            Long commentId = 1L;
+            Long commentId = 10L;
+            Long boardId = 20L;
             String updatedContent = "수정된 댓글 내용";
             UpdateCommentRequest request = mock(UpdateCommentRequest.class);
             Member member = mock(Member.class);
@@ -107,9 +108,10 @@ public class CommentServiceTest {
 
             when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
             when(request.getContent()).thenReturn(updatedContent);
+            when(boardRepository.findById(boardId)).thenReturn(Optional.of(board));
 
             // when
-            UpdateCommentResponse response = commentService.updateComment(commentId, request, member);
+            UpdateCommentResponse response = commentService.updateComment(commentId, boardId, request, member);
 
             // then
             assertThat(response.getContent()).isEqualTo(updatedContent);
