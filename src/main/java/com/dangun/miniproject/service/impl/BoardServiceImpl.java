@@ -1,22 +1,25 @@
 package com.dangun.miniproject.service.impl;
 
-import com.dangun.miniproject.domain.Board;
-import com.dangun.miniproject.domain.Member;
-import com.dangun.miniproject.dto.*;
-import com.dangun.miniproject.repository.BoardRepository;
-import com.dangun.miniproject.repository.MemberRepository;
-import com.dangun.miniproject.service.BoardService;
-import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.dangun.miniproject.domain.Board;
 import com.dangun.miniproject.domain.Comment;
+import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.dto.BoardResponse;
+import com.dangun.miniproject.dto.CreateBoardRequest;
 import com.dangun.miniproject.dto.GetBoardDetailResponse;
 import com.dangun.miniproject.dto.GetBoardResponse;
 import com.dangun.miniproject.dto.GetCommentResponse;
+import com.dangun.miniproject.dto.UpdateBoardRequest;
+import com.dangun.miniproject.repository.BoardRepository;
+import com.dangun.miniproject.repository.MemberRepository;
+import com.dangun.miniproject.service.BoardService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

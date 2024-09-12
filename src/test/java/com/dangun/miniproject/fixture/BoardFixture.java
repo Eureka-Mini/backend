@@ -23,4 +23,18 @@ public class BoardFixture {
 			.member(member)
 			.build();
 	}
+
+	public static Board instanceOf(final Member member, final String title, final String content) {
+
+		final int price = current().nextInt(5000, 50000);
+		final BoardStatus status = current().nextBoolean() ? BoardStatus.판매중 : BoardStatus.판매완료;
+
+		return Board.builder()
+			.title(title)
+			.content(content)
+			.price(price)
+			.boardStatus(status)
+			.member(member)
+			.build();
+	}
 }
