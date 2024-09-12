@@ -25,7 +25,7 @@ public class CommentController {
                                           @PathVariable Long boardId) {
         WriteCommentResponse writeCommentResponse = commentService.writeComment(member, boardId, request);
 
-        if(request.getContent().isBlank()){
+        if (request.getContent().isBlank()) {
             return ApiResponse.badRequest("COMMENT-F001", "Content is blank");
         }
 
@@ -39,10 +39,19 @@ public class CommentController {
                                            @PathVariable Long commentId) {
         UpdateCommentResponse response = commentService.updateComment(boardId, commentId, member, request);
 
-        if(request.getContent().isBlank()){
+        if (request.getContent().isBlank()) {
             return ApiResponse.badRequest("COMMENT-F001", "Content is blank");
         }
 
         return ApiResponse.ok("COMMENT-S002", response, "Update Success");
+    }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<?> deleteComment(@AuthenticationPrincipal Member member,
+                                           @PathVariable Long boardId,
+                                           @PathVariable Long commentId) {
+        commentService.deleteComment(boardId, commentId, member);
+
+        return ApiResponse.ok("COMMENT-S003", commentId, "Delete Success");
     }
 }
