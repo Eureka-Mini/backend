@@ -5,25 +5,38 @@ import com.dangun.miniproject.dto.GetMemberRequest;
 import com.dangun.miniproject.repository.MemberRepository;
 import com.dangun.miniproject.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.Pattern;
+
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+            "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+    );
+
     @Override
-    public void signupMember(GetMemberRequest memberReq) {
+    public boolean signupMember(GetMemberRequest memberReq) {
         String email = memberReq.getEmail();
+
+        if (!isEmailValid(email)) {
+            log.warn("올바른 이메일 형식을 입력해주세요.");
+            return false;
+        }
 
         Boolean isMember = memberRepository.existsByEmail(email);
 
         if (isMember) {
-            System.out.println("signupMember : 이미 존재하는 이메일입니다.");
-            return;
+            log.warn("이미 존재하는 이메일입니다.");
+            return false;
         }
 
         String rawPassword = memberReq.getPassword();
@@ -43,5 +56,10 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         memberRepository.save(member);
+        return true;
+    }
+
+    private boolean isEmailValid(String email) {
+        return EMAIL_PATTERN.matcher(email).matches();
     }
 }
