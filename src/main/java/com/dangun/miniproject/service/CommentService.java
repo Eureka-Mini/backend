@@ -7,4 +7,6 @@ import com.dangun.miniproject.dto.WriteCommentResponse;
 public interface CommentService {
 
     WriteCommentResponse writeComment(Member member, Long boardId, WriteCommentRequest comment);
+
+    void updateComment(Long commentId, String updatedContent, Member member);
 }

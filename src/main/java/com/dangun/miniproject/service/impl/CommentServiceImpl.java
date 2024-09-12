@@ -9,6 +9,7 @@ import com.dangun.miniproject.repository.BoardRepository;
 import com.dangun.miniproject.repository.CommentRepository;
 import com.dangun.miniproject.service.CommentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,5 +33,17 @@ public class CommentServiceImpl implements CommentService {
         comment = commentRepository.save(comment);
 
         return new WriteCommentResponse(comment.getContent());
+    }
+
+    @Override
+    public void updateComment(Long commentId, String updatedContent, Member member) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NoSuchElementException("Comment not found"));
+
+        if (!comment.getMember().equals(member)) {
+            throw new AccessDeniedException("You are not the owner of this comment");
+        }
+
+        comment.updateContent(updatedContent);
     }
 }
