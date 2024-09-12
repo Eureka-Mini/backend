@@ -4,8 +4,6 @@ import com.dangun.miniproject.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-
-
 public interface BoardService {
 
 	// 게시글 상세 조회
@@ -21,15 +19,12 @@ public interface BoardService {
 	Page<GetBoardResponse> getMyBoardList(final Long memberId, final Pageable pageable);
 
 	// 게시글 생성
-	BoardResponse createBoard(CreateBoardRequest createBoardRequest);  // Crea
+	BoardResponse createBoard(CreateBoardRequest createBoardRequest);
 
 	// 게시글 수정
 	BoardResponse updateBoard(Long id, UpdateBoardRequest updateBoardRequest);
 
 	// 게시글 삭제
 	void deleteBoard(Long boardId);
-
-
-
 
 }

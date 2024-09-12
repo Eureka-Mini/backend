@@ -1,139 +1,241 @@
 package com.dangun.miniproject.controller;
 
+import static org.mockito.BDDMockito.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.List;
+
 import com.dangun.miniproject.domain.BoardStatus;
-import com.dangun.miniproject.dto.BoardResponse;
-import com.dangun.miniproject.dto.CreateBoardRequest;
-import com.dangun.miniproject.dto.UpdateBoardRequest;
-import com.dangun.miniproject.service.BoardService;
+import com.dangun.miniproject.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+
+import com.dangun.miniproject.domain.Board;
+import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.fixture.BoardFixture;
+import com.dangun.miniproject.service.BoardService;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+@WebMvcTest(controllers = BoardController.class)
+@WithMockUser
+class BoardControllerTest {
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-public class BoardControllerTest {
+	@Autowired
+	private MockMvc mockMvc;
 
-    @Autowired
-    private MockMvc mockMvc;
+	@MockBean
+	private BoardService boardService;
 
-    @Mock
-    private BoardService boardService;
+	@Autowired
+	private ObjectMapper objectMapper;
+	
+	@Nested
+	@DisplayName("게시글 상세 조회")
+	class getBoardDetail {
 
-    @Autowired
-    private ObjectMapper objectMapper;
+		@Test
+		@DisplayName("[성공] 게시글 상세 정보가 정상적으로 조회된다.")
+		void getBoardDetail_success() throws Exception {
+			// given -- 테스트의 상태 설정
+			final Member member = mock(Member.class);
+			final Board board = BoardFixture.instanceOf(member);
 
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this); // @Mock 어노테이션으로 생성된 모의 객체를 초기화
-    }
+			final GetBoardDetailResponse response = GetBoardDetailResponse.from(board);
+
+			given(boardService.getBoardDetail(any())).willReturn(response);
+
+			// when -- 테스트하고자 하는 행동
+			final ResultActions result = mockMvc.perform(
+				get("/boards/{boardId}", 1L)
+					.accept(APPLICATION_JSON)
+					.contentType(APPLICATION_JSON));
+
+			// then -- 예상되는 변화 및 결과
+			result.andExpect(status().isOk());
+		}
+
+	}
+
+	@Nested
+	@DisplayName("게시글 목록 조회")
+	class GetBoardList {
+
+		@Test
+		@DisplayName("[성공] 키워드가 없을 경우, 게시글 전체 목록이 조회된다.")
+		void getBoardList_no_keyword_success() throws Exception {
+			// given -- 테스트의 상태 설정
+			final Pageable pageable = PageRequest.of(0, 10);
+
+			final Member member = mock(Member.class);
+			final Board board1 = BoardFixture.instanceOf(member);
+			final Board board2 = BoardFixture.instanceOf(member);
+
+			final List<GetBoardResponse> boardList = List.of(
+				GetBoardResponse.from(board1),
+				GetBoardResponse.from(board2)
+			);
+
+			final Page<GetBoardResponse> response = new PageImpl<>(boardList, pageable, boardList.size());
+
+			given(boardService.getBoardList(any())).willReturn(response);
+
+			// when -- 테스트하고자 하는 행동
+			final ResultActions result = mockMvc.perform(
+				get("/boards")
+					.accept(APPLICATION_JSON)
+					.contentType(APPLICATION_JSON));
+
+			// then -- 예상되는 변화 및 결과
+			result.andExpect(status().isOk());
+		}
+
+		@Test
+		@DisplayName("[성공] 키워드가 있을 경우, 키워드가 포함된 게시글 목록이 조회된다.")
+		void getBoardList_has_keyword_success() throws Exception {
+			// given -- 테스트의 상태 설정
+			final Pageable pageable = PageRequest.of(0, 10);
+
+			final Member member = mock(Member.class);
+			final Board board1 = BoardFixture.instanceOf(member);
+			final Board board2 = BoardFixture.instanceOf(member);
+
+			final List<GetBoardResponse> boardList = List.of(
+				GetBoardResponse.from(board1),
+				GetBoardResponse.from(board2)
+			);
+
+			final Page<GetBoardResponse> response = new PageImpl<>(boardList, pageable, boardList.size());
+
+			given(boardService.getBoardList(any(), any())).willReturn(response);
+
+			// when -- 테스트하고자 하는 행동
+			final ResultActions result = mockMvc.perform(
+				get("/boards")
+					.param("keyword", "Test")
+					.accept(APPLICATION_JSON)
+					.contentType(APPLICATION_JSON));
+
+			// then -- 예상되는 변화 및 결과
+			result.andExpect(status().isOk());
+		}
+	}
+
+	@Nested
+	@DisplayName("작성 게시글 목록 조회")
+	class GetMyBoardList {
+
+		@Test
+		@DisplayName("[성공] 자신이 작성한 게시글 목록이 조회된다.")
+		void getMyBoardList_success() throws Exception {
+			// given -- 테스트의 상태 설정
+			final Pageable pageable = PageRequest.of(0, 10);
+
+			final Member member = mock(Member.class);
+			final Board board1 = BoardFixture.instanceOf(member);
+			final Board board2 = BoardFixture.instanceOf(member);
+
+			final List<GetBoardResponse> boardList = List.of(
+				GetBoardResponse.from(board1),
+				GetBoardResponse.from(board2)
+			);
+
+			final Page<GetBoardResponse> response = new PageImpl<>(boardList, pageable, boardList.size());
+
+			given(boardService.getMyBoardList(any(), any())).willReturn(response);
+
+			// when -- 테스트하고자 하는 행동
+			final ResultActions result = mockMvc.perform(
+				get("/boards/my-board")
+					.param("memberId", "1")
+					.accept(APPLICATION_JSON)
+					.contentType(APPLICATION_JSON));
+
+			// then -- 예상되는 변화 및 결과
+			result.andExpect(status().isOk());
+		}
+	}
 
 
-    //게시글 생성 테스트
-    @Test
-    @WithMockUser // 가상의 인증된 사용자를 생성
-    public void testCreateBoard() throws Exception {
-        //43번으로 추가
-        CreateBoardRequest request = new CreateBoardRequest(
-                "테스트",
-                "테스트내용",
-                1000,
-                BoardStatus.판매중,
-                1L
-        );
-        BoardResponse response = new BoardResponse(
-                43L,
-                "테스트",
-                "테스트내용",
-                1000,
-                BoardStatus.판매중,
-                1L
-        );
+	@Test
+	@DisplayName("게시글 생성")
+	@WithMockUser(username = "testUser", roles = "USER")
+	public void testCreateBoard() throws Exception {
+		// Given
+		CreateBoardRequest request = new CreateBoardRequest("Title", "Content", 100, BoardStatus.판매중, 1L);
+		BoardResponse response = new BoardResponse(1L, "Title", "Content", 100, BoardStatus.판매중, 1L);
+		when(boardService.createBoard(any(CreateBoardRequest.class))).thenReturn(response);
 
-        // Mockito 설정
-        when(boardService.createBoard(request)).thenReturn(response);
+		// When
+		mockMvc.perform(MockMvcRequestBuilders.post("/boards")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
+						.with(csrf()))
+				//Then
+				.andExpect(MockMvcResultMatchers.status().isCreated())
+				.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(response)));
 
-        // 요청 및 검증 ( JSON 응답 확인 )
-        mockMvc.perform(MockMvcRequestBuilders.post("/boards")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())  // 응답 상태 코드가 201 Created인지 확인
-                .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("테스트"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.content").value("테스트내용"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.price").value(1000))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.boardStatus").value("판매중"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.memberId").value(1));
-    }
+		// Verify
+		verify(boardService).createBoard(any(CreateBoardRequest.class));
+	}
 
 
 
 
-    // 게시글 수정 테스트
-    @Test
-    @WithMockUser
-    public void testUpdateBoard() throws Exception {
-        // 41번 글 수정
-        Long boardId = 41L;
-        UpdateBoardRequest request = new UpdateBoardRequest(
-                "테스트(판매완료)",
-                "판매완료했어요",
-                1234,
-                BoardStatus.판매완료
-        );
-        BoardResponse response = new BoardResponse(
-                boardId,
-                "테스트(판매완료)",
-                "판매완료했어요",
-                1234, // 응답에서 price는 1234로 설정
-                BoardStatus.판매완료,
-                6L
-        );
+	@Test
+	@DisplayName("게시글 수정")
+	@WithMockUser(username = "testUser", roles = "USER")
+	public void testUpdateBoard() throws Exception {
+		// Given
+		Long boardId = 1L;
+		UpdateBoardRequest request = new UpdateBoardRequest("Updated Title", "Updated Content", 200, BoardStatus.판매완료);
+		BoardResponse response = new BoardResponse(boardId, "Updated Title", "Updated Content", 200, BoardStatus.판매완료, 1L);
+		when(boardService.updateBoard(anyLong(), any(UpdateBoardRequest.class))).thenReturn(response);
 
-        // Mockito 설정
-        when(boardService.updateBoard(boardId, request)).thenReturn(response);
+		// When
+		mockMvc.perform(MockMvcRequestBuilders.put("/boards/{id}", boardId)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
+						.with(csrf()))
+				// Then
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(response)));
 
-        // 요청 및 검증
-        mockMvc.perform(MockMvcRequestBuilders.put("/boards/{boardId}", boardId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("테스트(판매완료)"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.content").value("판매완료했어요"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.price").value(1234))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.boardStatus").value("판매완료"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.memberId").value(6));
-    }
+		// Verify
+		verify(boardService).updateBoard(eq(boardId), any(UpdateBoardRequest.class));
+	}
 
+	
+	@Test
+	@DisplayName("게시글 삭제")
+	@WithMockUser(username = "testUser", roles = "USER")
+	public void testDeleteBoard() throws Exception {
+		// Given
+		Long boardId = 1L;
 
+		// When
+		mockMvc.perform(MockMvcRequestBuilders.delete("/boards/{id}", boardId)
+						.with(csrf()))
+				// Then
+				.andExpect(MockMvcResultMatchers.status().isNoContent());
 
-
-    // 게시글 삭제 테스트
-    @Test
-    @WithMockUser
-    public void testDeleteBoard() throws Exception {
-        // 42번 삭제
-        Long boardId = 42L;
-
-        // Mockito 설정
-        doNothing().when(boardService).deleteBoard(boardId);
-
-        // 요청 및 검증
-        mockMvc.perform(MockMvcRequestBuilders.delete("/boards/{boardId}", boardId))
-                .andExpect(MockMvcResultMatchers.status().isNoContent()); // 삭제 성공 시 상태 코드 204 No Content
-    }
+		verify(boardService).deleteBoard(boardId);
+	}
 
 }
