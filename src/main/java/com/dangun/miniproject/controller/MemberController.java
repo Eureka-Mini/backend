@@ -16,16 +16,9 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/{memberId}")
-    public GetMemberRequest getMember(@PathVariable Long memberId, HttpSession session) {
+    public GetMemberRequest getMember(@PathVariable Long memberId) {
         try {
-            // 세션에 memberId를 저장
-            session.setAttribute("memberId", memberId);
-
-            // 이후 세션에서 memberId를 가져옴
-            Long id = (Long) session.getAttribute("memberId");
-
-            // 서비스 로직 호출
-            return memberService.getMember(id);
+            return memberService.getMember(memberId);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
