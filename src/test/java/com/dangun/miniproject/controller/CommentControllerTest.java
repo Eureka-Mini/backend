@@ -1,6 +1,5 @@
 package com.dangun.miniproject.controller;
 
-import com.dangun.miniproject.config.SecurityConfig;
 import com.dangun.miniproject.domain.Member;
 import com.dangun.miniproject.dto.WriteCommentRequest;
 import com.dangun.miniproject.dto.WriteCommentResponse;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -22,13 +20,13 @@ import java.nio.charset.StandardCharsets;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CommentController.class)
-@Import(SecurityConfig.class)
 public class CommentControllerTest {
 
     @Autowired
@@ -54,6 +52,7 @@ public class CommentControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8)
                 .with(authentication(new TestingAuthenticationToken(member, null, AuthorityUtils.createAuthorityList("ROLE_USER"))))
+                .with(csrf())
                 .content(new ObjectMapper().writeValueAsString(request)));
 
         // then
@@ -79,6 +78,7 @@ public class CommentControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8)
                 .with(authentication(new TestingAuthenticationToken(member, null, AuthorityUtils.createAuthorityList("ROLE_USER"))))
+                .with(csrf())
                 .content(new ObjectMapper().writeValueAsString(request)));
 
         // then
