@@ -2,6 +2,8 @@ package com.dangun.miniproject.domain;
 
 
 import static jakarta.persistence.FetchType.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -33,7 +35,7 @@ public class Board extends BaseEntity {
     private Member member;
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
     @Builder
     private Board(String content, Member member, Integer price, BoardStatus boardStatus, String title) {

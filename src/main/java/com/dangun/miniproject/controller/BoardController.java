@@ -1,6 +1,5 @@
 package com.dangun.miniproject.controller;
 
-
 import com.dangun.miniproject.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,14 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import com.dangun.miniproject.service.BoardService;
 import lombok.RequiredArgsConstructor;
 
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/boards")
 public class BoardController {
 
 	private final BoardService boardService;
-
 
 	// 게시글 상세 조회
 	@GetMapping("/{boardId}")

@@ -9,10 +9,10 @@ import org.springframework.data.repository.query.Param;
 import com.dangun.miniproject.domain.Board;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
-  
-  void deleteByMemberId(Long memberId);
 
- 	// 게시글 목록 조회
+	void deleteByMemberId(Long memberId);
+
+	// 게시글 목록 조회
 	@Query(value = """
 			SELECT b
 			 FROM Board b
@@ -27,7 +27,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 			  FROM Board b
 			  JOIN FETCH b.member
 			 WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-			 	OR LOWER(b.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
+				OR LOWER(b.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
 			 ORDER BY b.createdAt DESC
 	""")
 	Page<Board> searchBoardsByKeyword(@Param("keyword") final String keyword, final Pageable pageable);
