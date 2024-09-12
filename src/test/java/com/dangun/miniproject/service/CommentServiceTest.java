@@ -216,5 +216,30 @@ public class CommentServiceTest {
                     .isInstanceOf(NoSuchElementException.class)
                     .hasMessage("Board Not Found");
         }
+
+        @Test
+        void 다른_사용자가_댓글을_삭제하려고_할_때_권한_없음() {
+            // given
+            Long commentId = 10L;
+            Long boardId = 20L;
+            Member actualMember = mock(Member.class);
+            Member anotherMember = mock(Member.class);
+            Board board = mock(Board.class);
+            Comment comment = Comment.builder()
+                    .board(board)
+                    .member(actualMember)
+                    .content("댓글 내용")
+                    .build();
+
+            when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+            when(board.getId()).thenReturn(boardId);
+            when(actualMember.getId()).thenReturn(1L);
+            when(anotherMember.getId()).thenReturn(2L);
+
+            // when & then
+            assertThatThrownBy(() -> commentService.deleteComment(boardId, commentId, anotherMember))
+                    .isInstanceOf(AccessDeniedException.class)
+                    .hasMessage("You are not the owner of this comment");
+        }
     }
 }
