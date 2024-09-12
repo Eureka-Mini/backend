@@ -167,4 +167,32 @@ public class CommentServiceTest {
                     .hasMessage("You are not the owner of this comment");
         }
     }
+
+    @Nested
+    class deleteComment {
+
+        @Test
+        void 유효한_사용자가_본인의_댓글을_삭제한다() {
+            // given
+            Long commentId = 10L;
+            Long boardId = 20L;
+            Member member = mock(Member.class);
+            Board board = mock(Board.class);
+            Comment comment = Comment.builder()
+                    .board(board)
+                    .member(member)
+                    .content("댓글 내용")
+                    .build();
+
+            when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+            when(board.getId()).thenReturn(boardId);
+            when(member.getId()).thenReturn(1L);
+
+            // when
+            commentService.deleteComment(boardId, commentId, member);
+
+            // then
+            verify(commentRepository).delete(comment);
+        }
+    }
 }
