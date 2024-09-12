@@ -1,12 +1,14 @@
 package com.dangun.miniproject.domain;
 
+
+import static jakarta.persistence.FetchType.*;
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -24,9 +26,10 @@ public class Board extends BaseEntity {
     private Integer price;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "board_status")
     private BoardStatus boardStatus;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     private Member member;
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
