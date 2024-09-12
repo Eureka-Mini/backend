@@ -1,13 +1,12 @@
 package com.dangun.miniproject.domain;
 
-import static jakarta.persistence.FetchType.*;
-
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,10 +24,9 @@ public class Board extends BaseEntity {
     private Integer price;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "board_status")
     private BoardStatus boardStatus;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne
     private Member member;
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -41,5 +39,14 @@ public class Board extends BaseEntity {
         this.price = price;
         this.boardStatus = boardStatus;
         this.title = title;
+    }
+
+
+    // 수정 메서드 추가
+    public void updateDetails(String title, String content, Integer price, BoardStatus boardStatus) {
+        this.title = title;
+        this.content = content;
+        this.price = price;
+        this.boardStatus = boardStatus;
     }
 }
