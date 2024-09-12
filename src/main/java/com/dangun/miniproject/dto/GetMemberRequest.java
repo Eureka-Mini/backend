@@ -23,4 +23,12 @@ public class GetMemberRequest {
         this.nickname = nickname;
         this.address = address;
     }
+
+    @Builder
+    public GetMemberRequest(Long id, String email, String password, String nickname) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+    }
 }
