@@ -4,6 +4,8 @@ import com.dangun.miniproject.domain.Address;
 import com.dangun.miniproject.domain.Member;
 import com.dangun.miniproject.dto.GetMemberRequest;
 import com.dangun.miniproject.repository.AddressRepository;
+import com.dangun.miniproject.repository.BoardRepository;
+import com.dangun.miniproject.repository.CommentRepository;
 import com.dangun.miniproject.repository.MemberRepository;
 import com.dangun.miniproject.service.impl.MemberServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +30,12 @@ public class MemberServiceTest {
 
     @Mock
     private AddressRepository addressRepository;
+
+    @Mock
+    private CommentRepository commentRepository;
+
+    @Mock
+    private BoardRepository boardRepository;
 
     @InjectMocks
     private MemberServiceImpl memberService;
@@ -123,5 +131,25 @@ public class MemberServiceTest {
         assertEquals("101동 아파트", result.get().getDetail());
         assertEquals("14352", result.get().getZipcode());
     }
+
+
+    @Test
+    void deleteMember() {
+        // given
+        Long memberId = 1L;
+        Member member = new Member(); // 필요한 멤버 객체 생성
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+
+        // when
+        boolean result = memberService.deleteMember(memberId);
+
+        // then
+        assertTrue(result);  // 멤버가 존재하면 true
+
+        // Verify that deletions happened
+        verify(commentRepository, times(1)).deleteByMemberId(memberId);
+        verify(boardRepository, times(1)).deleteByMemberId(memberId);
+        verify(addressRepository, times(1)).deleteByMemberId(memberId);
+        verify(memberRepository, times(1)).delete(member);    }
 
 }
