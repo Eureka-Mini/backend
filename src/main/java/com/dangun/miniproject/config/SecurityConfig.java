@@ -4,7 +4,6 @@ import com.dangun.miniproject.filter.JWTFilter;
 import com.dangun.miniproject.filter.LoginFilter;
 import com.dangun.miniproject.jwt.JWTUtil;
 import com.dangun.miniproject.repository.MemberRepository;
-import com.dangun.miniproject.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
