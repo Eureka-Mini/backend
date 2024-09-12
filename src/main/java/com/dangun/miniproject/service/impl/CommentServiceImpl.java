@@ -38,7 +38,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public UpdateCommentResponse updateComment(Long commentId, Long boardId, UpdateCommentRequest request, Member member) {
+    public UpdateCommentResponse updateComment(Long boardId, Long commentId, Member member, UpdateCommentRequest request) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NoSuchElementException("Comment not found"));
 

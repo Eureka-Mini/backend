@@ -112,7 +112,7 @@ public class CommentServiceTest {
             when(board.getId()).thenReturn(boardId);
 
             // when
-            UpdateCommentResponse response = commentService.updateComment(commentId, boardId, request, member);
+            UpdateCommentResponse response = commentService.updateComment(boardId, commentId, member, request);
 
             // then
             assertThat(response.getContent()).isEqualTo(updatedContent);
@@ -136,7 +136,7 @@ public class CommentServiceTest {
             when(board.getId()).thenReturn(20L);
 
             // when, then
-            assertThatThrownBy(() -> commentService.updateComment(commentId, invalidBoardId, request, member))
+            assertThatThrownBy(() -> commentService.updateComment(invalidBoardId, commentId, member, request))
                     .isInstanceOf(NoSuchElementException.class)
                     .hasMessage("Board Not Found");
         }
@@ -162,7 +162,7 @@ public class CommentServiceTest {
             when(anotherMember.getId()).thenReturn(2L);
 
             // when, then
-            assertThatThrownBy(() -> commentService.updateComment(commentId, boardId, request, anotherMember))
+            assertThatThrownBy(() -> commentService.updateComment(boardId, commentId, anotherMember, request))
                     .isInstanceOf(AccessDeniedException.class)
                     .hasMessage("You are not the owner of this comment");
         }
