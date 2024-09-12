@@ -2,11 +2,15 @@ package com.dangun.miniproject.controller;
 
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.MediaType.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
 
+import com.dangun.miniproject.domain.BoardStatus;
+import com.dangun.miniproject.dto.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,16 +21,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.dangun.miniproject.domain.Board;
 import com.dangun.miniproject.domain.Member;
-import com.dangun.miniproject.dto.GetBoardDetailResponse;
-import com.dangun.miniproject.dto.GetBoardResponse;
 import com.dangun.miniproject.fixture.BoardFixture;
 import com.dangun.miniproject.service.BoardService;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @WebMvcTest(controllers = BoardController.class)
 @WithMockUser
@@ -38,6 +43,9 @@ class BoardControllerTest {
 	@MockBean
 	private BoardService boardService;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+	
 	@Nested
 	@DisplayName("게시글 상세 조회")
 	class getBoardDetail {
@@ -162,6 +170,72 @@ class BoardControllerTest {
 			// then -- 예상되는 변화 및 결과
 			result.andExpect(status().isOk());
 		}
+	}
+
+
+	@Test
+	@DisplayName("게시글 생성")
+	@WithMockUser(username = "testUser", roles = "USER")
+	public void testCreateBoard() throws Exception {
+		// Given
+		CreateBoardRequest request = new CreateBoardRequest("Title", "Content", 100, BoardStatus.판매중, 1L);
+		BoardResponse response = new BoardResponse(1L, "Title", "Content", 100, BoardStatus.판매중, 1L);
+		when(boardService.createBoard(any(CreateBoardRequest.class))).thenReturn(response);
+
+		// When
+		mockMvc.perform(MockMvcRequestBuilders.post("/boards")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
+						.with(csrf()))
+				//Then
+				.andExpect(MockMvcResultMatchers.status().isCreated())
+				.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(response)));
+
+		// Verify
+		verify(boardService).createBoard(any(CreateBoardRequest.class));
+	}
+
+
+
+
+	@Test
+	@DisplayName("게시글 수정")
+	@WithMockUser(username = "testUser", roles = "USER")
+	public void testUpdateBoard() throws Exception {
+		// Given
+		Long boardId = 1L;
+		UpdateBoardRequest request = new UpdateBoardRequest("Updated Title", "Updated Content", 200, BoardStatus.판매완료);
+		BoardResponse response = new BoardResponse(boardId, "Updated Title", "Updated Content", 200, BoardStatus.판매완료, 1L);
+		when(boardService.updateBoard(anyLong(), any(UpdateBoardRequest.class))).thenReturn(response);
+
+		// When
+		mockMvc.perform(MockMvcRequestBuilders.put("/boards/{id}", boardId)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
+						.with(csrf()))
+				// Then
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(response)));
+
+		// Verify
+		verify(boardService).updateBoard(eq(boardId), any(UpdateBoardRequest.class));
+	}
+
+	
+	@Test
+	@DisplayName("게시글 삭제")
+	@WithMockUser(username = "testUser", roles = "USER")
+	public void testDeleteBoard() throws Exception {
+		// Given
+		Long boardId = 1L;
+
+		// When
+		mockMvc.perform(MockMvcRequestBuilders.delete("/boards/{id}", boardId)
+						.with(csrf()))
+				// Then
+				.andExpect(MockMvcResultMatchers.status().isNoContent());
+
+		verify(boardService).deleteBoard(boardId);
 	}
 
 }
