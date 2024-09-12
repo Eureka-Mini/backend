@@ -133,5 +133,28 @@ public class CommentControllerTest {
             assertThat("테스트댓글 수정").isEqualTo(capturedRequest.getContent());
         }
 
+
+        @Test
+        void 내용이_존재하지_않는_댓글로_수정_시도_400() throws Exception {
+            // given
+            Long boardId = 1L;
+            Long commentId = 2L;
+            UpdateCommentRequest request = mock(UpdateCommentRequest.class);
+            Member member = mock(Member.class);
+
+            when(request.getContent()).thenReturn("");
+
+            // when
+            ResultActions result = mockMvc.perform(put("/boards/{boardId}/comments/{commentId}", boardId, commentId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .characterEncoding(StandardCharsets.UTF_8)
+                    .with(authentication(new TestingAuthenticationToken(member, null, AuthorityUtils.createAuthorityList("ROLE_USER"))))
+                    .with(csrf())
+                    .content(new ObjectMapper().writeValueAsString(request)));
+
+            // then
+            result.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value("Content is blank"));
+        }
     }
 }
