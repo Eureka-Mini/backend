@@ -8,9 +8,7 @@ import com.dangun.miniproject.domain.Member;
 
 public class BoardFixture {
 
-	public static Board instanceOf() {
-
-		final Member member = MemberFixture.instanceOf();
+	public static Board instanceOf(final Member member) {
 
 		final String title = "Test Title " + current().nextInt(100, 1000);
 		final String content = "Test Content " + current().nextInt(100, 1000);

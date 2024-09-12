@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.dangun.miniproject.domain.Board;
+import com.dangun.miniproject.domain.Member;
 import com.dangun.miniproject.dto.GetBoardDetailResponse;
 import com.dangun.miniproject.dto.GetBoardResponse;
 import com.dangun.miniproject.fixture.BoardFixture;
@@ -45,7 +46,9 @@ class BoardControllerTest {
 		@DisplayName("[성공] 게시글 상세 정보가 정상적으로 조회된다.")
 		void getBoardDetail_success() throws Exception {
 			// given -- 테스트의 상태 설정
-			final Board board = BoardFixture.instanceOf();
+			final Member member = mock(Member.class);
+			final Board board = BoardFixture.instanceOf(member);
+
 			final GetBoardDetailResponse response = GetBoardDetailResponse.from(board);
 
 			given(boardService.getBoardDetail(any())).willReturn(response);
@@ -72,8 +75,9 @@ class BoardControllerTest {
 			// given -- 테스트의 상태 설정
 			final Pageable pageable = PageRequest.of(0, 10);
 
-			final Board board1 = BoardFixture.instanceOf();
-			final Board board2 = BoardFixture.instanceOf();
+			final Member member = mock(Member.class);
+			final Board board1 = BoardFixture.instanceOf(member);
+			final Board board2 = BoardFixture.instanceOf(member);
 
 			final List<GetBoardResponse> boardList = List.of(
 				GetBoardResponse.from(board1),
@@ -100,8 +104,9 @@ class BoardControllerTest {
 			// given -- 테스트의 상태 설정
 			final Pageable pageable = PageRequest.of(0, 10);
 
-			final Board board1 = BoardFixture.instanceOf();
-			final Board board2 = BoardFixture.instanceOf();
+			final Member member = mock(Member.class);
+			final Board board1 = BoardFixture.instanceOf(member);
+			final Board board2 = BoardFixture.instanceOf(member);
 
 			final List<GetBoardResponse> boardList = List.of(
 				GetBoardResponse.from(board1),
@@ -134,8 +139,9 @@ class BoardControllerTest {
 			// given -- 테스트의 상태 설정
 			final Pageable pageable = PageRequest.of(0, 10);
 
-			final Board board1 = BoardFixture.instanceOf();
-			final Board board2 = BoardFixture.instanceOf();
+			final Member member = mock(Member.class);
+			final Board board1 = BoardFixture.instanceOf(member);
+			final Board board2 = BoardFixture.instanceOf(member);
 
 			final List<GetBoardResponse> boardList = List.of(
 				GetBoardResponse.from(board1),
