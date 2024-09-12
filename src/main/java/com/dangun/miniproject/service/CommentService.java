@@ -11,4 +11,6 @@ public interface CommentService {
     WriteCommentResponse writeComment(Member member, Long boardId, WriteCommentRequest comment);
 
     UpdateCommentResponse updateComment(Long boardId, Long commentId, Member member, UpdateCommentRequest request);
+
+    void deleteComment(Long boardId, Long commentId, Member member);
 }
