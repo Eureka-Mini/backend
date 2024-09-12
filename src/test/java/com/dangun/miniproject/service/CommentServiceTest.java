@@ -4,6 +4,8 @@ import com.dangun.miniproject.domain.Board;
 import com.dangun.miniproject.domain.BoardStatus;
 import com.dangun.miniproject.domain.Comment;
 import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.dto.UpdateCommentRequest;
+import com.dangun.miniproject.dto.UpdateCommentResponse;
 import com.dangun.miniproject.dto.WriteCommentRequest;
 import com.dangun.miniproject.dto.WriteCommentResponse;
 import com.dangun.miniproject.repository.BoardRepository;
@@ -94,6 +96,7 @@ public class CommentServiceTest {
             // given
             Long commentId = 1L;
             String updatedContent = "수정된 댓글 내용";
+            UpdateCommentRequest request = mock(UpdateCommentRequest.class);
             Member member = mock(Member.class);
             Board board = mock(Board.class);
             Comment comment = Comment.builder()
@@ -102,14 +105,14 @@ public class CommentServiceTest {
                     .member(member)
                     .build();
 
-            // mock comment repository behavior
             when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+            when(request.getContent()).thenReturn(updatedContent);
 
             // when
-            commentService.updateComment(commentId, updatedContent, member);
+            UpdateCommentResponse response = commentService.updateComment(commentId, request, member);
 
             // then
-            assertThat(comment.getContent()).isEqualTo(updatedContent);
+            assertThat(response.getContent()).isEqualTo(updatedContent);
         }
     }
 }
