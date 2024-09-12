@@ -26,8 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -155,6 +154,37 @@ public class CommentControllerTest {
             // then
             result.andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.message").value("Content is blank"));
+        }
+    }
+
+    @Nested
+    class deleteComment {
+
+        @Test
+        void 댓글_삭제_성공_200() throws Exception {
+            // given
+            Long boardId = 1L;
+            Long commentId = 2L;
+            Member member = mock(Member.class);
+
+            doNothing().when(commentService).deleteComment(eq(boardId), eq(commentId), any(Member.class));
+
+            // when
+            ResultActions result = mockMvc.perform(
+                    delete("/boards/{boardId}/comments/{commentId}", boardId, commentId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .characterEncoding(StandardCharsets.UTF_8)
+                            .with(authentication(new TestingAuthenticationToken(member, null, AuthorityUtils.createAuthorityList("ROLE_USER"))))
+                            .with(csrf())
+            );
+
+            // then
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data").value(2L))
+                    .andExpect(jsonPath("$.message").value("Delete Success"))
+                    .andDo(print());
+
+            verify(commentService).deleteComment(eq(boardId), eq(commentId), eq(member));
         }
     }
 }
