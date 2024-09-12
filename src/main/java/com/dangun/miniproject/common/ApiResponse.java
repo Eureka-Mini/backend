@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 
 @Getter
 public class ApiResponse<T> {
-    private String code;
-    private String message;
+    private final String code;
+    private final String message;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private T data;
-    private LocalDateTime timestamp;
+    private final T data;
+    private final LocalDateTime timestamp;
 
     private ApiResponse(String code, T data, String message) {
         this.code = code;
@@ -24,6 +24,10 @@ public class ApiResponse<T> {
 
     public static <T> ResponseEntity<ApiResponse<T>> created(String redirectUrl, String code, T data, String message) {
         return ResponseEntity.created(URI.create(redirectUrl)).body(new ApiResponse<>(code, data, message));
+    }
+
+    public static <T> ResponseEntity<ApiResponse<T>> ok(String code, T data, String message) {
+        return ResponseEntity.ok(new ApiResponse<>(code, data, message));
     }
 
     public static <T> ResponseEntity<ApiResponse<T>> badRequest(String code, String message) {
