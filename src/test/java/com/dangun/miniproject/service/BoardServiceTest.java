@@ -1,6 +1,8 @@
 package com.dangun.miniproject.service;
 
 import static org.assertj.core.api.SoftAssertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.data.domain.Sort.*;
 
@@ -9,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.dangun.miniproject.domain.BoardStatus;
+import com.dangun.miniproject.dto.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,20 +27,21 @@ import org.springframework.data.domain.PageRequest;
 import com.dangun.miniproject.domain.Board;
 import com.dangun.miniproject.domain.Comment;
 import com.dangun.miniproject.domain.Member;
-import com.dangun.miniproject.dto.GetBoardDetailResponse;
-import com.dangun.miniproject.dto.GetBoardResponse;
-import com.dangun.miniproject.dto.GetCommentResponse;
 import com.dangun.miniproject.fixture.BoardFixture;
 import com.dangun.miniproject.fixture.CommentFixture;
 import com.dangun.miniproject.repository.BoardRepository;
 import com.dangun.miniproject.repository.MemberRepository;
 import com.dangun.miniproject.service.impl.BoardServiceImpl;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class BoardServiceTest {
 
 	@InjectMocks
 	private BoardServiceImpl boardServiceImpl;
+
+	@InjectMocks
+	private BoardServiceImpl boardService;
 
 	@Mock
 	private BoardRepository boardRepository;
@@ -51,7 +56,7 @@ class BoardServiceTest {
 		@Test
 		@DisplayName("[성공] 게시글 ID로 상세 정보가 정상적으로 조회된다.")
 		void getBoardDetail_success() {
-		    // given -- 테스트의 상태 설정
+			// given -- 테스트의 상태 설정
 			final Member member = mock(Member.class);
 			final Board board = BoardFixture.instanceOf(member);
 
@@ -61,7 +66,7 @@ class BoardServiceTest {
 
 			final GetBoardDetailResponse response = GetBoardDetailResponse.from(board);
 
-		    // when -- 테스트하고자 하는 행동
+			// when -- 테스트하고자 하는 행동
 			final GetBoardDetailResponse result = boardServiceImpl.getBoardDetail(1L);
 
 			// then -- 예상되는 변화 및 결과
@@ -74,7 +79,7 @@ class BoardServiceTest {
 		@Test
 		@DisplayName("[성공] 게시글의 댓글 목록과 댓글 작성자 정보가 정상적으로 조회된다.")
 		void getBoardDetail_commentsAndWriterInfo_success() {
-		    // given -- 테스트의 상태 설정
+			// given -- 테스트의 상태 설정
 			final Member member = mock(Member.class);
 			final Board board = mock(Board.class);
 			final Comment comment = CommentFixture.instanceOf(member, board);
@@ -91,7 +96,7 @@ class BoardServiceTest {
 
 			response.getComments().add(commentResponse);
 
-		    // when -- 테스트하고자 하는 행동
+			// when -- 테스트하고자 하는 행동
 			final GetBoardDetailResponse result = boardServiceImpl.getBoardDetail(1L);
 
 			// then -- 예상되는 변화 및 결과
@@ -110,20 +115,20 @@ class BoardServiceTest {
 		@Test
 		@DisplayName("[성공] 페이지당 게시글 목록이 10개씩 정상적으로 조회된다.")
 		void getBoardList_paging_success() {
-		    // given -- 테스트의 상태 설정
+			// given -- 테스트의 상태 설정
 			final Member member = mock(Member.class);
 			final PageRequest pageRequest = PageRequest.of(0, 10);
 
 			final List<Board> boardList = Arrays.asList(
-				BoardFixture.instanceOf(member),
-				BoardFixture.instanceOf(member)
+					BoardFixture.instanceOf(member),
+					BoardFixture.instanceOf(member)
 			);
 
 			final PageImpl<Board> response = new PageImpl<>(boardList);
 
 			given(boardRepository.findAllWithMember(any())).willReturn(response);
 
-		    // when -- 테스트하고자 하는 행동
+			// when -- 테스트하고자 하는 행동
 			final Page<GetBoardResponse> result = boardServiceImpl.getBoardList(pageRequest);
 
 			// then -- 예상되는 변화 및 결과
@@ -142,13 +147,13 @@ class BoardServiceTest {
 			final PageRequest pageRequest = PageRequest.of(0, 10, by(Direction.DESC, "createdAt"));
 
 			final List<Board> boardList = List.of(
-				BoardFixture.instanceOf(member, "키워드 Title", "content"),
-				BoardFixture.instanceOf(member, "일반 Title", "content")
+					BoardFixture.instanceOf(member, "키워드 Title", "content"),
+					BoardFixture.instanceOf(member, "일반 Title", "content")
 			);
 
 			final List<Board> searchBoardList = boardList.stream()
-				.filter(board -> board.getTitle().contains("키워드"))
-				.toList();
+					.filter(board -> board.getTitle().contains("키워드"))
+					.toList();
 
 			final PageImpl<Board> response = new PageImpl<>(searchBoardList);
 
@@ -177,8 +182,8 @@ class BoardServiceTest {
 				final PageRequest pageRequest = PageRequest.of(0, 10);
 
 				final List<Board> boardList = Arrays.asList(
-					BoardFixture.instanceOf(member),
-					BoardFixture.instanceOf(member)
+						BoardFixture.instanceOf(member),
+						BoardFixture.instanceOf(member)
 				);
 
 				final PageImpl<Board> response = new PageImpl<>(boardList);
@@ -197,4 +202,195 @@ class BoardServiceTest {
 			}
 		}
 	}
+
+
+
+
+
+
+		@Test
+		@DisplayName("게시글 생성")
+		public void testCreateBoard() {
+			// Given
+			Long memberId = 1L;
+			Member member = new Member();
+			ReflectionTestUtils.setField(member, "id", memberId); // 'id' 필드 값을 직접 설정
+
+			CreateBoardRequest request = new CreateBoardRequest("제목", "내용", 1000, BoardStatus.판매중, memberId);
+
+			Board board = Board.builder()
+					.title(request.getTitle())
+					.content(request.getContent())
+					.price(request.getPrice())
+					.boardStatus(request.getBoardStatus())
+					.member(member)
+					.build();
+
+			when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+			when(boardRepository.save(any(Board.class))).thenReturn(board);
+
+			// When
+			BoardResponse response = boardService.createBoard(request);
+
+			// Then
+			assertNotNull(response);
+			assertEquals(request.getTitle(), response.getTitle());
+			assertEquals(request.getContent(), response.getContent());
+			assertEquals(request.getPrice(), response.getPrice());
+			assertEquals(request.getBoardStatus(), response.getBoardStatus());
+			assertEquals(memberId, response.getMemberId());
+
+			verify(memberRepository).findById(memberId);
+			verify(boardRepository).save(any(Board.class));
+		}
+
+
+
+
+		@Test
+		@DisplayName("존재하지 않은 작성자에 의해 게시글 생성")
+		public void testCreateBoardWhenMemberNotFound() {
+			// Given
+			Long memberId = 1L;
+			CreateBoardRequest request = new CreateBoardRequest("제목", "내용", 1000, BoardStatus.판매중, memberId);
+
+			when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+
+			// When & Then
+			assertThrows(RuntimeException.class, () -> boardService.createBoard(request), "Member not found");
+		}
+
+
+
+		@Test
+		@DisplayName("게시글 수정")
+		public void testUpdateBoard() {
+			// Given
+			Long boardId = 1L;
+			Long memberId = 1L;
+
+			Member member = new Member();
+			ReflectionTestUtils.setField(member, "id", memberId); // 멤버 ID 설정
+
+			// 빌더 패턴을 사용해 기존 게시글 생성
+			Board existingBoard = Board.builder()
+					.title("기존 제목")
+					.content("기존 내용")
+					.price(500)
+					.boardStatus(BoardStatus.판매중)
+					.member(member)
+					.build();
+
+			ReflectionTestUtils.setField(existingBoard, "id", boardId);
+
+			UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1500, BoardStatus.판매완료);
+
+			when(boardRepository.findById(boardId)).thenReturn(Optional.of(existingBoard));
+			when(boardRepository.save(any(Board.class))).thenReturn(existingBoard);
+
+			// When
+			BoardResponse response = boardService.updateBoard(boardId, request);
+
+			// Then
+			assertNotNull(response);
+			assertEquals("새 제목", response.getTitle());
+			assertEquals("새 내용", response.getContent());
+			assertEquals(1500, response.getPrice());
+			assertEquals(BoardStatus.판매완료, response.getBoardStatus());
+
+			verify(boardRepository).findById(boardId);
+			verify(boardRepository).save(existingBoard);
+		}
+
+
+
+		@Test
+		@DisplayName("존재하지 않는 멤버로 게시글을 수정")
+		public void testUpdateBoardWithNonExistentMember() {
+			// Given
+			Long boardId = 1L;
+			Long nonExistentMemberId = 999L; // 존재하지 않는 회원 ID
+			UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 2000, BoardStatus.판매완료);
+
+			// 존재하지 않는 회원 객체 생성
+			Member existingMember = new Member(); // 실제 회원 객체로 대체 가능
+			ReflectionTestUtils.setField(existingMember, "id", nonExistentMemberId);
+
+			// Board 객체와 연결된 Member 객체 생성
+			Board existingBoard = Board.builder()
+					.content("기존 내용")
+					.member(existingMember) // 더미 회원 객체 사용
+					.price(1000)
+					.boardStatus(BoardStatus.판매중)
+					.title("기존 제목")
+					.build();
+
+			// 직접 id 필드 설정
+			ReflectionTestUtils.setField(existingBoard, "id", boardId);
+
+			// Mock 설정
+			when(boardRepository.findById(boardId)).thenReturn(Optional.of(existingBoard));
+
+			// When & Then
+			assertThrows(RuntimeException.class, () -> {
+				boardService.updateBoard(boardId, request);
+			});
+		}
+
+
+
+		@Test
+		@DisplayName("존재하지 않은 게시글에 대한 수정")
+		public void testUpdateNonExistentBoard() {
+			// Given
+			Long nonExistentBoardId = 999L; // 존재하지 않는 게시글 ID
+			UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 2000, BoardStatus.판매완료);
+
+			// BoardRepository에서 존재하지 않는 게시글에 대해 Optional.empty() 반환 설정
+			when(boardRepository.findById(nonExistentBoardId)).thenReturn(Optional.empty());
+
+			// When & Then
+			assertThrows(RuntimeException.class, () -> {
+				boardService.updateBoard(nonExistentBoardId, request);
+			});
+		}
+
+		@Test
+		@DisplayName("게시글 삭제")
+		public void testDeleteBoard() {
+			// Given
+			Long boardId = 1L;
+
+			Board board = Board.builder()
+					.title("제목")
+					.content("내용")
+					.price(1000)
+					.boardStatus(BoardStatus.판매중)
+					.build();
+
+			ReflectionTestUtils.setField(board, "id", boardId);
+
+			when(boardRepository.findById(boardId)).thenReturn(Optional.of(board));
+
+			// When
+			boardService.deleteBoard(boardId);
+
+			// Then
+			verify(boardRepository).findById(boardId);
+			verify(boardRepository).delete(board);
+		}
+
+		@Test
+		@DisplayName("존재하지 않은 게시글에 대한 삭제")
+		public void testDeleteBoardWhenBoardNotFound() {
+			// Given
+			Long boardId = 1L;
+
+			when(boardRepository.findById(boardId)).thenReturn(Optional.empty());
+
+			// When & Then
+			assertThrows(RuntimeException.class, () -> boardService.deleteBoard(boardId), "Board not found");
+		}
+
+
 }
