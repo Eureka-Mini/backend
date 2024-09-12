@@ -194,5 +194,27 @@ public class CommentServiceTest {
             // then
             verify(commentRepository).delete(comment);
         }
+
+        @Test
+        void 유효하지_않은_게시글_ID가_주어진_경우() {
+            // given
+            Long commentId = 10L;
+            Long invalidBoardId = 999L;
+            Member member = mock(Member.class);
+            Board board = mock(Board.class);
+            Comment comment = Comment.builder()
+                    .board(board)
+                    .member(member)
+                    .content("댓글 내용")
+                    .build();
+
+            when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+            when(board.getId()).thenReturn(20L);
+
+            // when & then
+            assertThatThrownBy(() -> commentService.deleteComment(invalidBoardId, commentId, member))
+                    .isInstanceOf(NoSuchElementException.class)
+                    .hasMessage("Board Not Found");
+        }
     }
 }
