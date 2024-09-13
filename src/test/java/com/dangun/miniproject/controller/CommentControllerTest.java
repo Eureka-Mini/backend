@@ -183,7 +183,7 @@ public class CommentControllerTest {
 
             // then
             result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data").value(2L))
+                    .andExpect(jsonPath("$.data.commentId").value(2L))
                     .andExpect(jsonPath("$.message").value("Delete Success"))
                     .andDo(print());
 
