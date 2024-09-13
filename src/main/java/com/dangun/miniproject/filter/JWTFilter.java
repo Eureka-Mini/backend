@@ -34,7 +34,15 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        String accessToken = request.getHeader("accessToken");
+        String authorization = request.getHeader("Authorization");
+
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            response.getWriter().write("authorization null");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        String accessToken = authorization.split(" ")[1];
 
         if (accessToken == null) {
             response.getWriter().write("accessToken null");
