@@ -1,10 +1,7 @@
 package com.dangun.miniproject.controller;
 
 import com.dangun.miniproject.domain.Member;
-import com.dangun.miniproject.dto.UpdateCommentRequest;
-import com.dangun.miniproject.dto.UpdateCommentResponse;
-import com.dangun.miniproject.dto.WriteCommentRequest;
-import com.dangun.miniproject.dto.WriteCommentResponse;
+import com.dangun.miniproject.dto.*;
 import com.dangun.miniproject.service.CommentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Nested;
@@ -15,7 +12,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -49,7 +48,8 @@ public class CommentControllerTest {
             Long boardId = 1L;
             WriteCommentRequest request = mock(WriteCommentRequest.class);
             WriteCommentResponse response = new WriteCommentResponse("테스트댓글");
-            Member member = mock(Member.class);
+            Member member = new Member();
+            UserDetails userDetails = new UserDetailsDto(member);
 
             when(request.getContent()).thenReturn("테스트댓글");
             when(commentService.writeComment(any(), any(Long.class), any(WriteCommentRequest.class)))
@@ -59,7 +59,7 @@ public class CommentControllerTest {
             ResultActions result = mockMvc.perform(post("/boards/{boardId}/comments", boardId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .characterEncoding(StandardCharsets.UTF_8)
-                    .with(authentication(new TestingAuthenticationToken(member, null, AuthorityUtils.createAuthorityList("ROLE_USER"))))
+                    .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
                     .with(csrf())
                     .content(new ObjectMapper().writeValueAsString(request)));
 
@@ -78,6 +78,7 @@ public class CommentControllerTest {
             Long boardId = 1L;
             WriteCommentRequest request = mock(WriteCommentRequest.class);
             Member member = mock(Member.class);
+            UserDetails userDetails = new UserDetailsDto(member);
 
             when(request.getContent()).thenReturn("");
 
@@ -85,13 +86,15 @@ public class CommentControllerTest {
             ResultActions result = mockMvc.perform(post("/boards/{boardId}/comments", boardId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .characterEncoding(StandardCharsets.UTF_8)
-                    .with(authentication(new TestingAuthenticationToken(member, null, AuthorityUtils.createAuthorityList("ROLE_USER"))))
+                    .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
                     .with(csrf())
                     .content(new ObjectMapper().writeValueAsString(request)));
 
             // then
             result.andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.message").value("Content is blank"));
+
+            verify(commentService, never()).writeComment(any(Member.class), eq(boardId), any(WriteCommentRequest.class));
         }
     }
 
