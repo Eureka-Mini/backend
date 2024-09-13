@@ -4,6 +4,7 @@ import com.dangun.miniproject.domain.Member;
 import com.dangun.miniproject.dto.UserDetailsDto;
 import com.dangun.miniproject.jwt.JWTUtil;
 import com.dangun.miniproject.repository.MemberRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,50 +29,48 @@ public class JWTFilter extends OncePerRequestFilter {
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        if (request.getRequestURI().equals("/login") || request.getRequestURI().equals("/") || request.getRequestURI().equals("/signup")) {
+        if (request.getRequestURI().startsWith("/auth/") || request.getRequestURI().equals("/") || request.getRequestURI().startsWith("/static/")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String authorization = request.getHeader("Authorization");
+        String accessToken = request.getHeader("accessToken");
 
-        // Header 체크
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            log.warn("요청 헤더에 토큰이 비어있습니다");
-            setUnauthorizedResponse(request, response, filterChain);
+        if (accessToken == null) {
+            response.getWriter().write("accessToken null");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        String token = authorization.split(" ")[1];
-
-        // expireTime 체크
-        if (jwtUtil.isExpiredToken(token)) {
-            log.warn("요청 헤더에 있는 토큰의 사용 시간이 만료 되었습니다.");
-            setUnauthorizedResponse(request, response, filterChain);
+        try {
+            jwtUtil.isExpiredToken(accessToken);
+        } catch (ExpiredJwtException e) {
+            response.getWriter().write("accessToken expired");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        // 유저 객체 추출
-        String email = jwtUtil.getMemberEmail(token);
+        String category = jwtUtil.getJwtCategory(accessToken);
+
+        if (!category.equals("accessToken")) {
+            response.getWriter().write("not accessToken");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        String email = jwtUtil.getMemberEmail(accessToken);
         Member member = memberRepository.findByEmail(email);
 
         if (member == null) {
-            log.warn("사용자를 찾을 수 없습니다");
-            setUnauthorizedResponse(request, response, filterChain);
+            response.getWriter().write("not found member");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        // Jwt 검증
         UserDetailsDto customUserDetails = new UserDetailsDto(member);
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
-        filterChain.doFilter(request, response);
-    }
-
-    private void setUnauthorizedResponse(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-    throws IOException, ServletException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         filterChain.doFilter(request, response);
     }
 }

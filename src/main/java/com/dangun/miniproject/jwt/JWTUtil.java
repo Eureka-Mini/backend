@@ -1,9 +1,8 @@
 package com.dangun.miniproject.jwt;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
-
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -40,19 +39,24 @@ public class JWTUtil {
                     .parseClaimsJws(token)
                     .getBody().getExpiration()
                     .before(new Date());
-        } catch (Exception e) {
+        } catch (ExpiredJwtException e) {
             log.warn("토큰 파싱 중 예외 발생: " + e.getMessage());
             return true;
         }
     }
 
     // 토큰 생성
-    public String createJwt(String email, Long expireTime) {
+    public String createJwt(String category, String email, Long expireTime) {
         return Jwts.builder()
+                .claim("category", category)
                 .claim("email", email)
                 .issuedAt(new Date(System.currentTimeMillis())) // 발행 시간
                 .expiration(new Date(System.currentTimeMillis() + expireTime)) // 만료 시간
                 .signWith(secretKey) // 시그니쳐
                 .compact();
+    }
+
+    public String getJwtCategory(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
     }
 }

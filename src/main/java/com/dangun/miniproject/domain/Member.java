@@ -39,9 +39,14 @@ public class Member {
         this.password = password;
     }
 
-    public void updateMember(GetMemberRequest getMemberRequest){
+    public void updateMember(GetMemberRequest getMemberRequest) {
         this.email = getMemberRequest.getEmail();
         this.password = getMemberRequest.getPassword();
         this.nickname = getMemberRequest.getNickname();
+    }
+
+    public void addAddress(Address address) {
+        this.address = address;
+        Address.builder().member(this).build();
     }
 }
