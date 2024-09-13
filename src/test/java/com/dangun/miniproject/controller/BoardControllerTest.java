@@ -263,8 +263,6 @@ class BoardControllerTest {
 						.content("{\"title\":\"Updated Title\",\"content\":\"Updated Content\",\"price\":2000}")
 						.with(csrf())
 						.with(SecurityMockMvcRequestPostProcessors.user("testUser"))
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("{\"code\":\"MEMBER-F001\",\"message\":\"User Not Found\"}")
 				)
 				// Then
 				.andDo(print())
@@ -285,8 +283,6 @@ class BoardControllerTest {
 						.content("{\"title\":\"Updated Title\",\"content\":\"Updated Content\",\"price\":2000}")
 						.with(csrf())
 						.with(SecurityMockMvcRequestPostProcessors.user("testUser"))
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("{\"code\":\"BOARD-F001\",\"message\":\"Board Not Found\",\"data\":null}")
 				)
 				// Then
 				.andDo(print())
