@@ -3,6 +3,7 @@ package com.dangun.miniproject.domain;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
 
 public class CommentTest {
 
@@ -30,6 +31,31 @@ public class CommentTest {
             softly.assertThat(comment.getBoard()).isEqualTo(board);
             softly.assertThat(comment.getMember()).isEqualTo(member);
             softly.assertThat(comment.getContent()).isEqualTo(content);
+        });
+    }
+
+    @Test
+    void Comment_객체의_content_를_수정한다() {
+        // given
+        Board board = mock(Board.class);
+        Member member = mock(Member.class);
+
+        Comment comment = Comment.builder()
+                .member(member)
+                .board(board)
+                .content("수정 전 댓글")
+                .build();
+        String updatedComment = "수정 후 댓글";
+
+        // when
+        comment.updateContent(updatedComment);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(comment).isNotNull();
+            softly.assertThat(comment.getContent()).isEqualTo(updatedComment);
+            softly.assertThat(comment.getMember()).isEqualTo(member);
+            softly.assertThat(comment.getBoard()).isEqualTo(board);
         });
     }
 }
