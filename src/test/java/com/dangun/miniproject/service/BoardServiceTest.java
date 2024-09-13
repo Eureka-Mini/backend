@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,11 +32,8 @@ import com.dangun.miniproject.fixture.CommentFixture;
 import com.dangun.miniproject.repository.BoardRepository;
 import com.dangun.miniproject.repository.MemberRepository;
 import com.dangun.miniproject.service.impl.BoardServiceImpl;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.server.ResponseStatusException;
+
 
 @ExtendWith(MockitoExtension.class)
 class BoardServiceTest {
@@ -256,7 +252,7 @@ class BoardServiceTest {
 	@DisplayName("존재하지 않는 작성자에 의해 게시글 생성")
 	public void testCreateBoardWhenMemberNotFound() {
 		// Given
-		Long memberId = 1L;
+		Long memberId = 99L;
 		CreateBoardRequest request = new CreateBoardRequest("제목", "내용", 1000, BoardStatus.판매중, memberId);
 
 		when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
@@ -388,8 +384,8 @@ class BoardServiceTest {
 	@DisplayName("존재하지 않는 회원이 게시글 삭제 시도")
 	public void testDeleteBoardByNonExistentMember() {
 		// Given
-		Long boardId = 1L;
-		Long existingMemberId = 1L;
+		Long boardId = 999L;
+		Long existingMemberId = 999L;
 
 		Member existingMember = new Member();
 		ReflectionTestUtils.setField(existingMember, "id", existingMemberId);
