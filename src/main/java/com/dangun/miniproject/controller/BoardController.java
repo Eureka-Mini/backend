@@ -3,6 +3,7 @@ package com.dangun.miniproject.controller;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dangun.miniproject.common.ApiResponse;
+import com.dangun.miniproject.domain.Member;
 import com.dangun.miniproject.dto.BoardResponse;
 import com.dangun.miniproject.dto.CreateBoardRequest;
 import com.dangun.miniproject.dto.UpdateBoardRequest;
@@ -64,13 +66,13 @@ public class BoardController {
 	// 작성 게시글 목록 조회
 	@GetMapping("/my-board")
 	public ResponseEntity<?> getMyBoardList(
-			@RequestParam("memberId") final Long memberId,
+			@AuthenticationPrincipal(expression = "member") final Member member,
 			final Pageable pageable
 	) {
 
 		return ApiResponse.ok(
 			"BOARD-S004",
-			boardService.getMyBoardList(memberId, pageable),
+			boardService.getMyBoardList(member.getId(), pageable),
 			"My Board List Success"
 		);
 	}
