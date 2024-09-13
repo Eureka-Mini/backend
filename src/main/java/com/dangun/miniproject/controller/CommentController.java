@@ -2,10 +2,7 @@ package com.dangun.miniproject.controller;
 
 import com.dangun.miniproject.common.ApiResponse;
 import com.dangun.miniproject.domain.Member;
-import com.dangun.miniproject.dto.UpdateCommentRequest;
-import com.dangun.miniproject.dto.UpdateCommentResponse;
-import com.dangun.miniproject.dto.WriteCommentRequest;
-import com.dangun.miniproject.dto.WriteCommentResponse;
+import com.dangun.miniproject.dto.*;
 import com.dangun.miniproject.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +50,6 @@ public class CommentController {
                                            @PathVariable Long commentId) {
         commentService.deleteComment(boardId, commentId, member);
 
-        return ApiResponse.ok("COMMENT-S003", commentId, "Delete Success");
+        return ApiResponse.ok("COMMENT-S003", new DeleteCommentResponse(commentId), "Delete Success");
     }
 }
