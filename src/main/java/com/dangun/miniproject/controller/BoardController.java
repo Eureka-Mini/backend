@@ -1,13 +1,24 @@
 package com.dangun.miniproject.controller;
 
-import com.dangun.miniproject.dto.*;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.dangun.miniproject.common.ApiResponse;
+import com.dangun.miniproject.dto.BoardResponse;
+import com.dangun.miniproject.dto.CreateBoardRequest;
+import com.dangun.miniproject.dto.UpdateBoardRequest;
 import com.dangun.miniproject.service.BoardService;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -19,30 +30,49 @@ public class BoardController {
 
 	// 게시글 상세 조회
 	@GetMapping("/{boardId}")
-	public GetBoardDetailResponse getBoardDetail(@PathVariable("boardId") final Long boardId) {
-		return boardService.getBoardDetail(boardId);
+	public ResponseEntity<?> getBoardDetail(@PathVariable("boardId") final Long boardId) {
+
+		return ApiResponse.ok(
+			 "BOARD-S002",
+			boardService.getBoardDetail(boardId),
+			"Board Read Success"
+		);
 	}
 
 	// 게시글 목록 조회
 	@GetMapping
-	public Page<GetBoardResponse> getBoardList(
+	public ResponseEntity<?> getBoardList(
 			@RequestParam(value = "keyword", required = false) final String keyword,
 			final Pageable pageable
 	) {
 		if (keyword != null && !keyword.isEmpty()) {
-			return boardService.getBoardList(keyword, pageable);
+
+			return ApiResponse.ok(
+				"BOARD-S003",
+				boardService.getBoardList(keyword, pageable),
+				"Board Sorted List Success"
+			);
 		}
 
-		return boardService.getBoardList(pageable);
+		return ApiResponse.ok(
+			"BOARD-S003",
+			boardService.getBoardList(pageable),
+			"Board Sorted List Success"
+		);
 	}
 
 	// 작성 게시글 목록 조회
 	@GetMapping("/my-board")
-	public Page<GetBoardResponse> getMyBoardList(
+	public ResponseEntity<?> getMyBoardList(
 			@RequestParam("memberId") final Long memberId,
 			final Pageable pageable
 	) {
-		return boardService.getMyBoardList(memberId, pageable);
+
+		return ApiResponse.ok(
+			"BOARD-S004",
+			boardService.getMyBoardList(memberId, pageable),
+			"My Board List Success"
+		);
 	}
 
 
