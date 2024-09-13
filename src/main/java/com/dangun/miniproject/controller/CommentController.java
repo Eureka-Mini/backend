@@ -20,14 +20,15 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<?> writeComment(@AuthenticationPrincipal Member member,
+    public ResponseEntity<?> writeComment(@AuthenticationPrincipal(expression = "member") Member member,
                                           @RequestBody WriteCommentRequest request,
                                           @PathVariable Long boardId) {
-        WriteCommentResponse writeCommentResponse = commentService.writeComment(member, boardId, request);
 
         if (request.getContent().isBlank()) {
             return ApiResponse.badRequest("COMMENT-F001", "Content is blank");
         }
+
+        WriteCommentResponse writeCommentResponse = commentService.writeComment(member, boardId, request);
 
         return ApiResponse.created("", "COMMENT-S001", writeCommentResponse, "Create Success");
     }
