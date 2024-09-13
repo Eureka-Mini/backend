@@ -93,6 +93,8 @@ public class CommentControllerTest {
             // then
             result.andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.message").value("Content is blank"));
+
+            verify(commentService, never()).writeComment(any(Member.class), eq(boardId), any(WriteCommentRequest.class));
         }
     }
 
