@@ -7,7 +7,6 @@ import com.dangun.miniproject.dto.GetMemberRequest;
 import com.dangun.miniproject.jwt.JWTUtil;
 import com.dangun.miniproject.repository.MemberRepository;
 import com.dangun.miniproject.service.AuthService;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -120,17 +119,7 @@ public class AuthServiceImpl implements AuthService {
             return ApiResponse.badRequest("AUTH_F001", "refreshToken null");
         }
 
-        try {
-            jwtUtil.isExpiredToken(refreshToken);
-        } catch (ExpiredJwtException e) {
-            return ApiResponse.badRequest("AUTH_F002", "refreshToken expired");
-        }
-
-        String category = jwtUtil.getJwtCategory(refreshToken);
-
-        if (!category.equals("refreshToken")) {
-            return ApiResponse.badRequest("AUTH_F002", "not refreshToken");
-        }
+        jwtUtil.isExpiredToken(refreshToken);
 
         String email = jwtUtil.getMemberEmail(refreshToken);
         String newAccessToken = jwtUtil.createJwt("accessToken", email, ACCESS_TOKEN_EXPIRE_TIME);

@@ -1,5 +1,6 @@
 package com.dangun.miniproject.config;
 
+import com.dangun.miniproject.filter.JWTExceptionHandlerFilter;
 import com.dangun.miniproject.filter.JWTFilter;
 import com.dangun.miniproject.filter.LoginFilter;
 import com.dangun.miniproject.jwt.JWTUtil;
@@ -38,6 +39,7 @@ public class SecurityConfig {
         loginFilter.setFilterProcessesUrl("/auth/login");
 
         JWTFilter jwtFilter = new JWTFilter(jwtUtil, memberRepository);
+        JWTExceptionHandlerFilter jwtExceptionHandlerFilter = new JWTExceptionHandlerFilter();
 
         // Http Security Setting
         http
@@ -57,6 +59,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(jwtFilter, LoginFilter.class)
+                .addFilterBefore(jwtExceptionHandlerFilter, JWTFilter.class)
 
                 .cors((cors) -> cors
                         .configurationSource(new CorsConfigurationSource() {

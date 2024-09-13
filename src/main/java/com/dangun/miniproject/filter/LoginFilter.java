@@ -51,7 +51,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUtil.createJwt("accessToken", email, ACCESS_TOKEN_EXPIRE_TIME);
         String refreshToken = jwtUtil.createJwt("refreshToken", email, REFRESH_TOKEN_EXPIRE_TIME);
 
-        response.setHeader("accessToken", accessToken);
+        response.setHeader("Authorization", "Bearer " + accessToken);
         response.addCookie(createCookie("refreshToken", refreshToken));
 
         // response
