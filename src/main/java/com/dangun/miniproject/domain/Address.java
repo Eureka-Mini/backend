@@ -18,7 +18,7 @@ public class Address {
     private String zipcode;
 
     @MapsId
-    @ManyToOne(fetch = LAZY)
+    @OneToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
