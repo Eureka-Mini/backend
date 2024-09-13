@@ -4,13 +4,11 @@ import java.time.LocalDateTime;
 
 import com.dangun.miniproject.domain.Board;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class GetBoardResponse {
 	private Long id;
 	private String title;

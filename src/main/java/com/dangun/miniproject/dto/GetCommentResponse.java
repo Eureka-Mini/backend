@@ -4,13 +4,11 @@ import java.time.LocalDateTime;
 
 import com.dangun.miniproject.domain.Comment;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class GetCommentResponse {
 	private Long id;	// comment ID
 	private String content;
