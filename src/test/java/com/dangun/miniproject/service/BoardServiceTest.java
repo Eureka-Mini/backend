@@ -2,7 +2,6 @@ package com.dangun.miniproject.service;
 
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.data.domain.Sort.*;
 
@@ -11,8 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import com.dangun.miniproject.domain.BoardStatus;
-import com.dangun.miniproject.dto.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,16 +20,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.dangun.miniproject.domain.Board;
+import com.dangun.miniproject.domain.BoardStatus;
 import com.dangun.miniproject.domain.Comment;
 import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.dto.BoardResponse;
+import com.dangun.miniproject.dto.CreateBoardRequest;
+import com.dangun.miniproject.dto.GetBoardDetailResponse;
+import com.dangun.miniproject.dto.GetBoardResponse;
+import com.dangun.miniproject.dto.UpdateBoardRequest;
 import com.dangun.miniproject.fixture.BoardFixture;
 import com.dangun.miniproject.fixture.CommentFixture;
 import com.dangun.miniproject.repository.BoardRepository;
 import com.dangun.miniproject.repository.MemberRepository;
 import com.dangun.miniproject.service.impl.BoardServiceImpl;
-import org.springframework.test.util.ReflectionTestUtils;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -67,6 +70,8 @@ class BoardServiceTest {
 
 			final GetBoardDetailResponse response = GetBoardDetailResponse.from(board);
 
+			given(boardRepository.findBoardById(any())).willReturn(response);
+
 			// when -- 테스트하고자 하는 행동
 			final GetBoardDetailResponse result = boardServiceImpl.getBoardDetail(1L);
 
@@ -74,28 +79,28 @@ class BoardServiceTest {
 			assertSoftly(softAssertions -> {
 				softAssertions.assertThat(result).isNotNull();
 				softAssertions.assertThat(result.getId()).isEqualTo(response.getId());
+				softAssertions.assertThat(result.getTitle()).isEqualTo(response.getTitle());
 			});
 		}
 
 		@Test
-		@DisplayName("[성공] 게시글의 댓글 목록과 댓글 작성자 정보가 정상적으로 조회된다.")
+		@DisplayName("[성공] 게시글 작성자 정보와 함께 댓글 목록이 최신순으로 조회된다.")
 		void getBoardDetail_commentsAndWriterInfo_success() {
 			// given -- 테스트의 상태 설정
 			final Member member = mock(Member.class);
 			final Board board = mock(Board.class);
-			final Comment comment = CommentFixture.instanceOf(member, board);
+			final Comment comment1 = CommentFixture.instanceOf(member, board);
+			final Comment comment2 = CommentFixture.instanceOf(member, board);
 
-			when(board.getComments()).thenReturn(List.of(comment));
+			when(board.getComments()).thenReturn(List.of(comment1, comment2));
 			when(member.getId()).thenReturn(1L);
 			when(board.getMember()).thenReturn(member);
 
 			given(boardRepository.findById(any())).willReturn(Optional.of(board));
 
-			final boolean isBoardWriter = board.getMember().getId().equals(comment.getMember().getId());
-			final GetCommentResponse commentResponse = GetCommentResponse.from(comment, isBoardWriter);
 			final GetBoardDetailResponse response = GetBoardDetailResponse.from(board);
 
-			response.getComments().add(commentResponse);
+			given(boardRepository.findBoardById(any())).willReturn(response);
 
 			// when -- 테스트하고자 하는 행동
 			final GetBoardDetailResponse result = boardServiceImpl.getBoardDetail(1L);
@@ -204,11 +209,6 @@ class BoardServiceTest {
 		}
 	}
 
-
-
-
-
-
 	@Test
 	@DisplayName("게시글 생성")
 	public void testCreateBoard() {
@@ -245,9 +245,6 @@ class BoardServiceTest {
 		verify(boardRepository).save(any(Board.class));
 	}
 
-
-
-
 	@Test
 	@DisplayName("존재하지 않는 작성자에 의해 게시글 생성")
 	public void testCreateBoardWhenMemberNotFound() {
@@ -260,8 +257,6 @@ class BoardServiceTest {
 		// When & Then
 		assertThrows(RuntimeException.class, () -> boardService.createBoard(request), "Member not found");
 	}
-
-
 
 	@Test
 	@DisplayName("게시글 수정")
@@ -303,8 +298,6 @@ class BoardServiceTest {
 		verify(boardRepository).save(existingBoard);
 	}
 
-
-
 	@Test
 	@DisplayName("존재하지 않는 회원이 수정")
 	public void testUpdateBoardWithNonExistentMember() {
@@ -336,8 +329,6 @@ class BoardServiceTest {
 		});
 	}
 
-
-
 	@Test
 	@DisplayName("존재하지 않는 게시글에 대한 수정")
 	public void testUpdateNonExistentBoard() {
@@ -352,7 +343,6 @@ class BoardServiceTest {
 			boardService.updateBoard(nonExistentBoardId, request);
 		});
 	}
-
 
 	@Test
 	@DisplayName("게시글 삭제")
@@ -378,7 +368,6 @@ class BoardServiceTest {
 		verify(boardRepository).findById(boardId);
 		verify(boardRepository).delete(board);
 	}
-
 
 	@Test
 	@DisplayName("존재하지 않는 회원이 게시글 삭제 시도")
@@ -411,9 +400,4 @@ class BoardServiceTest {
 		verify(boardRepository).findById(boardId);
 		verify(boardRepository).delete(board);
 	}
-
-
-
-
-
 }
