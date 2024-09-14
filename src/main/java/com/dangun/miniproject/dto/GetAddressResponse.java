@@ -4,14 +4,14 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class GetAddressRequest {
+public class GetAddressResponse {
     private Long id;
     private String street;
     private String detail;
     private String zipcode;
 
     @Builder
-    public GetAddressRequest(Long id, String street, String detail, String zipcode) {
+    public GetAddressResponse(Long id, String street, String detail, String zipcode) {
         this.id = id;
         this.street = street;
         this.detail = detail;

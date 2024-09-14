@@ -1,13 +1,16 @@
 package com.dangun.miniproject.service;
 
-import com.dangun.miniproject.dto.GetMemberRequest;
+import com.dangun.miniproject.dto.GetMemberDto;
+import com.dangun.miniproject.dto.GetMemberResponse;
 import org.springframework.http.ResponseEntity;
 
 public interface MemberService {
 
-    GetMemberRequest getMember(Long id);
+    GetMemberDto getMember(Long id);
 
-    ResponseEntity<GetMemberRequest> updateMember(GetMemberRequest getMemberRequest, Long id);
+    GetMemberDto getMyInfo(Long id);
+
+    ResponseEntity<GetMemberDto> updateMember(GetMemberDto getMemberDto, Long id);
 
     boolean deleteMember(Long id);
 }

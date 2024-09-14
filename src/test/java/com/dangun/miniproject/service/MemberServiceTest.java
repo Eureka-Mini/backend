@@ -2,7 +2,9 @@ package com.dangun.miniproject.service;
 
 import com.dangun.miniproject.domain.Address;
 import com.dangun.miniproject.domain.Member;
-import com.dangun.miniproject.dto.GetMemberRequest;
+import com.dangun.miniproject.dto.GetAddressDto;
+import com.dangun.miniproject.dto.GetMemberDto;
+import com.dangun.miniproject.dto.GetMemberResponse;
 import com.dangun.miniproject.repository.AddressRepository;
 import com.dangun.miniproject.repository.BoardRepository;
 import com.dangun.miniproject.repository.CommentRepository;
@@ -50,7 +52,6 @@ public class MemberServiceTest {
         member = Member.builder()
                 .email("Hong@test.com")
                 .nickname("Hong")
-                .password("1234")
                 .build();
 
         address = Address.builder()
@@ -59,6 +60,8 @@ public class MemberServiceTest {
                 .zipcode("14352")
                 .member(member)
                 .build();
+
+        member.addAddress(address); // Member에 주소 추가
     }
 
 
@@ -66,35 +69,51 @@ public class MemberServiceTest {
     @Test
     public void getMember() {
         // Given
-        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+        when(addressRepository.findById(member.getId())).thenReturn(Optional.of(address));
 
         // When
-        GetMemberRequest result = memberService.getMember(1L);
+        GetMemberDto result = memberService.getMember(member.getId());
 
         // Then
         assertNotNull(result);
-        assertEquals(member.getId(), result.getId());
         assertEquals(member.getEmail(), result.getEmail());
         assertEquals(member.getNickname(), result.getNickname());
-        assertEquals(member.getPassword(), result.getPassword());
 
         assertNotNull(result.getAddress());
-        assertEquals(address.getId(), result.getAddress().getId());
         assertEquals(address.getStreet(), result.getAddress().getStreet());
         assertEquals(address.getDetail(), result.getAddress().getDetail());
         assertEquals(address.getZipcode(), result.getAddress().getZipcode());
     }
+
+
+    // 본인 정보 조회 테스트
+    @Test
+    public void getMyInfo() {
+        // Given
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+
+        // When
+        GetMemberDto result = memberService.getMyInfo(member.getId());
+
+        // Then
+        assertNotNull(result);
+        assertEquals(member.getEmail(), result.getEmail());
+        assertEquals(member.getNickname(), result.getNickname());
+        assertNotNull(result.getAddress());
+        assertEquals(member.getAddress().getStreet(), result.getAddress().getStreet());
+        assertEquals(member.getAddress().getDetail(), result.getAddress().getDetail());
+        assertEquals(member.getAddress().getZipcode(), result.getAddress().getZipcode());
+    }
+
 
     // 회원 수정 테스트
     @Test
     void updateMember() {
         // given
         Long memberId = 1L;
-        GetMemberRequest updateRequest = new GetMemberRequest(
-                memberId,
+        GetMemberDto updateRequest = new GetMemberDto(
                 "Hong@test.com",
-                "1234",
                 "Hong",
                 null // 주소는 업데이트하지 않으므로 null
         );
@@ -103,33 +122,32 @@ public class MemberServiceTest {
         when(memberRepository.save(any(Member.class))).thenReturn(member);
 
         // when
-        ResponseEntity<GetMemberRequest> response = memberService.updateMember(updateRequest, memberId);
+        ResponseEntity<GetMemberDto> response = memberService.updateMember(updateRequest, memberId);
 
         // then
-        Optional<GetMemberRequest> optionalBody = Optional.ofNullable(response.getBody());
+        Optional<GetMemberDto> optionalBody = Optional.ofNullable(response.getBody());
         optionalBody.ifPresent(body -> {
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals("Hong@test.com", body.getEmail());
-            assertEquals("1234", response.getBody().getPassword());
             assertEquals("Hong", response.getBody().getNickname());
-            // 주소에 대한 검증은 생략
         });
     }
 
+    // 주소 정보 조회 테스트
     @Test
-    void findAddress() {
+    public void getAddressDtoWhenAddressExists() {
         // given
         Long memberId = 1L;
         when(addressRepository.findById(memberId)).thenReturn(Optional.of(address));
 
-        // when
+        // When
         Optional<Address> result = addressRepository.findById(memberId);
 
-        // then
-        assertTrue(result.isPresent());
-        assertEquals("123 주요 거리", result.get().getStreet());
-        assertEquals("101동 아파트", result.get().getDetail());
-        assertEquals("14352", result.get().getZipcode());
+        // Then
+        assertNotNull(result);
+        assertEquals(address.getStreet(), result.get().getStreet());
+        assertEquals(address.getDetail(), result.get().getDetail());
+        assertEquals(address.getZipcode(), result.get().getZipcode());
     }
 
 
