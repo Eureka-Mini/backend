@@ -1,6 +1,6 @@
 package com.dangun.miniproject.domain;
 
-import com.dangun.miniproject.dto.GetMemberRequest;
+import com.dangun.miniproject.dto.GetMemberDto;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,9 +39,8 @@ public class Member {
         this.password = password;
     }
 
-    public void updateMember(GetMemberRequest getMemberRequest) {
+    public void updateMember(GetMemberDto getMemberRequest) {
         this.email = getMemberRequest.getEmail();
-        this.password = getMemberRequest.getPassword();
         this.nickname = getMemberRequest.getNickname();
     }
 

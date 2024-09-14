@@ -1,28 +1,34 @@
 package com.dangun.miniproject.controller;
 
 
-import com.dangun.miniproject.dto.GetAddressRequest;
-import com.dangun.miniproject.dto.GetMemberRequest;
+import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.dto.*;
 import com.dangun.miniproject.service.MemberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 
+import java.nio.charset.StandardCharsets;
+
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -39,12 +45,13 @@ public class MemberControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+
     @Test
     @WithMockUser(username = "user")
     void getMember() throws Exception {
         // given: GetAddressRequest 객체 생성, GetMemberRequest 객체 생성
-        GetAddressRequest mockAddress = new GetAddressRequest(1L, "123 주요 거리", "101동 아파트", "14352");
-        GetMemberRequest mockResponse = new GetMemberRequest(1L, "Hong@test.com", "1234", "Hong", mockAddress);
+        GetAddressDto mockAddress = new GetAddressDto("testStreet", "testDetail", "12345");
+        GetMemberDto mockResponse = new GetMemberDto("test@test.com", "testUser", mockAddress);
 
         // when: MemberService의 getMember가 호출될 때, mockResponse를 반환하도록 설정
         when(memberService.getMember(anyLong())).thenReturn(mockResponse);
@@ -53,22 +60,45 @@ public class MemberControllerTest {
         mockMvc.perform(get("/members/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.email").value("Hong@test.com"))
-                .andExpect(jsonPath("$.nickname").value("Hong"))
-                .andExpect(jsonPath("$.address.id").value(1L))
-                .andExpect(jsonPath("$.address.street").value("123 주요 거리"))
-                .andExpect(jsonPath("$.address.detail").value("101동 아파트"))
-                .andExpect(jsonPath("$.address.zipcode").value("14352"));
+                .andExpect(jsonPath("$.email").value("test@test.com"))
+                .andExpect(jsonPath("$.nickname").value("testUser"))
+                .andExpect(jsonPath("$.address.street").value("testStreet"))
+                .andExpect(jsonPath("$.address.detail").value("testDetail"))
+                .andExpect(jsonPath("$.address.zipcode").value("12345"));
     }
+
+    @Test
+    void myInfoWhenLoggedIn() throws Exception {
+        // given: Member 정보 설정
+        GetAddressDto mockAddress = new GetAddressDto("testStreet", "testDetail", "12345");
+        GetMemberDto mockResponse = new GetMemberDto("test@example.com", "tester", mockAddress);
+        Member member = new Member(); // Member 객체 초기화 필요
+        UserDetails userDetails = new UserDetailsDto(member);
+
+        // memberService.getMyInfo 호출 시 mockResponse 반환하도록 설정
+        when(memberService.getMyInfo(any(Long.class))).thenReturn(mockResponse);
+
+        // mockResponse의 값이 제대로 설정되었는지 확인
+        System.out.println("mockResponse: " + mockResponse);
+
+        // when & then: 응답 검증
+        mockMvc.perform(MockMvcRequestBuilders.get("/members/my-info")
+                        .accept(APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
 
     @Test
     @WithMockUser(username = "user")
     void updateMember() throws Exception {
         // given
-        GetAddressRequest mockAddress = new GetAddressRequest(4L, "부산광역시 해운대구 해운대로 620", "4동 203호", "48093");
-        GetMemberRequest updateRequest = new GetMemberRequest(4L, "minah@naver.com", "password4", "minah", mockAddress);
-        GetMemberRequest updatedResponse = new GetMemberRequest(4L, "minah@naver.com", "password4", "minah", mockAddress);
+        GetAddressDto mockAddress = new GetAddressDto("부산광역시 해운대구 해운대로 620", "4동 203호", "48093");
+        GetMemberDto updateRequest = new GetMemberDto("minah@naver.com", "minah", mockAddress);
+        GetMemberDto updatedResponse = new GetMemberDto("minah@naver.com", "minah", mockAddress);
 
         // Mockito 설정
         when(memberService.updateMember(Mockito.any(), Mockito.eq(4L)))
@@ -83,11 +113,8 @@ public class MemberControllerTest {
         // then
         result.andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(4L))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("minah@naver.com"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.password").value("password4"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.nickname").value("minah"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.address.id").value(4L));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.nickname").value("minah"));
     }
 
     @Test
