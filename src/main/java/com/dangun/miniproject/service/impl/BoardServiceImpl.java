@@ -39,7 +39,7 @@ public class BoardServiceImpl implements BoardService {
 		final Board board = boardRepository.findById(boardId)
 				.orElseThrow(IllegalArgumentException::new);
 
-		final GetBoardDetailResponse boardResponse = GetBoardDetailResponse.from(board);
+		final GetBoardDetailResponse boardResponse = boardRepository.findBoardById(boardId);
 
 		for (Comment comment : board.getComments()) {
 			final boolean isBoardWriter = checkBoardWriter(board, comment);
@@ -154,5 +154,4 @@ public class BoardServiceImpl implements BoardService {
 				board.getMember().getId()
 		);
 	}
-
 }

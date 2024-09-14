@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.dangun.miniproject.domain.Board;
 import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.dto.GetBoardDetailResponse;
 
 import jakarta.persistence.EntityManager;
 
@@ -27,6 +28,23 @@ public class BoardRepositoryTest {
 
 	@Autowired
 	private EntityManager em;
+
+	@Test
+	@DisplayName("[성공] 게시글 작성자 정보와 댓글이 최신순으로 상세 조회된다.")
+	void getBoardDetail_withMemberAndComments_success() {
+	    // given -- 테스트의 상태 설정
+		final Board board = em.find(Board.class, 1L);
+
+	    // when -- 테스트하고자 하는 행동
+		final GetBoardDetailResponse result = boardRepository.findBoardById(1L);
+
+	    // then -- 예상되는 변화 및 결과
+		assertSoftly(softAssertions -> {
+			softAssertions.assertThat(result.getTitle()).isEqualTo(board.getTitle());
+			softAssertions.assertThat(result.getComments()).isSortedAccordingTo(
+				(c1, c2) -> c2.getCreatedAt().compareTo(c1.getCreatedAt()));
+		});
+	}
 
 	@Test
 	@DisplayName("[성공] 작성자 정보가 포함된 게시글이 정상적으로 조회된다.")

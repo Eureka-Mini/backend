@@ -7,10 +7,23 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.dangun.miniproject.domain.Board;
+import com.dangun.miniproject.dto.GetBoardDetailResponse;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
 	void deleteByMemberId(Long memberId);
+
+	// 게시글 상세 조회
+	@Query(value = """
+			SELECT b
+			 FROM Board b
+			 JOIN FETCH b.member m
+			 LEFT JOIN FETCH b.comments c
+			WHERE b.id = :boardId
+			ORDER BY c.createdAt DESC
+	""")
+	GetBoardDetailResponse findBoardById(final Long boardId);
+
 
 	// 게시글 목록 조회
 	@Query(value = """

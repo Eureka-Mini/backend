@@ -2,16 +2,13 @@ package com.dangun.miniproject.controller;
 
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.MediaType.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
 
-import com.dangun.miniproject.domain.BoardStatus;
-import com.dangun.miniproject.dto.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,18 +22,27 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
-import com.dangun.miniproject.domain.Board;
-import com.dangun.miniproject.domain.Member;
-import com.dangun.miniproject.fixture.BoardFixture;
-import com.dangun.miniproject.service.BoardService;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.dangun.miniproject.domain.Board;
+import com.dangun.miniproject.domain.BoardStatus;
+import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.dto.BoardResponse;
+import com.dangun.miniproject.dto.CreateBoardRequest;
+import com.dangun.miniproject.dto.GetBoardDetailResponse;
+import com.dangun.miniproject.dto.GetBoardResponse;
+import com.dangun.miniproject.dto.UpdateBoardRequest;
+import com.dangun.miniproject.dto.UserDetailsDto;
+import com.dangun.miniproject.fixture.BoardFixture;
+import com.dangun.miniproject.service.BoardService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = BoardController.class)
 @WithMockUser
@@ -157,24 +163,29 @@ class BoardControllerTest {
 			final Pageable pageable = PageRequest.of(0, 10);
 
 			final Member member = mock(Member.class);
+			given(member.getId()).willReturn(1L);
+
+			final UserDetailsDto userDetails = new UserDetailsDto(member);
+
 			final Board board1 = BoardFixture.instanceOf(member);
 			final Board board2 = BoardFixture.instanceOf(member);
 
 			final List<GetBoardResponse> boardList = List.of(
-					GetBoardResponse.from(board1),
-					GetBoardResponse.from(board2)
+				GetBoardResponse.from(board1),
+				GetBoardResponse.from(board2)
 			);
 
 			final Page<GetBoardResponse> response = new PageImpl<>(boardList, pageable, boardList.size());
 
-			given(boardService.getMyBoardList(any(), any())).willReturn(response);
+			given(boardService.getMyBoardList(anyLong(), any(Pageable.class))).willReturn(response);
 
 			// when -- 테스트하고자 하는 행동
 			final ResultActions result = mockMvc.perform(
-					get("/boards/my-board")
-							.param("memberId", "1")
-							.accept(APPLICATION_JSON)
-							.contentType(APPLICATION_JSON));
+				get("/boards/my-board")
+					.accept(APPLICATION_JSON)
+					.contentType(APPLICATION_JSON)
+					.with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
+					.with(csrf()));
 
 			// then -- 예상되는 변화 및 결과
 			result.andExpect(status().isOk());
