@@ -23,8 +23,8 @@ public class Member {
 
     private String nickname;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Address> addresses;
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Address address;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boards;
@@ -39,9 +39,14 @@ public class Member {
         this.password = password;
     }
 
-    public void updateMember(GetMemberRequest getMemberRequest){
+    public void updateMember(GetMemberRequest getMemberRequest) {
         this.email = getMemberRequest.getEmail();
         this.password = getMemberRequest.getPassword();
         this.nickname = getMemberRequest.getNickname();
+    }
+
+    public void addAddress(Address address) {
+        this.address = address;
+        Address.builder().member(this).build();
     }
 }

@@ -1,5 +1,6 @@
 package com.dangun.miniproject.config;
 
+import com.dangun.miniproject.filter.JWTExceptionHandlerFilter;
 import com.dangun.miniproject.filter.JWTFilter;
 import com.dangun.miniproject.filter.LoginFilter;
 import com.dangun.miniproject.jwt.JWTUtil;
@@ -35,9 +36,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         AuthenticationManager authenticationManager = authenticationManagerBean();
         LoginFilter loginFilter = new LoginFilter(authenticationManager, jwtUtil);
-        loginFilter.setFilterProcessesUrl("/login");
+        loginFilter.setFilterProcessesUrl("/auth/login");
 
         JWTFilter jwtFilter = new JWTFilter(jwtUtil, memberRepository);
+        JWTExceptionHandlerFilter jwtExceptionHandlerFilter = new JWTExceptionHandlerFilter();
 
         // Http Security Setting
         http
@@ -46,29 +48,30 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/signup", "/").permitAll()
-                        .anyRequest().permitAll())
+                        .requestMatchers("/auth/login", "/auth/signup", "/auth/token/reissue", "/").permitAll()
+                        .anyRequest().authenticated())
 
                 .logout((logout) -> logout
                         .logoutSuccessUrl("/")
-                        .invalidateHttpSession(true)) // 로그인 시 세션 전체 삭제
+                        .invalidateHttpSession(true))
 
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtFilter, LoginFilter.class)
+                .addFilterAfter(jwtFilter, LoginFilter.class)
+                .addFilterBefore(jwtExceptionHandlerFilter, JWTFilter.class)
 
-                .cors((cors) -> cors // cors 정책 설정
+                .cors((cors) -> cors
                         .configurationSource(new CorsConfigurationSource() {
 
                             @Override
                             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                                 CorsConfiguration configuration = new CorsConfiguration();
 
-                                configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000")); // 프론트 port 확인 후 변경 필요
+                                configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
                                 configuration.setAllowedMethods(Collections.singletonList("*"));
-                                configuration.setAllowCredentials(true);
                                 configuration.setAllowedHeaders(Collections.singletonList("*"));
+                                configuration.setAllowCredentials(true);
                                 configuration.setMaxAge(3600L);
                                 configuration.setExposedHeaders(Collections.singletonList("Authorization"));
 
