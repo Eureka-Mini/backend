@@ -71,8 +71,8 @@ public class AuthServiceImpl implements AuthService {
             return  ApiResponse.badRequest("MEMBER-F004", "it's not email");
         }
 
-        if (password == null || password.trim().isEmpty()) {
-            return ApiResponse.badRequest("MEMBER-F001", "password empty");
+        if (password == null || password.trim().isBlank()) {
+            throw new IllegalArgumentException("비밀번호를 입력해주세요.");
         }
 
         if (nickname == null || nickname.trim().isEmpty()) {

@@ -1,4 +1,4 @@
-package com.dangun.miniproject.servcie;
+package com.dangun.miniproject.service;
 
 import com.dangun.miniproject.domain.Member;
 import com.dangun.miniproject.dto.UserDetailsDto;
@@ -73,7 +73,7 @@ public class LoginFilterTest {
                 .thenReturn(authentication);
 
         // authentication 통과 후 jwt 발급
-        when(jwtUtil.createJwt(email, 60 * 60 * 10L)).thenReturn(token);
+        when(jwtUtil.createJwt("accessToken", email, 60 * 10 * 1000L)).thenReturn(token);
 
         mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON) // json body
@@ -93,8 +93,8 @@ public class LoginFilterTest {
 
         // When & Then
         mockMvc.perform(post("/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(Collections.singletonMap("email", email))))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(Collections.singletonMap("email", email))))
                 .andExpect(status().isUnauthorized());
     }
 }

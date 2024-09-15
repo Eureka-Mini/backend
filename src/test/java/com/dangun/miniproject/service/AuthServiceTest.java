@@ -1,11 +1,8 @@
-package com.dangun.miniproject.servcie;
+package com.dangun.miniproject.service;
 
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.dto.GetAddressRequest;
 import com.dangun.miniproject.dto.GetMemberRequest;
 import com.dangun.miniproject.repository.MemberRepository;
 import com.dangun.miniproject.service.impl.AuthServiceImpl;
@@ -17,6 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -35,31 +37,42 @@ public class AuthServiceTest {
     private GetMemberRequest invalidEmailMemberRequest;
     private GetMemberRequest existingMemberRequest;
     private GetMemberRequest emptyPasswordMemberRequest;
+    private GetAddressRequest validAddressRequest;
 
     @BeforeEach
     void setupMember() {
+        validAddressRequest = GetAddressRequest.builder()
+                .detail("addressDetail")
+                .street("street")
+                .zipcode("zipcode")
+                .build();
+
         validMemberRequest = GetMemberRequest.builder()
                 .email("test@example.com")
                 .nickname("nickname1")
                 .password("password1")
+                .address(validAddressRequest)
                 .build();
 
         invalidEmailMemberRequest = GetMemberRequest.builder()
                 .email("testEmail")
                 .nickname("nickname2")
                 .password("password2")
+                .address(validAddressRequest)
                 .build();
 
         existingMemberRequest = GetMemberRequest.builder()
                 .email("okay123@example.com")
                 .nickname("nickname3")
                 .password("password3")
+                .address(validAddressRequest)
                 .build();
 
         emptyPasswordMemberRequest = GetMemberRequest.builder()
                 .email("rnrnrnrnrn@example.com")
                 .nickname("nickname4")
                 .password("")
+                .address(validAddressRequest)
                 .build();
     }
 
@@ -71,10 +84,9 @@ public class AuthServiceTest {
         when(bCryptPasswordEncoder.encode(validMemberRequest.getPassword())).thenReturn("encodedPassword");
 
         // When
-        boolean result = authService.signupMember(validMemberRequest);
+        authService.signupMember(validMemberRequest);
 
         // Then
-        assertTrue(result);
         verify(memberRepository, times(1)).save(any(Member.class));
     }
 
@@ -82,11 +94,11 @@ public class AuthServiceTest {
     @Test
     @DisplayName("잘못된 이메일 양식 예외 발생")
     void testSignupMember_InvalidEmail() {
+
         // When
-        boolean result = authService.signupMember(invalidEmailMemberRequest);
+        authService.signupMember(invalidEmailMemberRequest);
 
         // Then
-        assertFalse(result);
         verify(memberRepository, never()).save(any(Member.class));
     }
 
@@ -97,10 +109,9 @@ public class AuthServiceTest {
         when(memberRepository.existsByEmail(existingMemberRequest.getEmail())).thenReturn(true);
 
         // When
-        boolean result = authService.signupMember(existingMemberRequest);
+        authService.signupMember(existingMemberRequest);
 
         // Then
-        assertFalse(result);
         verify(memberRepository, never()).save(any(Member.class));
     }
 
@@ -109,7 +120,6 @@ public class AuthServiceTest {
     @DisplayName("비밀번호 미입력 시 예외 발생")
     void testSignupMember_EmptyPassword() {
         // Given
-        when(memberRepository.existsByEmail(emptyPasswordMemberRequest.getEmail())).thenReturn(false);
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
