@@ -1,11 +1,8 @@
 package com.dangun.miniproject.service;
 
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.dto.GetAddressRequest;
 import com.dangun.miniproject.dto.GetMemberRequest;
 import com.dangun.miniproject.repository.MemberRepository;
 import com.dangun.miniproject.service.impl.AuthServiceImpl;
@@ -17,6 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -35,31 +37,42 @@ public class AuthServiceTest {
     private GetMemberRequest invalidEmailMemberRequest;
     private GetMemberRequest existingMemberRequest;
     private GetMemberRequest emptyPasswordMemberRequest;
+    private GetAddressRequest validAddressRequest;
 
     @BeforeEach
     void setupMember() {
+        validAddressRequest = GetAddressRequest.builder()
+                .detail("addressDetail")
+                .street("street")
+                .zipcode("zipcode")
+                .build();
+
         validMemberRequest = GetMemberRequest.builder()
                 .email("test@example.com")
                 .nickname("nickname1")
                 .password("password1")
+                .address(validAddressRequest)
                 .build();
 
         invalidEmailMemberRequest = GetMemberRequest.builder()
                 .email("testEmail")
                 .nickname("nickname2")
                 .password("password2")
+                .address(validAddressRequest)
                 .build();
 
         existingMemberRequest = GetMemberRequest.builder()
                 .email("okay123@example.com")
                 .nickname("nickname3")
                 .password("password3")
+                .address(validAddressRequest)
                 .build();
 
         emptyPasswordMemberRequest = GetMemberRequest.builder()
                 .email("rnrnrnrnrn@example.com")
                 .nickname("nickname4")
                 .password("")
+                .address(validAddressRequest)
                 .build();
     }
 
