@@ -107,7 +107,6 @@ public class AuthServiceTest {
     @DisplayName("비밀번호 미입력 시 예외 발생")
     void testSignupMember_EmptyPassword() {
         // Given
-        when(memberRepository.existsByEmail(emptyPasswordMemberRequest.getEmail())).thenReturn(false);
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
