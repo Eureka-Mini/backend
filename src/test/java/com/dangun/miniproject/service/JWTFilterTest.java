@@ -1,21 +1,18 @@
-package com.dangun.miniproject.servcie;
+package com.dangun.miniproject.service;
 
 import com.dangun.miniproject.domain.Member;
 import com.dangun.miniproject.filter.JWTFilter;
 import com.dangun.miniproject.jwt.JWTUtil;
 import com.dangun.miniproject.repository.MemberRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.ui.ModelExtensionsKt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -41,6 +38,7 @@ public class JWTFilterTest {
 
         when(jwtUtil.isExpiredToken(token)).thenReturn(false); // 만료 검증
         when(jwtUtil.getMemberEmail(token)).thenReturn(email); // payload email 검증
+        when(jwtUtil.getJwtCategory(token)).thenReturn("accessToken");
 
         Member member = Member.builder()
                         .email(email)
@@ -67,6 +65,7 @@ public class JWTFilterTest {
         String token = "dummyToken";
 
         when(jwtUtil.isExpiredToken(token)).thenReturn(true);
+        when(jwtUtil.getJwtCategory(token)).thenReturn("notAccessToken");
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Bearer " + token);
