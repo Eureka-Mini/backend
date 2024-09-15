@@ -1,4 +1,4 @@
-package com.dangun.miniproject.servcie;
+package com.dangun.miniproject.service;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -71,10 +71,9 @@ public class AuthServiceTest {
         when(bCryptPasswordEncoder.encode(validMemberRequest.getPassword())).thenReturn("encodedPassword");
 
         // When
-        boolean result = authService.signupMember(validMemberRequest);
+        authService.signupMember(validMemberRequest);
 
         // Then
-        assertTrue(result);
         verify(memberRepository, times(1)).save(any(Member.class));
     }
 
@@ -82,11 +81,11 @@ public class AuthServiceTest {
     @Test
     @DisplayName("잘못된 이메일 양식 예외 발생")
     void testSignupMember_InvalidEmail() {
+
         // When
-        boolean result = authService.signupMember(invalidEmailMemberRequest);
+        authService.signupMember(invalidEmailMemberRequest);
 
         // Then
-        assertFalse(result);
         verify(memberRepository, never()).save(any(Member.class));
     }
 
@@ -97,10 +96,9 @@ public class AuthServiceTest {
         when(memberRepository.existsByEmail(existingMemberRequest.getEmail())).thenReturn(true);
 
         // When
-        boolean result = authService.signupMember(existingMemberRequest);
+        authService.signupMember(existingMemberRequest);
 
         // Then
-        assertFalse(result);
         verify(memberRepository, never()).save(any(Member.class));
     }
 
