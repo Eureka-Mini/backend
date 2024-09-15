@@ -2,9 +2,7 @@ package com.dangun.miniproject.service;
 
 import com.dangun.miniproject.domain.Address;
 import com.dangun.miniproject.domain.Member;
-import com.dangun.miniproject.dto.GetAddressDto;
 import com.dangun.miniproject.dto.GetMemberDto;
-import com.dangun.miniproject.dto.GetMemberResponse;
 import com.dangun.miniproject.repository.AddressRepository;
 import com.dangun.miniproject.repository.BoardRepository;
 import com.dangun.miniproject.repository.CommentRepository;
