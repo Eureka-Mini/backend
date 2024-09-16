@@ -1,7 +1,6 @@
 package com.dangun.miniproject.auth.jwt;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,17 +30,20 @@ public class JWTUtil {
     }
 
     // 만료 시간 검증
-    public Boolean isExpiredToken(String token) {
+    public boolean isExpiredToken(String token) {
         try {
-            return Jwts.parser()
+            return  Jwts.parser()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody().getExpiration()
                     .before(new Date());
         } catch (ExpiredJwtException e) {
-            log.warn("토큰 파싱 중 예외 발생: " + e.getMessage());
-            return true;
+            log.warn("토큰이 만료되었습니다: " + e.getMessage());
+            throw e;
+        } catch (JwtException e) {
+            log.warn("토큰 서명이 유효하지 않습니다: "+ e.getMessage());
+            throw e;
         }
     }
 

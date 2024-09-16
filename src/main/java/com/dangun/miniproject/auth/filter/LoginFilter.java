@@ -72,11 +72,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setCharacterEncoding("UTF-8");
 
         Map<String, String> data = new HashMap<>();
+        data.put("code", "AUTH_F000");
         data.put("message", "Login Failed.. -> Id / Password invalid..");
 
         response.getWriter().write(new ObjectMapper().writeValueAsString(data));
 
-        response.setStatus(401);
+        response.setStatus(400);
     }
 
     private Cookie createCookie(String key, String value) {
