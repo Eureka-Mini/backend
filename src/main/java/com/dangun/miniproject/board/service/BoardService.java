@@ -19,12 +19,12 @@ public interface BoardService {
 	Page<GetBoardResponse> getMyBoardList(final Long memberId, final Pageable pageable);
 
 	// 게시글 생성
-	BoardResponse createBoard(CreateBoardRequest createBoardRequest);
+	WriteBoardResponse writeBoard(WriteBoardRequest request, Long memberId);
 
 	// 게시글 수정
-	BoardResponse updateBoard(Long id, UpdateBoardRequest updateBoardRequest);
+	UpdateBoardResponse updateBoard(Long boardId, UpdateBoardRequest request, Long memberId);
 
 	// 게시글 삭제
-	void deleteBoard(Long boardId);
+	DeleteBoardResponse deleteBoard(Long boardId, Long memberId);
 
 }
