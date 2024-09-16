@@ -1,11 +1,14 @@
 package com.dangun.miniproject.auth;
 
 
+import com.dangun.miniproject.auth.service.impl.AuthServiceImpl;
+import com.dangun.miniproject.fixture.AddressFixture;
+import com.dangun.miniproject.fixture.MemberFixture;
+import com.dangun.miniproject.member.domain.Address;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.dto.GetAddressRequest;
 import com.dangun.miniproject.member.dto.GetMemberRequest;
 import com.dangun.miniproject.member.repository.MemberRepository;
-import com.dangun.miniproject.auth.service.impl.AuthServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,8 +16,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -80,14 +86,22 @@ public class AuthServiceTest {
     @DisplayName("회원 가입 완료 테스트")
     void testSignupMember_Success() {
         // Given
-        when(memberRepository.existsByEmail(validMemberRequest.getEmail())).thenReturn(false);
-        when(bCryptPasswordEncoder.encode(validMemberRequest.getPassword())).thenReturn("encodedPassword");
+        GetMemberRequest validMemberRequest = mock(GetMemberRequest.class);
+        Member member = MemberFixture.instanceOf();
+        Address address = AddressFixture.instanceOf(member);
+        member.addAddress(address);
+
+        when(validMemberRequest.toEntity()).thenReturn(member);
+        when(memberRepository.existsByEmail(member.getEmail())).thenReturn(false);
+        when(bCryptPasswordEncoder.encode(member.getPassword())).thenReturn("encodedPassword");
 
         // When
-        authService.signupMember(validMemberRequest);
+        ResponseEntity<?> response = authService.signupMember(validMemberRequest);
 
         // Then
-        verify(memberRepository, times(1)).save(any(Member.class));
+        verify(memberRepository, times(1)).save(member);
+        assertThat(response).isNotNull();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
     }
 
 

@@ -1,20 +1,26 @@
 package com.dangun.miniproject.member.dto;
 
+import com.dangun.miniproject.member.domain.Address;
+import com.dangun.miniproject.member.domain.Member;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Data
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class GetAddressRequest {
-    private Long id;
     private String street;
     private String detail;
     private String zipcode;
 
-    @Builder
-    public GetAddressRequest(Long id, String street, String detail, String zipcode) {
-        this.id = id;
-        this.street = street;
-        this.detail = detail;
-        this.zipcode = zipcode;
+    public Address toEntity(Member member) {
+        return Address.builder()
+                .zipcode(zipcode)
+                .detail(detail)
+                .street(street)
+                .build();
     }
 }

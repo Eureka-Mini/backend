@@ -1,5 +1,6 @@
 package com.dangun.miniproject.auth.controller;
 
+import com.dangun.miniproject.common.ApiResponse;
 import com.dangun.miniproject.member.dto.GetMemberRequest;
 import com.dangun.miniproject.auth.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,13 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signupMember(@RequestBody GetMemberRequest member) {
+
+        try{
+            authService.signupMember(member);
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().body(ApiResponse.badRequest("", e.getMessage()));
+        }
+
         return authService.signupMember(member);
     }
 

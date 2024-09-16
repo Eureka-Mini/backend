@@ -1,12 +1,11 @@
 package com.dangun.miniproject.auth.service.impl;
 
+import com.dangun.miniproject.auth.jwt.JWTUtil;
+import com.dangun.miniproject.auth.service.AuthService;
 import com.dangun.miniproject.common.ApiResponse;
-import com.dangun.miniproject.member.domain.Address;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.dto.GetMemberRequest;
-import com.dangun.miniproject.auth.jwt.JWTUtil;
 import com.dangun.miniproject.member.repository.MemberRepository;
-import com.dangun.miniproject.auth.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,28 +35,16 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<?> signupMember(GetMemberRequest memberReq) {
-        ResponseEntity<?> validated = validateSignup(memberReq.getNickname(), memberReq.getPassword(), memberReq.getEmail());
+
+        Member member = memberReq.toEntity();
+        member.updatePassword(bCryptPasswordEncoder.encode(member.getPassword()));
+
+        ResponseEntity<?> validated = validateSignup(member.getNickname(), member.getPassword(), member.getEmail());
 
         if (!validated.getStatusCode().is2xxSuccessful()) {
             return validated;
         }
 
-        String encodedPassword = bCryptPasswordEncoder.encode(memberReq.getPassword());
-
-        Member member = Member.builder()
-                .email(memberReq.getEmail())
-                .nickname(memberReq.getNickname())
-                .password(encodedPassword)
-                .build();
-
-        Address address = Address.builder()
-                .detail(memberReq.getAddress().getDetail())
-                .street(memberReq.getAddress().getStreet())
-                .zipcode(memberReq.getAddress().getZipcode())
-                .member(member)
-                .build();
-
-        member.addAddress(address);
         memberRepository.save(member);
 
         Map<String, String> data = new HashMap<>();
@@ -68,7 +55,12 @@ public class AuthServiceImpl implements AuthService {
 
     private ResponseEntity<?> validateSignup(String nickname, String password, String email) {
         if (!isEmailValid(email)) {
-            return  ApiResponse.badRequest("MEMBER-F004", "it's not email");
+            return ApiResponse.badRequest("MEMBER-F004", "it's not email");
+        }
+
+        Boolean isExistEmail = memberRepository.existsByEmail(email);
+        if (isExistEmail) {
+            return ApiResponse.badRequest("MEMBER-F005", "already email exist");
         }
 
         if (password == null || password.trim().isBlank()) {
@@ -77,11 +69,6 @@ public class AuthServiceImpl implements AuthService {
 
         if (nickname == null || nickname.trim().isEmpty()) {
             return ApiResponse.badRequest("MEMBER-F002", "nickname empty");
-        }
-
-        Boolean isExistEmail = memberRepository.existsByEmail(email);
-        if (isExistEmail) {
-            return  ApiResponse.badRequest("MEMBER-F005", "already email exist");
         }
 
         Boolean isExistNickname = memberRepository.existsByNickname(nickname);
@@ -97,7 +84,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-
     // --------------------------------------- Token Logic
     @Override
     public ResponseEntity<?> reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
@@ -108,7 +94,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if(cookie.getName().equals("refreshToken")) {
+                if (cookie.getName().equals("refreshToken")) {
                     refreshToken = cookie.getValue();
                     break;
                 }

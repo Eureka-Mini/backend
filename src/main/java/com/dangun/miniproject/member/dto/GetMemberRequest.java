@@ -1,5 +1,7 @@
 package com.dangun.miniproject.member.dto;
 
+import com.dangun.miniproject.member.domain.Member;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,21 +9,21 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class GetMemberRequest {
-
-    private Long id;
     private String email;
     private String password;
     private String nickname;
     private GetAddressRequest address;
 
-    @Builder
-    public GetMemberRequest(Long id, String email, String password, String nickname, GetAddressRequest address) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.nickname = nickname;
-        this.address = address;
-    }
+    public Member toEntity() {
+        Member member = Member.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .build();
 
+        member.addAddress(address.toEntity(member));
+        return member;
+    }
 }

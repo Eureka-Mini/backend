@@ -51,4 +51,8 @@ public class Member {
         this.address = address;
         Address.builder().member(this).build();
     }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }
