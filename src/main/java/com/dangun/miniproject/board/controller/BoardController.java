@@ -1,5 +1,7 @@
 package com.dangun.miniproject.board.controller;
 
+import com.dangun.miniproject.auth.dto.UserDetailsDto;
+import com.dangun.miniproject.board.dto.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dangun.miniproject.common.ApiResponse;
 import com.dangun.miniproject.member.domain.Member;
-import com.dangun.miniproject.board.dto.BoardResponse;
-import com.dangun.miniproject.board.dto.CreateBoardRequest;
-import com.dangun.miniproject.board.dto.UpdateBoardRequest;
 import com.dangun.miniproject.board.service.BoardService;
 
 import lombok.RequiredArgsConstructor;
@@ -80,25 +79,32 @@ public class BoardController {
 
 	// 게시글 생성
 	@PostMapping
-	public ResponseEntity<BoardResponse> createBoard(@RequestBody CreateBoardRequest createBoardRequest) {
-		BoardResponse createdBoard = boardService.createBoard(createBoardRequest);
-		return new ResponseEntity<>(createdBoard, HttpStatus.CREATED);
+	public ResponseEntity<WriteBoardResponse> writeBoard(
+			@AuthenticationPrincipal UserDetailsDto userDetailsDto,
+			@RequestBody WriteBoardRequest writeBoardRequest) {
+		Long memberId = userDetailsDto.getMember().getId();
+		WriteBoardResponse response = boardService.writeBoard(writeBoardRequest, memberId);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 	// 게시글 수정
 	@PutMapping("/{boardId}")
-	public ResponseEntity<BoardResponse> updateBoard(
+	public ResponseEntity<UpdateBoardResponse> updateBoard(
+			@AuthenticationPrincipal UserDetailsDto userDetailsDto,
 			@PathVariable Long boardId,
-			@RequestBody UpdateBoardRequest updateBoardRequest
-	) {
-		BoardResponse updatedBoard = boardService.updateBoard(boardId, updateBoardRequest);
-		return new ResponseEntity<>(updatedBoard, HttpStatus.OK);
+			@RequestBody UpdateBoardRequest updateBoardRequest) {
+		Long memberId = userDetailsDto.getMember().getId();
+		UpdateBoardResponse response = boardService.updateBoard(boardId, updateBoardRequest, memberId);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	// 게시글 삭제
 	@DeleteMapping("/{boardId}")
-	public ResponseEntity<Void> deleteBoard(@PathVariable Long boardId) {
-		boardService.deleteBoard(boardId);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	public ResponseEntity<DeleteBoardResponse> deleteBoard(
+			@AuthenticationPrincipal UserDetailsDto userDetailsDto,
+			@PathVariable Long boardId) {
+		Long memberId = userDetailsDto.getMember().getId();
+		DeleteBoardResponse response = boardService.deleteBoard(boardId, memberId);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

@@ -1,5 +1,7 @@
 package com.dangun.miniproject.board.service.impl;
 
+import com.dangun.miniproject.board.domain.BoardStatus;
+import com.dangun.miniproject.board.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -9,17 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.comment.domain.Comment;
 import com.dangun.miniproject.member.domain.Member;
-import com.dangun.miniproject.board.dto.BoardResponse;
-import com.dangun.miniproject.board.dto.CreateBoardRequest;
-import com.dangun.miniproject.board.dto.GetBoardDetailResponse;
-import com.dangun.miniproject.board.dto.GetBoardResponse;
 import com.dangun.miniproject.comment.dto.GetCommentResponse;
-import com.dangun.miniproject.board.dto.UpdateBoardRequest;
 import com.dangun.miniproject.board.repository.BoardRepository;
 import com.dangun.miniproject.member.repository.MemberRepository;
 import com.dangun.miniproject.board.service.BoardService;
 
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -101,21 +100,28 @@ public class BoardServiceImpl implements BoardService {
 	 */
 	@Override
 	@Transactional
-	public BoardResponse createBoard(CreateBoardRequest request) {
-		Member member = (Member) memberRepository.findById(request.getMemberId())
-				.orElseThrow(() -> new RuntimeException("회원을 찾을 수 없음"));
+	public WriteBoardResponse writeBoard(WriteBoardRequest request, Long memberId) {
+		Member member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new RuntimeException("Member not found"));
 
 		Board board = Board.builder()
+				.title(request.getTitle())
 				.content(request.getContent())
 				.member(member)
-				.price(request.getPrice())
-				.boardStatus(request.getBoardStatus())
-				//.boardStatus(BoardStatus.valueOf(request.getBoardStatus()))
-				.title(request.getTitle())
+				.boardStatus(BoardStatus.판매중)
+				.price(0) // 기본값 설정, 필요에 따라 수정
 				.build();
 
 		Board savedBoard = boardRepository.save(board);
-		return convertToResponse(savedBoard);
+
+		return WriteBoardResponse.builder()
+				.code("BOARD-S001")
+				.message("Board Write Success")
+				.data(WriteBoardResponse.BoardData.builder()
+						.id(savedBoard.getId())
+						.build())
+				.timestamp(LocalDateTime.now())
+				.build();
 	}
 
 	/**
@@ -123,35 +129,50 @@ public class BoardServiceImpl implements BoardService {
 	 */
 	@Override
 	@Transactional
-	public BoardResponse updateBoard(Long boardId, UpdateBoardRequest request) {
-		Board existingBoard = boardRepository.findById(boardId)
-				.orElseThrow(() -> new RuntimeException("게시글 찾을 수 없음"));
+	public UpdateBoardResponse updateBoard(Long boardId, UpdateBoardRequest request, Long memberId) {
+		// 토큰 존재 여부 확인
+		if (memberId == null) {
+			throw new RuntimeException("Token Not Exist");
+		}
 
-		existingBoard.updateDetails(request.getTitle(), request.getContent(), request.getPrice(), request.getBoardStatus());
+		Board board = boardRepository.findById(boardId)
+				.orElseThrow(() -> new RuntimeException("Board not found"));
 
-		Board updatedBoard = boardRepository.save(existingBoard);
-		return convertToResponse(updatedBoard);
+		Member member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new RuntimeException("User Not Found"));
+
+		board.updateDetails(board.getTitle(), request.getContent(), board.getPrice(), board.getBoardStatus());
+
+		return UpdateBoardResponse.builder()
+				.code("BOARD-S002")
+				.message("Board Update Success")
+				.data(UpdateBoardResponse.Data.builder()
+						.content(board.getContent())
+						.build())
+				.timestamp(LocalDateTime.now())
+				.build();
 	}
+
 
 	/**
 	 * 게시글 삭제
 	 */
+	@Override
 	@Transactional
-	public void deleteBoard(Long boardId) {
+	public DeleteBoardResponse deleteBoard(Long boardId, Long memberId) {
 		Board board = boardRepository.findById(boardId)
-				.orElseThrow(() -> new RuntimeException("게시글 찾을 수 없음"));
+				.orElseThrow(() -> new RuntimeException("Board not found"));
+
+		if (!board.getMember().getId().equals(memberId)) {
+			throw new RuntimeException("User Not Found");
+		}
 
 		boardRepository.delete(board);
-	}
 
-	private BoardResponse convertToResponse(Board board) {
-		return new BoardResponse(
-				board.getId(),
-				board.getTitle(),
-				board.getContent(),
-				board.getPrice(),
-				board.getBoardStatus(),
-				board.getMember().getId()
-		);
+		return DeleteBoardResponse.builder()
+				.code("BOARD-S001")
+				.message("Board Delete Success")
+				.timestamp(LocalDateTime.now())
+				.build();
 	}
 }

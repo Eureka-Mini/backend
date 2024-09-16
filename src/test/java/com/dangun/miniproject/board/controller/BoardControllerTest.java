@@ -1,5 +1,6 @@
 package com.dangun.miniproject.board.controller;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
@@ -9,10 +10,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import com.dangun.miniproject.board.dto.*;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,22 +26,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.dangun.miniproject.board.domain.Board;
-import com.dangun.miniproject.board.domain.BoardStatus;
 import com.dangun.miniproject.member.domain.Member;
-import com.dangun.miniproject.board.dto.BoardResponse;
-import com.dangun.miniproject.board.dto.CreateBoardRequest;
-import com.dangun.miniproject.board.dto.GetBoardDetailResponse;
-import com.dangun.miniproject.board.dto.GetBoardResponse;
-import com.dangun.miniproject.board.dto.UpdateBoardRequest;
 import com.dangun.miniproject.auth.dto.UserDetailsDto;
 import com.dangun.miniproject.fixture.BoardFixture;
 import com.dangun.miniproject.board.service.BoardService;
@@ -171,8 +169,8 @@ class BoardControllerTest {
 			final Board board2 = BoardFixture.instanceOf(member);
 
 			final List<GetBoardResponse> boardList = List.of(
-				GetBoardResponse.from(board1),
-				GetBoardResponse.from(board2)
+					GetBoardResponse.from(board1),
+					GetBoardResponse.from(board2)
 			);
 
 			final Page<GetBoardResponse> response = new PageImpl<>(boardList, pageable, boardList.size());
@@ -181,11 +179,11 @@ class BoardControllerTest {
 
 			// when -- 테스트하고자 하는 행동
 			final ResultActions result = mockMvc.perform(
-				get("/boards/my-board")
-					.accept(APPLICATION_JSON)
-					.contentType(APPLICATION_JSON)
-					.with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
-					.with(csrf()));
+					get("/boards/my-board")
+							.accept(APPLICATION_JSON)
+							.contentType(APPLICATION_JSON)
+							.with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
+							.with(csrf()));
 
 			// then -- 예상되는 변화 및 결과
 			result.andExpect(status().isOk());
@@ -196,148 +194,203 @@ class BoardControllerTest {
 
 	@Test
 	@DisplayName("게시글 생성")
-	@WithMockUser(username = "testUser", roles = "USER")
-	public void testCreateBoard() throws Exception {
+	void testWriteBoard_Success() throws Exception {
 		// Given
-		CreateBoardRequest request = new CreateBoardRequest("Title", "Content", 100, BoardStatus.판매중, 1L);
-		BoardResponse response = new BoardResponse(1L, "Title", "Content", 100, BoardStatus.판매중, 1L);
-		when(boardService.createBoard(any(CreateBoardRequest.class))).thenReturn(response);
+		Long memberId = 1L;
+		WriteBoardRequest request = new WriteBoardRequest("test", "test content");
+		WriteBoardResponse response = WriteBoardResponse.builder()
+				.code("BOARD-S001")
+				.message("Board Write Success")
+				.data(WriteBoardResponse.BoardData.builder().id(1L).build())
+				.build();
 
-		// When
-		mockMvc.perform(MockMvcRequestBuilders.post("/boards")
+		Member mockMember = Member.builder()
+				.email("test@example.com")
+				.nickname("testUser")
+				.password("password")
+				.build();
+		ReflectionTestUtils.setField(mockMember, "id", memberId);
+		UserDetailsDto userDetailsDto = new UserDetailsDto(mockMember);
+
+		when(boardService.writeBoard(any(WriteBoardRequest.class), eq(memberId))).thenReturn(response);
+
+		// When & Then
+		mockMvc.perform(post("/boards")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(request))
-						.with(csrf()))
-				//Then
-				.andExpect(MockMvcResultMatchers.status().isCreated())
-				.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(response)));
-
-		verify(boardService).createBoard(any(CreateBoardRequest.class));
+						.with(csrf())
+						.with(user(userDetailsDto)))
+				.andExpect(status().isCreated())
+				.andExpect(content().json(objectMapper.writeValueAsString(response)));
 	}
-
-
 
 	@Test
-	@DisplayName("존재하지 않는 작성자에 의해 게시글 생성")
+	@DisplayName("존재하지 않는 회원으로 게시글 생성 요청")
 	void testCreateBoard_MemberNotFound() throws Exception {
 		// Given
-		Mockito.when(boardService.createBoard(any(CreateBoardRequest.class)))
-				.thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "User Not Found"));
-		// When
+		WriteBoardRequest request = new WriteBoardRequest("Test Title", "Test Content");
+		when(boardService.writeBoard(any(WriteBoardRequest.class), any(Long.class)))
+				.thenThrow(new UsernameNotFoundException("Member not found"));
+
+		// When & Then
 		mockMvc.perform(post("/boards")
-						.with(csrf())
-						.with(SecurityMockMvcRequestPostProcessors.user("testUser"))
 						.contentType(MediaType.APPLICATION_JSON)
-						.content("{\"title\":\"Test Title\",\"content\":\"Test Content\",\"price\":1000,\"memberId\":99}")
-				)
-				// Then
-				.andDo(print())
-				.andExpect(status().isForbidden());
+						.content(objectMapper.writeValueAsString(request))
+						.with(user("nonexistentuser").roles("USER")))
+				.andExpect(status().isForbidden())
+				.andDo(print());
 	}
-
-
 
 	@Test
 	@DisplayName("게시글 수정")
-	@WithMockUser(username = "testUser", roles = "USER")
-	public void testUpdateBoard() throws Exception {
+	void testUpdateBoard_Success() throws Exception {
 		// Given
 		Long boardId = 1L;
-		UpdateBoardRequest request = new UpdateBoardRequest("Updated Title", "Updated Content", 200, BoardStatus.판매완료);
-		BoardResponse response = new BoardResponse(boardId, "Updated Title", "Updated Content", 200, BoardStatus.판매완료, 1L);
-		when(boardService.updateBoard(anyLong(), any(UpdateBoardRequest.class))).thenReturn(response);
+		Long memberId = 1L;
+		UpdateBoardRequest request = new UpdateBoardRequest("test content");
+		UpdateBoardResponse response = UpdateBoardResponse.builder()
+				.code("BOARD-S002")
+				.message("Board Update Success")
+				.data(UpdateBoardResponse.Data.builder().content("test content").build())
+				.build();
 
-		// When
-		mockMvc.perform(MockMvcRequestBuilders.put("/boards/{id}", boardId)
+		Member mockMember = Member.builder()
+				.email("test@example.com")
+				.nickname("testUser")
+				.password("password")
+				.build();
+		ReflectionTestUtils.setField(mockMember, "id", memberId);
+		UserDetailsDto userDetailsDto = new UserDetailsDto(mockMember);
+
+		when(boardService.updateBoard(eq(boardId), any(UpdateBoardRequest.class), eq(memberId)))
+				.thenReturn(response);
+
+		// When & Then
+		mockMvc.perform(put("/boards/{boardId}", boardId)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
+						.with(csrf())
+						.with(user(userDetailsDto)))
+				.andExpect(status().isOk())
+				.andExpect(content().json(objectMapper.writeValueAsString(response)));
+	}
+
+
+
+	@Test
+	@DisplayName("존재하지 않는 회원이 수정 시도")
+	void testUpdateBoard_MemberNotFound() throws Exception {
+		// Given
+		Long boardId = 1L;
+		Long nonExistentMemberId = 99L;
+		UpdateBoardRequest request = new UpdateBoardRequest("Updated Content");
+
+		Member mockMember = Member.builder()
+				.email("nonexistent@example.com")
+				.nickname("nonexistentUser")
+				.password("password")
+				.build();
+		ReflectionTestUtils.setField(mockMember, "id", nonExistentMemberId);
+		UserDetailsDto userDetailsDto = new UserDetailsDto(mockMember);
+
+		when(boardService.updateBoard(eq(boardId), any(UpdateBoardRequest.class), eq(nonExistentMemberId)))
+				.thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found"));
+
+		// When & Then
+		mockMvc.perform(put("/boards/{id}", boardId)
+						.with(user(userDetailsDto))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(request))
 						.with(csrf()))
-				// Then
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(response)));
-
-		verify(boardService).updateBoard(eq(boardId), any(UpdateBoardRequest.class));
+				.andExpect(status().isNotFound())
+				.andDo(print());
 	}
 
-
-
 	@Test
-	@DisplayName("존재하지 않는 회원이 수정")
-	void testUpdateBoard_MemberNotFound() throws Exception {
-		// Given
-		Mockito.when(boardService.updateBoard(eq(1L), any(UpdateBoardRequest.class)))
-				.thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found"));
-
-		// When
-		mockMvc.perform(put("/boards/1")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("{\"title\":\"Updated Title\",\"content\":\"Updated Content\",\"price\":2000}")
-						.with(csrf())
-						.with(SecurityMockMvcRequestPostProcessors.user("testUser"))
-				)
-				// Then
-				.andDo(print())
-				.andExpect(status().isNotFound());
-	}
-
-
-
-	@Test
-	@DisplayName("존재하지 않은 게시글에 대한 수정")
-	void testUpdateBoard_BoardNotFound() throws Exception {
-		// Given
-		Mockito.when(boardService.updateBoard(eq(99L), any(UpdateBoardRequest.class)))
-				.thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Board Not Found"));
-		// When
-		mockMvc.perform(put("/boards/99")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("{\"title\":\"Updated Title\",\"content\":\"Updated Content\",\"price\":2000}")
-						.with(csrf())
-						.with(SecurityMockMvcRequestPostProcessors.user("testUser"))
-				)
-				// Then
-				.andDo(print())
-				.andExpect(status().isNotFound());
-	}
-
-
-
-
-	@Test
-	@DisplayName("게시글 삭제")
-	@WithMockUser(username = "testUser", roles = "USER")
-	public void testDeleteBoard() throws Exception {
+	@DisplayName("토큰 없는 사용자 게시글 수정 시도")
+	@WithAnonymousUser
+	void testUpdateBoard_Unauthorized() throws Exception {
 		// Given
 		Long boardId = 1L;
+		UpdateBoardRequest request = new UpdateBoardRequest("Updated Content");
 
-		// When
-		mockMvc.perform(MockMvcRequestBuilders.delete("/boards/{id}", boardId)
-						.with(csrf()))
-				// Then
-				.andExpect(MockMvcResultMatchers.status().isNoContent());
+		// When & Then
+		MvcResult result = mockMvc.perform(put("/boards/{id}", boardId)
+						.with(csrf())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isUnauthorized())
+				.andDo(print())
+				.andReturn();
 
-		verify(boardService).deleteBoard(boardId);
+		String responseContent = result.getResponse().getContentAsString();
+		if (!responseContent.isEmpty()) {
+			DocumentContext context = JsonPath.parse(responseContent);
+			assertThat(context.read("$.code", String.class)).isEqualTo("BOARD-F002");
+			assertThat(context.read("$.message", String.class)).isEqualTo("Token Not Exist");
+			assertThat(context.<Object>read("$.data")).isNull();
+		}
 	}
 
+	@Test
+	@DisplayName("게시글 삭제 성공")
+	void testDeleteBoard_Success() throws Exception {
+		// Given
+		Long boardId = 1L;
+		Long memberId = 1L;
+		DeleteBoardResponse response = DeleteBoardResponse.builder()
+				.code("BOARD-S003")
+				.message("Board Delete Success")
+				.build();
 
+		Member mockMember = Member.builder()
+				.email("test@example.com")
+				.nickname("testUser")
+				.password("password")
+				.build();
+		ReflectionTestUtils.setField(mockMember, "id", memberId);
+		UserDetailsDto userDetailsDto = new UserDetailsDto(mockMember);
 
+		when(boardService.deleteBoard(eq(boardId), eq(memberId))).thenReturn(response);
+
+		// When & Then
+		mockMvc.perform(delete("/boards/{boardId}", boardId)
+						.with(csrf())
+						.with(user(userDetailsDto)))
+				.andExpect(status().isOk())
+				.andExpect(content().json(objectMapper.writeValueAsString(response)));
+	}
 
 	@Test
-	@DisplayName("존재하지 않은 작성자에 의해 게시글 삭제")
+	@DisplayName("존재하지 않은 작성자에 의해 게시글 삭제 시도")
 	void testDeleteBoard_MemberNotFound() throws Exception {
 		// Given
-		Mockito.doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "User Not Found"))
-				.when(boardService).deleteBoard(1L);
-		// When
-		mockMvc.perform(delete("/boards/1")
+		Long boardId = 1L;
+		Long nonExistentMemberId = 99L;
+
+		Member mockMember = Member.builder()
+				.email("nonexistent@example.com")
+				.nickname("nonexistentUser")
+				.password("password")
+				.build();
+		ReflectionTestUtils.setField(mockMember, "id", nonExistentMemberId);
+		UserDetailsDto userDetailsDto = new UserDetailsDto(mockMember);
+
+		when(boardService.deleteBoard(eq(boardId), any(Long.class)))
+				.thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "User Not Found"));
+
+		// When & Then
+		mockMvc.perform(delete("/boards/{id}", boardId)
+						.with(user(userDetailsDto))
 						.with(csrf())
-						.with(SecurityMockMvcRequestPostProcessors.user("testUser"))
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("{\"code\":\"MEMBER-F001\",\"message\":\"User Not Found\"}")
-				)
-				// Then
-				.andDo(print())
-				.andExpect(status().isForbidden());
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isForbidden())
+				.andExpect(result -> assertThat(result.getResolvedException())
+						.isInstanceOf(ResponseStatusException.class)
+						.hasMessageContaining("User Not Found"))
+				.andDo(print());
+
+		verify(boardService).deleteBoard(eq(boardId), any(Long.class));
 	}
 
 }
