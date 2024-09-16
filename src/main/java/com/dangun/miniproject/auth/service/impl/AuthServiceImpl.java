@@ -1,8 +1,11 @@
 package com.dangun.miniproject.auth.service.impl;
 
+import com.dangun.miniproject.auth.exception.exceptions.DuplicateEmailException;
+import com.dangun.miniproject.auth.exception.exceptions.DuplicateNicknameException;
+import com.dangun.miniproject.auth.exception.exceptions.InvalidEmailException;
+import com.dangun.miniproject.auth.exception.exceptions.ReissueAccessTokenException;
 import com.dangun.miniproject.auth.jwt.JWTUtil;
 import com.dangun.miniproject.auth.service.AuthService;
-import com.dangun.miniproject.common.ApiResponse;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.dto.GetMemberRequest;
 import com.dangun.miniproject.member.repository.MemberRepository;
@@ -11,12 +14,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 @Service
@@ -34,49 +34,56 @@ public class AuthServiceImpl implements AuthService {
     );
 
     @Override
-    public ResponseEntity<?> signupMember(GetMemberRequest memberReq) {
-
+    public Member signupMember(GetMemberRequest memberReq) {
+        validateMember(memberReq);
         Member member = memberReq.toEntity();
         member.updatePassword(bCryptPasswordEncoder.encode(member.getPassword()));
 
-        ResponseEntity<?> validated = validateSignup(member.getNickname(), member.getPassword(), member.getEmail());
-
-        if (!validated.getStatusCode().is2xxSuccessful()) {
-            return validated;
-        }
-
         memberRepository.save(member);
-
-        Map<String, String> data = new HashMap<>();
-        data.put("nickname", member.getNickname());
-
-        return ApiResponse.ok("SING-UP-S001", data, "Sign up Success");
+        return member;
     }
 
-    private ResponseEntity<?> validateSignup(String nickname, String password, String email) {
-        if (!isEmailValid(email)) {
-            return ApiResponse.badRequest("MEMBER-F004", "it's not email");
-        }
+    @Override
+    public void validateMember(GetMemberRequest memberReq) {
+        validateEmailFormat(memberReq.getEmail());
+        validatePassword(memberReq.getPassword());
+        validateNickname(memberReq.getNickname());
 
+        isConflictEmail(memberReq.getEmail());
+        isConflictNickname(memberReq.getNickname());
+    }
+
+    private void validateEmailFormat(String email) {
+        if (!isEmailValid(email)) {
+            throw new InvalidEmailException("유효하지 않은 이메일 형식입니다.");
+        }
+    }
+
+    private void validateNickname(String nickname) {
+        if (nickname == null || nickname.trim().isEmpty()) {
+            throw new IllegalArgumentException("닉네임 값을 입력해주세요.");
+        }
+    }
+
+    private void validatePassword(String password) {
+        if (password == null || password.trim().isBlank()) {
+            throw new IllegalArgumentException("패스워드 값을 입력해주세요.");
+        }
+    }
+
+
+    private void isConflictEmail(String email) {
         Boolean isExistEmail = memberRepository.existsByEmail(email);
         if (isExistEmail) {
-            return ApiResponse.badRequest("MEMBER-F005", "already email exist");
+            throw new DuplicateEmailException("이미 존재하는 이메일 입니다.");
         }
+    }
 
-        if (password == null || password.trim().isBlank()) {
-            throw new IllegalArgumentException("비밀번호를 입력해주세요.");
-        }
-
-        if (nickname == null || nickname.trim().isEmpty()) {
-            return ApiResponse.badRequest("MEMBER-F002", "nickname empty");
-        }
-
+    private void isConflictNickname(String nickname) {
         Boolean isExistNickname = memberRepository.existsByNickname(nickname);
         if (isExistNickname) {
-            return ApiResponse.badRequest("MEMBER-F003", "nickname overlap");
+            throw new DuplicateNicknameException("이미 존재하는 닉네임 입니다.");
         }
-
-        return ApiResponse.ok("success", null, "success");
     }
 
     private boolean isEmailValid(String email) {
@@ -85,8 +92,9 @@ public class AuthServiceImpl implements AuthService {
 
 
     // --------------------------------------- Token Logic
+
     @Override
-    public ResponseEntity<?> reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
+    public String reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
 
         String refreshToken = null;
 
@@ -102,7 +110,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (refreshToken == null) {
-            return ApiResponse.badRequest("AUTH_F001", "refreshToken null");
+            throw new ReissueAccessTokenException("refreshToken null");
         }
 
         jwtUtil.isExpiredToken(refreshToken);
@@ -110,11 +118,7 @@ public class AuthServiceImpl implements AuthService {
         String email = jwtUtil.getMemberEmail(refreshToken);
         String newAccessToken = jwtUtil.createJwt("accessToken", email, ACCESS_TOKEN_EXPIRE_TIME);
 
-        response.setHeader("accessToken", newAccessToken);
-
-        Map<String, String> data = new HashMap<>();
-        data.put("accessToken", newAccessToken);
-
-        return ApiResponse.ok("AUTH_S001", data, "accessToken reissue success!!");
+        response.setHeader("Authorization", "Bearer " + newAccessToken);
+        return newAccessToken;
     }
 }

@@ -21,6 +21,7 @@ public class GetAddressRequest {
                 .zipcode(zipcode)
                 .detail(detail)
                 .street(street)
+                .member(member)
                 .build();
     }
 }
