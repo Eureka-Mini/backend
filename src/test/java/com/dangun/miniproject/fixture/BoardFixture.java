@@ -2,9 +2,9 @@ package com.dangun.miniproject.fixture;
 
 import static java.util.concurrent.ThreadLocalRandom.*;
 
-import com.dangun.miniproject.domain.Board;
-import com.dangun.miniproject.domain.BoardStatus;
-import com.dangun.miniproject.domain.Member;
+import com.dangun.miniproject.board.domain.Board;
+import com.dangun.miniproject.board.domain.BoardStatus;
+import com.dangun.miniproject.member.domain.Member;
 
 public class BoardFixture {
 
