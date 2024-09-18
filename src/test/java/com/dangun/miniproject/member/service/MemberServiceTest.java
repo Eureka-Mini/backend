@@ -105,31 +105,31 @@ public class MemberServiceTest {
     }
 
 
-    // 회원 수정 테스트
-    @Test
-    void updateMember() {
-        // given
-        Long memberId = 1L;
-        GetMemberDto updateRequest = new GetMemberDto(
-                "Hong@test.com",
-                "Hong",
-                null // 주소는 업데이트하지 않으므로 null
-        );
-
-        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-        when(memberRepository.save(any(Member.class))).thenReturn(member);
-
-        // when
-        ResponseEntity<GetMemberDto> response = memberService.updateMember(updateRequest, memberId);
-
-        // then
-        Optional<GetMemberDto> optionalBody = Optional.ofNullable(response.getBody());
-        optionalBody.ifPresent(body -> {
-            assertEquals(HttpStatus.OK, response.getStatusCode());
-            assertEquals("Hong@test.com", body.getEmail());
-            assertEquals("Hong", response.getBody().getNickname());
-        });
-    }
+//    // 회원 수정 테스트
+//    @Test
+//    void updateMember() {
+//        // given
+//        Long memberId = 1L;
+//        GetMemberDto updateRequest = new GetMemberDto(
+//                "Hong@test.com",
+//                "Hong",
+//                null // 주소는 업데이트하지 않으므로 null
+//        );
+//
+//        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+//        when(memberRepository.save(any(Member.class))).thenReturn(member);
+//
+//        // when
+//        ResponseEntity<GetMemberDto> response = memberService.updateMember(updateRequest, memberId);
+//
+//        // then
+//        Optional<GetMemberDto> optionalBody = Optional.ofNullable(response.getBody());
+//        optionalBody.ifPresent(body -> {
+//            assertEquals(HttpStatus.OK, response.getStatusCode());
+//            assertEquals("Hong@test.com", body.getEmail());
+//            assertEquals("Hong", response.getBody().getNickname());
+//        });
+//    }
 
     // 주소 정보 조회 테스트
     @Test

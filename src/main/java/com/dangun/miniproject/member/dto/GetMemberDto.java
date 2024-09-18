@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Getter
-@Builder
 @NoArgsConstructor
 @ToString
 public class GetMemberDto {
@@ -25,5 +24,9 @@ public class GetMemberDto {
         this.email = email;
         this.nickname = nickname;
         this.address = address;
+    }
+
+    public void GetMemberUpdateDto(String nickname) {
+        this.nickname = nickname;
     }
 }

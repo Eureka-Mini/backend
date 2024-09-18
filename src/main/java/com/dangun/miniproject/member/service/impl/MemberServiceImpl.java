@@ -68,24 +68,37 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public ResponseEntity<GetMemberDto> updateMember(GetMemberDto getMemberDto, Long id) {
-        Optional<Member> optionalMember = memberRepository.findById(id);
+    public GetMemberDto updateMember(GetMemberDto getMemberDto, Long id) {
+        Member member = memberRepository.findById(id).orElseThrow();
 
-        if (optionalMember.isPresent()) {
-            Member member = optionalMember.get();
-            member.updateMember(getMemberDto);
+        member.updateMember(getMemberDto);
 
-            memberRepository.save(member);
+        memberRepository.save(member);
 
-            GetMemberDto updatedMemberDto = GetMemberDto.builder()
-                    .email(member.getEmail())
-                    .nickname(member.getNickname())
-                    .build();
+        GetMemberDto updatedMemberDto = GetMemberDto.builder()
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .address(member.getAddress() != null ? GetAddressDto.fromEntity(member.getAddress()) : null)  // update 시 null 방지
+                .build();
 
-            return ResponseEntity.ok(updatedMemberDto);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return updatedMemberDto;
+    }
+
+    @Override
+    public GetAddressDto updateAddress(GetAddressDto getAddressDto, Long id) {
+        Address address = addressRepository.findById(id).orElseThrow();
+
+        address.updateAddress(getAddressDto);
+
+        addressRepository.save(address);
+
+        GetAddressDto updatedAddressDto = GetAddressDto.builder()
+                .street(address.getStreet())
+                .detail(address.getDetail())
+                .zipcode(address.getZipcode())
+                .build();
+
+        return updatedAddressDto;
     }
 
 
@@ -110,17 +123,11 @@ public class MemberServiceImpl implements MemberService {
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
 
-            // 연관된 Comment 삭제
-            commentRepository.deleteByMemberId(id);
-
-            // 연관된 Board 삭제
-            boardRepository.deleteByMemberId(id);
-
-            // 연관된 Address 삭제
-            addressRepository.deleteByMemberId(id);
-
-            // Member 삭제
+            commentRepository.deleteInBatch(member.getComments());
+            boardRepository.deleteInBatch(member.getBoards());
+            addressRepository.delete(member.getAddress());
             memberRepository.delete(member);
+
             return true;
         } else {
             return false;
