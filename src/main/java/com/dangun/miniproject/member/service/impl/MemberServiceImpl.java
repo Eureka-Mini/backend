@@ -105,22 +105,18 @@ public class MemberServiceImpl implements MemberService {
     private GetAddressDto getAddressDto(Long memberId) {
         // 주소 정보를 반환하는 메소드 (기본 예시)
         Optional<Address> addressOptional = addressRepository.findById(memberId);
-        if (addressOptional.isPresent()) {
             Address address = addressOptional.get();
             return GetAddressDto.builder()
                     .street(address.getStreet())
                     .detail(address.getDetail())
                     .zipcode(address.getZipcode())
                     .build();
-        }
-        return null;
     }
 
     @Override
     public boolean deleteMember(Long id) {
         Optional<Member> memberOptional = memberRepository.findById(id);
 
-        if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
 
             commentRepository.deleteInBatch(member.getComments());
@@ -129,9 +125,6 @@ public class MemberServiceImpl implements MemberService {
             memberRepository.delete(member);
 
             return true;
-        } else {
-            return false;
-        }
     }
 
 }
