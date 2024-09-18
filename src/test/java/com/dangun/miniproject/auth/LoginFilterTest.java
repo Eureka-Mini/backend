@@ -73,7 +73,7 @@ public class LoginFilterTest {
                 .thenReturn(authentication);
 
         // authentication 통과 후 jwt 발급
-        when(jwtUtil.createJwt("accessToken", email, 60 * 10 * 1000L)).thenReturn(token);
+        when(jwtUtil.createJwt("accessToken", email, 60 * 60 * 1000L)).thenReturn(token);
 
         mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON) // json body
