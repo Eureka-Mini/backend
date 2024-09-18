@@ -24,8 +24,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
 
-    private final static long ACCESS_TOKEN_EXPIRE_TIME = 60 * 10 * 1000L;
-    private final static long REFRESH_TOKEN_EXPIRE_TIME = 24 * 60 * 60 * 1000L;
+    private final static long ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 1000L;
+    private final static long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {

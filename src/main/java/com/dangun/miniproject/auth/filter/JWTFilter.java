@@ -29,7 +29,9 @@ public class JWTFilter extends OncePerRequestFilter {
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        if (request.getRequestURI().startsWith("/auth/") || request.getRequestURI().equals("/") || request.getRequestURI().startsWith("/static/")) {
+        String uri = request.getRequestURI();
+
+        if (uri.startsWith("/auth/") || uri.equals("/") || uri.startsWith("/static/") || uri.startsWith("/resources/") || uri.matches(".*\\.(html|css|js|png|jpg|jpeg|ico)$")) {
             filterChain.doFilter(request, response);
             return;
         }
