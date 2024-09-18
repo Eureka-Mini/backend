@@ -27,7 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JWTUtil jwtUtil;
-    private final static long ACCESS_TOKEN_EXPIRE_TIME = 60 * 10 * 1000L;
+    private final static long ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 1000L;
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
