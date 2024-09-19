@@ -215,23 +215,22 @@ class BoardServiceTest {
 
     @Test
     @DisplayName("게시글 생성")
-    public void testCreateBoard() {
+    public void testWriteBoard() {
         // Given
         Long memberId = 1L;
-        Long boardId = 1L; // 새로 생성된 게시글의 ID
+        Long boardId = 1L;
 
-        // Mock Member
         Member member = new Member();
         ReflectionTestUtils.setField(member, "id", memberId);
 
-        // Request 객체 생성
-        WriteBoardRequest request = new WriteBoardRequest("제목", "내용");
+        WriteBoardRequest request = new WriteBoardRequest("제목", "내용", 1000);
 
         Board board = Board.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
+                .price(request.getPrice())
                 .build();
-        ReflectionTestUtils.setField(board, "id", boardId); // 새로 생성된 게시글 ID 설정
+        ReflectionTestUtils.setField(board, "id", boardId);
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
         when(boardRepository.save(any(Board.class))).thenReturn(board);
@@ -250,19 +249,19 @@ class BoardServiceTest {
         verify(boardRepository).save(any(Board.class));
     }
 
-
     @Test
     @DisplayName("존재하지 않는 작성자에 의해 게시글 생성")
-    public void testCreateBoardWhenMemberNotFound() {
+    public void testWriteBoardWhenMemberNotFound() {
         // Given
         Long memberId = 99L;
-        WriteBoardRequest request = new WriteBoardRequest("제목", "내용");
+        WriteBoardRequest request = new WriteBoardRequest("제목", "내용", 1000);
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(RuntimeException.class, () -> boardService.writeBoard(request, memberId), "Member not found");
     }
+
 
     @Test
     @DisplayName("게시글 수정")
@@ -281,35 +280,31 @@ class BoardServiceTest {
                 .boardStatus(BoardStatus.판매중)
                 .member(member)
                 .build();
-
         ReflectionTestUtils.setField(existingBoard, "id", boardId);
 
-        UpdateBoardRequest request = new UpdateBoardRequest("새 제목");
+        UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
 
         when(boardRepository.findById(boardId)).thenReturn(Optional.of(existingBoard));
-        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
 
         // When
         UpdateBoardResponse response = boardService.updateBoard(boardId, request, memberId);
 
         // Then
-        assertNotNull(response); // 응답 확인
+        assertNotNull(response);
         assertEquals("BOARD-S002", response.getCode());
         assertEquals("Board Update Success", response.getMessage());
         assertNotNull(response.getData());
-        assertEquals("새 제목", response.getData().getContent());
+        assertEquals("새 내용", response.getData().getContent());
         assertNotNull(response.getTimestamp());
 
-        verify(boardRepository).findById(boardId);
-        verify(memberRepository).findById(memberId);
-
-        // 업데이트 되었는지
-        assertEquals("새 제목", existingBoard.getContent());
-        assertEquals("기존 제목", existingBoard.getTitle());
-        assertEquals(500, existingBoard.getPrice());
+        assertEquals("새 제목", existingBoard.getTitle());
+        assertEquals("새 내용", existingBoard.getContent());
+        assertEquals(1000, existingBoard.getPrice());
         assertEquals(BoardStatus.판매중, existingBoard.getBoardStatus());
-    }
 
+        verify(boardRepository, times(1)).findById(boardId);
+        verifyNoInteractions(memberRepository);
+    }
 
     @Test
     @DisplayName("존재하지 않는 회원이 수정")
@@ -317,10 +312,10 @@ class BoardServiceTest {
         // Given
         Long boardId = 1L;
         Long nonExistentMemberId = 999L;
-        UpdateBoardRequest request = new UpdateBoardRequest("새 제목");
+        UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
 
         Member existingMember = new Member();
-        ReflectionTestUtils.setField(existingMember, "id", nonExistentMemberId);
+        ReflectionTestUtils.setField(existingMember, "id", 1L);
 
         Board existingBoard = Board.builder()
                 .content("기존 내용")
@@ -329,16 +324,14 @@ class BoardServiceTest {
                 .boardStatus(BoardStatus.판매중)
                 .title("기존 제목")
                 .build();
-
         ReflectionTestUtils.setField(existingBoard, "id", boardId);
 
         when(boardRepository.findById(boardId)).thenReturn(Optional.of(existingBoard));
 
-        // When
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
-            boardService.updateBoard(boardId, request, nonExistentMemberId);
-        });
-        // Then
+        // When & Then
+        RuntimeException thrown = assertThrows(RuntimeException.class, () ->
+                boardService.updateBoard(boardId, request, nonExistentMemberId)
+        );
         assertEquals("User Not Found", thrown.getMessage());
     }
 
@@ -349,17 +342,7 @@ class BoardServiceTest {
         // Given
         Long boardId = 1L;
         Long memberId = null; // 인증되지 않은 사용자 (토큰이 없음)
-        UpdateBoardRequest request = new UpdateBoardRequest("새 제목");
-
-        Board existingBoard = Board.builder()
-                .content("기존 내용")
-                .member(new Member()) // 임시 회원 설정
-                .price(1000)
-                .boardStatus(BoardStatus.판매중)
-                .title("기존 제목")
-                .build();
-
-        ReflectionTestUtils.setField(existingBoard, "id", boardId);
+        UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
 
         // When
         RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
@@ -369,13 +352,12 @@ class BoardServiceTest {
         assertEquals("Token Not Exist", thrown.getMessage());
     }
 
-
     @Test
     @DisplayName("존재하지 않는 게시글에 대한 수정")
     public void testUpdateNonExistentBoard() {
         // Given
         Long nonExistentBoardId = 999L;
-        UpdateBoardRequest request = new UpdateBoardRequest("새 제목");
+        UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
 
         when(boardRepository.findById(nonExistentBoardId)).thenReturn(Optional.empty());
 
@@ -386,7 +368,6 @@ class BoardServiceTest {
         // Then
         assertEquals("Board not found", thrown.getMessage());
     }
-
 
     @Test
     @DisplayName("게시글 삭제 성공")
