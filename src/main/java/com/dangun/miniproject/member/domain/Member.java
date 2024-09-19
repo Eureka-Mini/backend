@@ -2,6 +2,7 @@ package com.dangun.miniproject.member.domain;
 
 import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.comment.domain.Comment;
+import com.dangun.miniproject.member.dto.GetAddressDto;
 import com.dangun.miniproject.member.dto.GetMemberDto;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -26,13 +27,13 @@ public class Member {
 
     private String nickname;
 
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Address address;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Board> boards;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 
     @Builder
@@ -42,9 +43,14 @@ public class Member {
         this.password = password;
     }
 
-    public void updateMember(GetMemberDto getMemberRequest) {
-        this.email = getMemberRequest.getEmail();
-        this.nickname = getMemberRequest.getNickname();
+    public void updateMember(GetMemberDto getMemberDto) {
+        if (getMemberDto.getEmail() != null) {
+            this.email = getMemberDto.getEmail();
+        }
+
+        if (getMemberDto.getNickname() != null) {
+            this.nickname = getMemberDto.getNickname();
+        }
     }
 
     public void addAddress(Address address) {

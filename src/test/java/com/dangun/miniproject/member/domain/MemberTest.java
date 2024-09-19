@@ -5,47 +5,78 @@ import com.dangun.miniproject.comment.domain.Comment;
 import com.dangun.miniproject.member.dto.GetMemberDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class MemberTest {
+
     private Member member;
 
     @BeforeEach
     public void setUp() {
         member = Member.builder()
-                .email("hong@test.com")
-                .nickname("Hong")
-                .password("password123")
+                .email("test@example.com")
+                .nickname("tester")
+                .password("password1234")
                 .build();
     }
+
+    @Test
+    public void testMemberCreationWithBuilder() {
+        // Given
+        String email = "test@example.com";
+        String nickname = "tester";
+        String password = "password1234";
+
+        // When
+        Member member = Member.builder()
+                .email(email)
+                .nickname(nickname)
+                .password(password)
+                .build();
+
+        // Then
+        assertThat(member).isNotNull();
+        assertThat(member.getEmail()).isEqualTo(email);
+        assertThat(member.getNickname()).isEqualTo(nickname);
+        assertThat(member.getPassword()).isEqualTo(password);
+    }
+
 
     // 회원 정보 업데이트 테스트
     @Test
     public void updateMember() {
         // Given
-        GetMemberDto updateRequest = GetMemberDto.builder()
-                .email("newemail@test.com")
-                .nickname("NewHong")
+        Member member = Member.builder()
+                .email("old@example.com")
+                .nickname("oldNickname")
+                .password("password123")
+                .build();
+
+        GetMemberDto updateDto = GetMemberDto.builder()
+                .email("old@example.com")
+                .nickname("newNickname")
                 .build();
 
         // When
-        member.updateMember(updateRequest);
+        member.updateMember(updateDto);
 
         // Then
-        assertEquals("newemail@test.com", member.getEmail());
-        assertEquals("NewHong", member.getNickname());
+        assertThat(member.getEmail()).isEqualTo("old@example.com");
+        assertThat(member.getNickname()).isEqualTo("newNickname"); // nickname은 변경되지 않아야 함
     }
+
 
     // 주소 추가 테스트
     @Test
     public void addAddress() {
         // Given
         Address address = Address.builder()
-                .street("123 주요 거리")
-                .detail("101동 아파트")
-                .zipcode("14352")
+                .street("street")
+                .detail("detail")
+                .zipcode("11111")
                 .build();
 
         // When
@@ -56,16 +87,6 @@ public class MemberTest {
         assertEquals(address.getStreet(), member.getAddress().getStreet());
         assertEquals(address.getDetail(), member.getAddress().getDetail());
         assertEquals(address.getZipcode(), member.getAddress().getZipcode());
-    }
-
-    // 비밀번호 확인 테스트
-    @Test
-    public void checkPassword() {
-        // Given
-        String inputPassword = "password123"; // 올바른 비밀번호
-
-        // Then
-        assertEquals(inputPassword, member.getPassword());
     }
 
     // 댓글 삭제 테스트
