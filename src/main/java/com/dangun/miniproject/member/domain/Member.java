@@ -2,7 +2,6 @@ package com.dangun.miniproject.member.domain;
 
 import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.comment.domain.Comment;
-import com.dangun.miniproject.member.dto.GetAddressDto;
 import com.dangun.miniproject.member.dto.GetMemberDto;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -27,11 +26,11 @@ public class Member {
 
     private String nickname;
 
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
     private Address address;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Board> boards;
+    private List<Board> boards = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
