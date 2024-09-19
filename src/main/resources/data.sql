@@ -11,12 +11,12 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 -- Insert statements for Users
-INSERT INTO member (id, email, nickname, password) VALUES (1, 'jeongdong@google.com', 'jeongdong', 'password1');
-INSERT INTO member (id, email, nickname, password) VALUES (2, 'youngchul@google.com', 'youngchul', 'password2');
-INSERT INTO member (id, email, nickname, password) VALUES (3, 'sieun@google.com', 'sieun', 'password3');
-INSERT INTO member (id, email, nickname, password) VALUES (4, 'minah@naver.com', 'minah', 'password4');
-INSERT INTO member (id, email, nickname, password) VALUES (5, 'seunghee@naver.com', 'seunghee', 'password5');
-INSERT INTO member (id, email, nickname, password) VALUES (6, 'asdf@asdf.com', 'asdf', 'asdf');
+INSERT INTO member (id, email, nickname, password) VALUES (1, 'jeongdong@google.com', 'jeongdong', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
+INSERT INTO member (id, email, nickname, password) VALUES (2, 'youngchul@google.com', 'youngchul', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
+INSERT INTO member (id, email, nickname, password) VALUES (3, 'sieun@google.com', 'sieun', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
+INSERT INTO member (id, email, nickname, password) VALUES (4, 'minah@naver.com', 'minah', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
+INSERT INTO member (id, email, nickname, password) VALUES (5, 'seunghee@naver.com', 'seunghee', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
+INSERT INTO member (id, email, nickname, password) VALUES (6, 'asdf@asdf.com', 'asdf', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
 
 -- Insert statements for Addresses
 INSERT INTO address (member_id, detail, street, zipcode) VALUES (1, '1동 203호', '서울특별시 종로구 세종대로 175', '03172');
