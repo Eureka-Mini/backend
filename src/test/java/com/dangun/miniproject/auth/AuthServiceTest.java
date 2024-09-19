@@ -2,9 +2,9 @@ package com.dangun.miniproject.auth;
 
 
 import com.dangun.miniproject.auth.exception.exceptions.DuplicateEmailException;
-import com.dangun.miniproject.auth.exception.exceptions.DuplicateNicknameException;
 import com.dangun.miniproject.auth.exception.exceptions.InvalidEmailException;
 import com.dangun.miniproject.auth.service.impl.AuthServiceImpl;
+import com.dangun.miniproject.auth.service.validator.SignupValidator;
 import com.dangun.miniproject.fixture.AddressFixture;
 import com.dangun.miniproject.fixture.MemberFixture;
 import com.dangun.miniproject.member.domain.Address;
@@ -36,6 +36,9 @@ public class AuthServiceTest {
     @Mock
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Mock
+    private SignupValidator signupValidator;
+
     @InjectMocks
     private AuthServiceImpl authService;
 
@@ -49,8 +52,7 @@ public class AuthServiceTest {
         Address address = AddressFixture.instanceOf(member);
         member.addAddress(address);
 
-        when(memberRepository.existsByEmail(member.getEmail())).thenReturn(false);
-        when(memberRepository.existsByNickname(member.getNickname())).thenReturn(false);
+        doNothing().when(signupValidator).validateMember(memberRequest);
         when(bCryptPasswordEncoder.encode(member.getPassword())).thenReturn("encodedPassword");
 
         // When
@@ -59,6 +61,7 @@ public class AuthServiceTest {
         // Then
         assertThat(result).isNotNull();
         verify(memberRepository, times(1)).save(result);
+        verify(signupValidator, times(1)).validateMember(memberRequest);
     }
 
     @Test
@@ -75,14 +78,17 @@ public class AuthServiceTest {
                         .build())
                 .build();
 
+        doThrow(new InvalidEmailException("유효하지 않은 이메일 형식입니다."))
+                .when(signupValidator).validateMember(memberRequest);
         // When
         InvalidEmailException exception = assertThrows(InvalidEmailException.class, () -> {
-            authService.validateMember(memberRequest);
+            authService.signupMember(memberRequest);
         });
 
         // Then
         assertEquals("유효하지 않은 이메일 형식입니다.", exception.getMessage());
         verify(memberRepository, never()).save(any(Member.class));
+        verify(signupValidator, times(1)).validateMember(memberRequest);
     }
 
     @Test
@@ -100,14 +106,18 @@ public class AuthServiceTest {
                         .build())
                 .build();
 
+        doThrow(new IllegalArgumentException("닉네임 값을 입력해주세요."))
+                .when(signupValidator).validateMember(memberRequest);
+
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            authService.validateMember(memberRequest);
+            authService.signupMember(memberRequest);
         });
 
         // Then
         assertEquals("닉네임 값을 입력해주세요.", exception.getMessage());
         verify(memberRepository, never()).save(any(Member.class));
+        verify(signupValidator, times(1)).validateMember(memberRequest);
     }
 
     @Test
@@ -125,14 +135,18 @@ public class AuthServiceTest {
                         .build())
                 .build();
 
+        doThrow(new IllegalArgumentException("비밀번호를 입력해주세요."))
+                .when(signupValidator).validateMember(memberRequest);
+
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            authService.validateMember(memberRequest);
+            authService.signupMember(memberRequest);
         });
 
         // Then
-        assertEquals("패스워드 값을 입력해주세요.", exception.getMessage());
+        assertEquals("비밀번호를 입력해주세요.", exception.getMessage());
         verify(memberRepository, never()).save(any(Member.class));
+        verify(signupValidator, times(1)).validateMember(memberRequest);
     }
 
     @Test
@@ -150,16 +164,19 @@ public class AuthServiceTest {
                         .build())
                 .build();
 
-        when(memberRepository.existsByEmail(memberRequest.getEmail())).thenReturn(true);
+        doThrow(new DuplicateEmailException("이미 존재하는 이메일 입니다."))
+                .when(signupValidator).validateMember(memberRequest);
 
         // When
         DuplicateEmailException exception = assertThrows(DuplicateEmailException.class, () -> {
-            authService.validateMember(memberRequest);
+            authService.signupMember(memberRequest);
         });
 
         // Then
         assertEquals("이미 존재하는 이메일 입니다.", exception.getMessage());
         verify(memberRepository, never()).save(any(Member.class));
+        verify(signupValidator, times(1)).validateMember(memberRequest);
+
     }
 
     @Test
@@ -177,15 +194,104 @@ public class AuthServiceTest {
                         .build())
                 .build();
 
-        when(memberRepository.existsByNickname(memberRequest.getNickname())).thenReturn(true);
+        doThrow(new DuplicateEmailException("이미 존재하는 닉네임 입니다."))
+                .when(signupValidator).validateMember(memberRequest);
 
         // When
-        DuplicateNicknameException exception = assertThrows(DuplicateNicknameException.class, () -> {
-            authService.validateMember(memberRequest);
+        DuplicateEmailException exception = assertThrows(DuplicateEmailException.class, () -> {
+            authService.signupMember(memberRequest);
         });
 
         // Then
         assertEquals("이미 존재하는 닉네임 입니다.", exception.getMessage());
         verify(memberRepository, never()).save(any(Member.class));
+        verify(signupValidator, times(1)).validateMember(memberRequest);
+    }
+
+    @Test
+    @DisplayName("주소 공란 예외 처리")
+    void testSignupMember_IllegalArgumentStreet() {
+        // Given
+        GetMemberRequest memberRequest = GetMemberRequest.builder()
+                .email("test@gmail.com")
+                .password("password")
+                .nickname("nickname")
+                .address(GetAddressRequest.builder()
+                        .street("")
+                        .detail("detail")
+                        .zipcode("zipcode")
+                        .build())
+                .build();
+
+        doThrow(new IllegalArgumentException("주소를 입력해주세요."))
+                .when(signupValidator).validateMember(memberRequest);
+
+        // When
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            authService.signupMember(memberRequest);
+        });
+
+        // Then
+        assertEquals("주소를 입력해주세요.", exception.getMessage());
+        verify(memberRepository, never()).save(any(Member.class));
+        verify(signupValidator, times(1)).validateMember(memberRequest);
+    }
+
+    @Test
+    @DisplayName("상세 주소 공란 예외 처리")
+    void testSignupMember_IllegalArgumentDetail() {
+        // Given
+        GetMemberRequest memberRequest = GetMemberRequest.builder()
+                .email("test@gmail.com")
+                .password("password")
+                .nickname("nickname")
+                .address(GetAddressRequest.builder()
+                        .street("street")
+                        .detail("")
+                        .zipcode("zipcode")
+                        .build())
+                .build();
+
+        doThrow(new IllegalArgumentException("상세주소를 입력해주세요."))
+                .when(signupValidator).validateMember(memberRequest);
+
+        // When
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            authService.signupMember(memberRequest);
+        });
+
+        // Then
+        assertEquals("상세주소를 입력해주세요.", exception.getMessage());
+        verify(memberRepository, never()).save(any(Member.class));
+        verify(signupValidator, times(1)).validateMember(memberRequest);
+    }
+
+    @Test
+    @DisplayName("우편번호 공란 예외 처리")
+    void testSignupMember_IllegalArgumentZipcode() {
+        // Given
+        GetMemberRequest memberRequest = GetMemberRequest.builder()
+                .email("test@gmail.com")
+                .password("password")
+                .nickname("nickname")
+                .address(GetAddressRequest.builder()
+                        .street("street")
+                        .detail("detail")
+                        .zipcode("")
+                        .build())
+                .build();
+
+        doThrow(new IllegalArgumentException("우편번호를 입력해주세요."))
+                .when(signupValidator).validateMember(memberRequest);
+
+        // When
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            authService.signupMember(memberRequest);
+        });
+
+        // Then
+        assertEquals("우편번호를 입력해주세요.", exception.getMessage());
+        verify(memberRepository, never()).save(any(Member.class));
+        verify(signupValidator, times(1)).validateMember(memberRequest);
     }
 }

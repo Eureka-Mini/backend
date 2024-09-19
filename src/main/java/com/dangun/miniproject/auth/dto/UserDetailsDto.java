@@ -29,6 +29,10 @@ public class UserDetailsDto implements UserDetails {
         return member.getEmail();
     }
 
+    public String getNickname() {
+        return member.getNickname();
+    }
+
     public Member getMember() {
         return member;
     }

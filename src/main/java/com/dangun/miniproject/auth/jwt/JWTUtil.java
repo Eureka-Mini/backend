@@ -29,36 +29,77 @@ public class JWTUtil {
                 .getPayload().get("email", String.class);
     }
 
-    // 만료 시간 검증
-    public boolean isExpiredToken(String token) {
+    // 액세스 토큰 내 member nickname 추출
+    public String getMemberNickname(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload().get("nickname", String.class);
+    }
+
+    public String getJwtCategory(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload().get("category", String.class);
+    }
+
+    public boolean isExpiredTokenAccess(String token) {
         try {
-            return  Jwts.parser()
+            // 토큰 파싱 및 유효성 검사
+            Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token);
+
+            // 만료 시간 검사
+            Date expirationDate = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody().getExpiration();
+            return expirationDate.before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (JwtException e) {
+            throw e;
+        }
+    }
+
+    // 리프레쉬 토큰 만료 시간 검증
+    public boolean isExpiredTokenRefresh(String token) {
+        try {
+            return Jwts.parser()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody().getExpiration()
                     .before(new Date());
         } catch (ExpiredJwtException e) {
-            log.warn("토큰이 만료되었습니다: " + e.getMessage());
-            throw e;
-        } catch (JwtException e) {
-            log.warn("토큰 서명이 유효하지 않습니다: "+ e.getMessage());
             throw e;
         }
     }
 
-    // 토큰 생성
-    public String createJwt(String category, String email, Long expireTime) {
+    public String createJwtAccess(String category, String email, String nickname, Long expireTime) {
         return Jwts.builder()
                 .claim("category", category)
                 .claim("email", email)
-                .issuedAt(new Date(System.currentTimeMillis())) // 발행 시간
-                .expiration(new Date(System.currentTimeMillis() + expireTime)) // 만료 시간
-                .signWith(secretKey) // 시그니쳐
+                .claim("nickname", nickname)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expireTime))
+                .signWith(secretKey)
                 .compact();
     }
 
-    public String getJwtCategory(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
+    public String createJwtRefresh(String category, String email, Long expireTime) {
+        return Jwts.builder()
+                .claim("category", category)
+                .claim("email", email)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expireTime))
+                .signWith(secretKey)
+                .compact();
     }
 }
