@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오이마켓 - 중고거래</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8f0; /* 오이 색상과 어울리는 부드러운 배경 */
+        }
+
+        .wrapper {
+            height: 100%;
+        }
+
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            border: 2px solid rgb(76, 175, 80); /* 오이 색상 */
+            border-radius: 12px;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-section img {
+            width: 100%;
+            border-radius: 12px;
+        }
+
+        #board-profile {
+            width: 100%;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        #board-nickname {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #board-address{
+            font-size: 12px;
+
+        }
+
+        #board-content-section {
+            width: 100%;
+            padding: 20px;
+            background-color: #f9fff9; /* 부드러운 녹색 배경 */
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        #board-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4caf50; /* 오이 색상 */
+        }
+
+        #board-created-time {
+            font-size: 16px;
+            color: #666;
+        }
+
+        #board-price {
+            margin-bottom: 20px;
+            font-size: 24px; /* 폰트 크기 증가 */
+            font-weight: bold;
+        }
+
+        .board-comment-container {
+            width: 100%;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .comment {
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f0f8f0;
+            border: 1px solid #e0e0e0;
+        }
+
+        .comment-profile a {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .comment-profile {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            align-items: center;
+        }
+
+        .created-time {
+            font-size: 12px;
+            color: #888;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="navbar-placeholder"></div>
+<div class="wrapper">
+    <article class="board-container">
+        <section class="image-section">
+            <img src="/images/defaultItem.png" alt="상품 사진">
+        </section>
+        <section id="board-profile">
+            <div id="board-nickname">닉네임</div>
+            <div id="board-address">주소</div>
+        </section>
+        <section id="board-content-section">
+            <h1 id="board-title">글 제목</h1>
+            <p class="created-time" id="board-created-time">12시간 전</p>
+            <p id="board-price">가격</p>
+            <div class="board-content">
+                <p>이곳에 글 내용이 들어갑니다. 예를 들어, 상품 설명 또는 게시글 내용 등을 여기에 넣을 수 있습니다.</p>
+            </div>
+        </section>
+        <section class="board-comment-container">
+            <!-- 댓글 섹션 -->
+        </section>
+    </article>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const boardId = new URLSearchParams(window.location.search);
+        const token = localStorage.getItem('accessToken');
+
+        fetch('/html/navbar.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navbar-placeholder').innerHTML = data;
+            });
+
+        if (boardId) {
+            fetch(`/boards/${boardId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const boardData = data.data;
+
+                    document.getElementById('board-title').textContent = boardData.title;
+                    document.getElementById('board-created-time').textContent = timeSince(boardData.createdAt);
+                    document.getElementById('board-price').textContent = boardData.price || "가격 없음";
+                    document.querySelector('.board-content p').textContent = boardData.content;
+                    document.getElementById('board-nickname').textContent = boardData.writer;
+
+                    const commentContainer = document.querySelector('.board-comment-container');
+                    boardData.comments.slice(0, 5).forEach(comment => {
+                        const commentElement = document.createElement('div');
+                        commentElement.classList.add('comment');
+                        commentElement.innerHTML = `
+                    <div class="comment-profile">
+                        <a style="text-align: left;">${comment.writer}</a>
+                        <p class="created-time" style="text-align: right;">${timeSince(comment.createdAt)}</p>
+                    </div>
+                    <p>${comment.content}</p>
+                    `;
+                        commentContainer.appendChild(commentElement);
+                    });
+                })
+                .catch(error => console.error('Error fetching board details:', error));
+        }
+    });
+
+    function timeSince(date) {
+        const now = new Date();
+        const seconds = Math.floor((now - new Date(date)) / 1000);
+
+        let interval = Math.floor(seconds / 31536000);
+        if (interval >= 1) return interval + "년 전";
+
+        interval = Math.floor(seconds / 2592000);
+        if (interval >= 1) return interval + "달 전";
+
+        interval = Math.floor(seconds / 86400);
+        if (interval >= 1) return interval + "일 전";
+
+        interval = Math.floor(seconds / 3600);
+        if (interval >= 1) return interval + "시간 전";
+
+        interval = Math.floor(seconds / 60);
+        if (interval >= 1) return interval + "분 전";
+
+        return "방금 전";
+    }
+</script>
+
+</body>
+</html>
