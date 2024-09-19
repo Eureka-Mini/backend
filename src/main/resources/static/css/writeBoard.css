@@ -1,0 +1,73 @@
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff; /* 흰색 배경 */
+    border-radius: 8px; /* 둥근 모서리 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 부드러운 그림자 */
+}
+
+h1 {
+    font-size: 28px;
+    color: #006400; /* 짙은 초록색 텍스트 */
+    margin-bottom: 20px;
+}
+
+.post-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.post-form label {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #006400; /* 짙은 초록색 텍스트 */
+}
+
+.post-form input,
+.post-form textarea,
+.post-form select {
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.post-form input[type="number"] {
+    width: 100%;
+}
+
+.post-form textarea {
+    width: 100%;
+}
+
+
+.post-form button{
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #32cd32; /* 라임 그린색 버튼 */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.post-form button:hover,
+#deleteButton:hover {
+    background-color: #228b22; /* 포레스트 그린색으로 변경 */
+}
+
+
+#deleteButton {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #32cd32; /* 라임 그린색 버튼 */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}

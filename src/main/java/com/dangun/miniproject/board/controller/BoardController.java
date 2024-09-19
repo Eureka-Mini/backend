@@ -77,6 +77,8 @@ public class BoardController {
 	}
 
 
+
+
 	// 게시글 생성
 	@PostMapping
 	public ResponseEntity<WriteBoardResponse> writeBoard(

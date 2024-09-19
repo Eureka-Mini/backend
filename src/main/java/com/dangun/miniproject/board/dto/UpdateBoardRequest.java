@@ -9,5 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateBoardRequest {
+    private String title;
     private String content;
+    private Integer price;
+    private String boardStatus;
 }

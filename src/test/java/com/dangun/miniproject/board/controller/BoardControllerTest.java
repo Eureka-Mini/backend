@@ -198,7 +198,7 @@ class BoardControllerTest {
     void testWriteBoard_Success() throws Exception {
         // Given
         Long memberId = 1L;
-        WriteBoardRequest request = new WriteBoardRequest("test", "test content");
+        WriteBoardRequest request = new WriteBoardRequest("test", "test content",1000);
         WriteBoardResponse response = WriteBoardResponse.builder()
                 .code("BOARD-S001")
                 .message("Board Write Success")
@@ -229,7 +229,7 @@ class BoardControllerTest {
     @DisplayName("존재하지 않는 회원으로 게시글 생성 요청")
     void testCreateBoard_MemberNotFound() throws Exception {
         // Given
-        WriteBoardRequest request = new WriteBoardRequest("Test Title", "Test Content");
+        WriteBoardRequest request = new WriteBoardRequest("Test Title", "Test Content",1000);
         when(boardService.writeBoard(any(WriteBoardRequest.class), any(Long.class)))
                 .thenThrow(new UsernameNotFoundException("Member not found"));
 
@@ -248,7 +248,7 @@ class BoardControllerTest {
         // Given
         Long boardId = 1L;
         Long memberId = 1L;
-        UpdateBoardRequest request = new UpdateBoardRequest("test content");
+        UpdateBoardRequest request = new UpdateBoardRequest("Updated Title", "Updated Content", 1000, "판매중");
         UpdateBoardResponse response = UpdateBoardResponse.builder()
                 .code("BOARD-S002")
                 .message("Board Update Success")
@@ -277,13 +277,14 @@ class BoardControllerTest {
     }
 
 
+
     @Test
     @DisplayName("존재하지 않는 회원이 수정 시도")
     void testUpdateBoard_MemberNotFound() throws Exception {
         // Given
         Long boardId = 1L;
         Long nonExistentMemberId = 99L;
-        UpdateBoardRequest request = new UpdateBoardRequest("Updated Content");
+        UpdateBoardRequest request = new UpdateBoardRequest("Updated Title", "Updated Content", 1000, "판매중");
 
         Member mockMember = Member.builder()
                 .email("nonexistent@example.com")
@@ -312,7 +313,7 @@ class BoardControllerTest {
     void testUpdateBoard_Unauthorized() throws Exception {
         // Given
         Long boardId = 1L;
-        UpdateBoardRequest request = new UpdateBoardRequest("Updated Content");
+        UpdateBoardRequest request = new UpdateBoardRequest("Updated Title", "Updated Content", 1000, "판매중");
 
         // When & Then
         MvcResult result = mockMvc.perform(put("/boards/{id}", boardId)
