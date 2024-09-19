@@ -17,5 +17,6 @@ public class UpdateBoardResponse {
     @Builder
     public static class Data {
         private final String content;
+
     }
 }
