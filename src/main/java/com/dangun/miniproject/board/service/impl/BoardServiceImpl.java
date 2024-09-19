@@ -1,5 +1,6 @@
 package com.dangun.miniproject.board.service.impl;
 
+import com.dangun.miniproject.auth.dto.UserDetailsDto;
 import com.dangun.miniproject.board.domain.BoardStatus;
 import com.dangun.miniproject.board.dto.*;
 import org.springframework.data.domain.Page;
@@ -109,7 +110,7 @@ public class BoardServiceImpl implements BoardService {
 				.content(request.getContent())
 				.member(member)
 				.boardStatus(BoardStatus.판매중)
-				.price(0) // 기본값 설정, 필요에 따라 수정
+				.price(request.getPrice())
 				.build();
 
 		Board savedBoard = boardRepository.save(board);
@@ -130,7 +131,6 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	@Transactional
 	public UpdateBoardResponse updateBoard(Long boardId, UpdateBoardRequest request, Long memberId) {
-		// 토큰 존재 여부 확인
 		if (memberId == null) {
 			throw new RuntimeException("Token Not Exist");
 		}
@@ -138,11 +138,20 @@ public class BoardServiceImpl implements BoardService {
 		Board board = boardRepository.findById(boardId)
 				.orElseThrow(() -> new RuntimeException("Board not found"));
 
-		Member member = memberRepository.findById(memberId)
-				.orElseThrow(() -> new RuntimeException("User Not Found"));
+		if (!board.getMember().getId().equals(memberId)) {
+			throw new RuntimeException("User Not Found");
+		}
 
-		board.updateDetails(board.getTitle(), request.getContent(), board.getPrice(), board.getBoardStatus());
+		// 부분 업데이트 로직
+		//null이면 그 필드는 업데이트하지 않고 기존 값을 유지
+		board.updateDetails(
+				request.getTitle() != null ? request.getTitle() : board.getTitle(),
+				request.getContent() != null ? request.getContent() : board.getContent(),
+				request.getPrice() != null ? request.getPrice() : board.getPrice(),
+				request.getBoardStatus() != null ? BoardStatus.valueOf(request.getBoardStatus()) : board.getBoardStatus()
+		);
 
+		// 응답 생성
 		return UpdateBoardResponse.builder()
 				.code("BOARD-S002")
 				.message("Board Update Success")
