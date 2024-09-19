@@ -2,6 +2,7 @@ package com.dangun.miniproject.member.controller;
 
 import com.dangun.miniproject.common.ApiResponse;
 import com.dangun.miniproject.member.domain.Member;
+import com.dangun.miniproject.member.dto.GetAddressDto;
 import com.dangun.miniproject.member.dto.GetMemberDto;
 import com.dangun.miniproject.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -34,24 +35,34 @@ public class MemberController {
 
 
     // 회원 정보 수정
-    @PutMapping("/{memberId}")
-    public ResponseEntity<GetMemberDto> updateMember(
-            @PathVariable Long memberId,
+    @PutMapping("my-info-update")
+    public ResponseEntity<?> updateMember(
+            @AuthenticationPrincipal(expression = "member") Member member,
             @RequestBody GetMemberDto getMemberDto
     ) {
-        return memberService.updateMember(getMemberDto, memberId);
+        GetMemberDto updateMember = memberService.updateMember(getMemberDto, member.getId());
+
+        return ApiResponse.ok("MEMBER-S003",updateMember,"회원 정보 수정 성공");
+    }
+
+    // 회원 정보 수정
+    @PutMapping("my-address-update")
+    public ResponseEntity<?> updateAddress(
+            @AuthenticationPrincipal(expression = "member") Member address,
+            @RequestBody GetAddressDto getAddressDto
+    ) {
+        GetAddressDto updateAddress = memberService.updateAddress(getAddressDto, address.getId());
+
+        return ApiResponse.ok("MEMBER-S003",updateAddress,"회원의 주소 정보 수정 성공");
     }
 
 
-    @DeleteMapping("/{memberId}")
-    public ResponseEntity<String> deleteMember(@PathVariable Long memberId) {
-        boolean isDeleted = memberService.deleteMember(memberId);
+    @DeleteMapping("/my-info-delete")
+    public ResponseEntity<?> deleteMember(
+            @AuthenticationPrincipal(expression = "member") Member member) {
+        boolean isDeleted = memberService.deleteMember(member.getId());
 
-        if (isDeleted) {
-            return ResponseEntity.ok("Member deleted successfully.");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found.");
-        }
+        return ApiResponse.ok("MEMBER-S004", null, "회원 탈퇴 성공");
     }
 }
 

@@ -2,10 +2,96 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('/images/signup/bg.png');
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .signup-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+
+        .address-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .address-row input {
+            width: 50%;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #3c9d5d 0%, #20481d 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #38f9d7 0%, #43e97b 100%);
+        }
+
+        .signup-container p {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .signup-container a {
+            color: #587cde;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
-
-<h1>signup</h1>
+<div class="signup-container">
+    <h2>Sign Up</h2>
+    <form action="#">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="text" id="nickname" placeholder="Nickname" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <input type="text" id="street" placeholder="Address" required>
+        <div class="address-row">
+            <input type="text" id="detail" placeholder="Detail" required>
+            <input type="text" id="zipcode" placeholder="ZipCode" required>
+        </div>
+        <button type="button" id="signup">회원 가입</button>
+    </form>
+    <p>이미 회원이신가요? <a href="/html/login.html">로그인</a></p>
+</div>
 </body>
+<script src="/js/signup.js"></script>
 </html>

@@ -1,5 +1,6 @@
 package com.dangun.miniproject.auth.filter;
 
+import com.dangun.miniproject.auth.dto.UserDetailsDto;
 import com.dangun.miniproject.auth.jwt.JWTUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -26,6 +27,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final static long ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 1000L;
     private final static long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;
+    private final static long REFRESH_TOKEN_EXPIRE_TIME_TEST = 30 * 1000L;
+    private final static long ACCESS_TOKEN_EXPIRE_TIME_TEST = 20 * 1000L;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -47,9 +50,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                                       FilterChain chain, Authentication authentication) throws IOException {
         String email = authentication.getName();
+        String nickname = ((UserDetailsDto) authentication.getPrincipal()).getNickname();
 
-        String accessToken = jwtUtil.createJwt("accessToken", email, ACCESS_TOKEN_EXPIRE_TIME);
-        String refreshToken = jwtUtil.createJwt("refreshToken", email, REFRESH_TOKEN_EXPIRE_TIME);
+        String accessToken = jwtUtil.createJwtAccess("accessToken", email, nickname, ACCESS_TOKEN_EXPIRE_TIME);
+        String refreshToken = jwtUtil.createJwtRefresh("refreshToken", email, REFRESH_TOKEN_EXPIRE_TIME);
 
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.addCookie(createCookie("refreshToken", refreshToken));
@@ -82,7 +86,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60 * 60 * 24);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24 * 7);
         cookie.setHttpOnly(true);
 
         return cookie;

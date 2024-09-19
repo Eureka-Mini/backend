@@ -1,5 +1,6 @@
 package com.dangun.miniproject.member.dto;
 
+import com.dangun.miniproject.member.domain.Address;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,5 +26,16 @@ public class GetAddressDto {
         this.street = street;
         this.detail = detail;
         this.zipcode = zipcode;
+    }
+
+    public static GetAddressDto fromEntity(Address address) {
+        if (address == null) {
+            return null;
+        }
+        return GetAddressDto.builder()
+                .street(address.getStreet())
+                .detail(address.getDetail())
+                .zipcode(address.getZipcode())
+                .build();
     }
 }

@@ -2,6 +2,7 @@ package com.dangun.miniproject.member.controller;
 
 
 import com.dangun.miniproject.auth.dto.UserDetailsDto;
+import com.dangun.miniproject.common.ApiResponse;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.dto.GetAddressDto;
 import com.dangun.miniproject.member.dto.GetMemberDto;
@@ -12,9 +13,11 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,10 +28,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -72,7 +78,9 @@ public class MemberControllerTest {
         // given: Member 정보 설정
         GetAddressDto mockAddress = new GetAddressDto("testStreet", "testDetail", "12345");
         GetMemberDto mockResponse = new GetMemberDto("test@example.com", "tester", mockAddress);
-        Member member = new Member(); // Member 객체 초기화 필요
+
+        Member member = new Member();
+        setField(member, "id", 1L);
         UserDetails userDetails = new UserDetailsDto(member);
 
         // memberService.getMyInfo 호출 시 mockResponse 반환하도록 설정
@@ -88,52 +96,105 @@ public class MemberControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
                         .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.email").value("test@example.com"))
+                .andExpect(jsonPath("$.data.nickname").value("tester"))
+                .andExpect(jsonPath("$.data.address.street").value("testStreet"))
+                .andExpect(jsonPath("$.data.address.detail").value("testDetail"))
+                .andExpect(jsonPath("$.data.address.zipcode").value("12345"));
     }
 
 
     @Test
-    @WithMockUser(username = "user")
-    void updateMember() throws Exception {
-        // given
-        GetAddressDto mockAddress = new GetAddressDto("부산광역시 해운대구 해운대로 620", "4동 203호", "48093");
-        GetMemberDto updateRequest = new GetMemberDto("minah@naver.com", "minah", mockAddress);
-        GetMemberDto updatedResponse = new GetMemberDto("minah@naver.com", "minah", mockAddress);
+    void UpdateMemberWhenLoggedIn() throws Exception {
+        // Given: 테스트에 사용할 DTO 데이터 정의
+        GetAddressDto mockAddress = new GetAddressDto("street", "detail", "11111");
+        given(memberService.updateMember(any(), anyLong()))
+                .willReturn(new GetMemberDto("newMinah@naver.com", "newMinah", mockAddress));
 
-        // Mockito 설정
-        when(memberService.updateMember(Mockito.any(), Mockito.eq(4L)))
-                .thenReturn(ResponseEntity.ok(updatedResponse));
+        Member member = new Member();
+        setField(member, "id", 4L);
+        UserDetails userDetails = new UserDetailsDto(member);
 
-        // when
-        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.put("/members/4")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(updateRequest))
-                .with(csrf()));
+        // Mock: memberService에서 사용될 메서드의 동작을 가짜로 정의
+        GetMemberDto updatedMemberDto = GetMemberDto.builder()
+                .email("newMinah@naver.com")
+                .nickname("newMinah")
+                .build();
 
-        // then
-        result.andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(print())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("minah@naver.com"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.nickname").value("minah"));
+        // When: PUT 요청을 MockMvc를 사용하여 전송
+        mockMvc.perform(put("/members/my-info-update")
+                        .accept(APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedMemberDto))  // 수정된 회원 정보를 전송
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, updatedMemberDto, userDetails.getAuthorities()))).with(csrf())
+
+                )
+                // Then: 응답 상태와 JSON 필드 검증
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("MEMBER-S003"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("회원 정보 수정 성공"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.nickname").value("newMinah"));
+    }
+
+
+    @Test
+    void UpdateAddressWhenLoggedIn() throws Exception {
+        // Given: 테스트에 사용할 DTO 데이터 정의
+        given(memberService.updateAddress(any(), anyLong()))
+                .willReturn(new GetAddressDto("newStreet", "newDetail", "00000"));
+
+        Member member = new Member();
+        setField(member, "id", 1L);
+        UserDetails userDetails = new UserDetailsDto(member);
+
+        // Mock: memberService에서 사용될 메서드의 동작을 가짜로 정의
+        GetAddressDto updatedAddressDto = GetAddressDto.builder()
+                .street("newStreet")
+                .detail("newDetail")
+                .zipcode("00000")
+                .build();
+
+        // When: PUT 요청을 MockMvc를 사용하여 전송
+        mockMvc.perform(put("/members/my-address-update")
+                        .accept(APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedAddressDto))  // 수정된 회원 정보를 전송
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, updatedAddressDto, userDetails.getAuthorities()))).with(csrf())
+
+                )
+                // Then: 응답 상태와 JSON 필드 검증
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("MEMBER-S003"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("회원의 주소 정보 수정 성공"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.street").value("newStreet"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.detail").value("newDetail"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.zipcode").value("00000"));
     }
 
     @Test
-    @WithMockUser(username = "user")
-    public void deleteMember() throws Exception {
-        // given
-        Long memberId = 1L;
-        when(memberService.deleteMember(memberId)).thenReturn(true);
+    void deleteMemberWhenLoggedIn() throws Exception {
+        // Given
+        Member member = new Member();
+        setField(member, "id", 1L);
+        UserDetails userDetails = new UserDetailsDto(member);
 
-        // when
-        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/members/{memberId}", memberId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf()));
+        GetMemberDto updatedMemberDto = GetMemberDto.builder()
+                .email("test@test.com")
+                .nickname("tester")
+                .build();
 
-        // then
-        result.andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string("Member deleted successfully."));
+        when(memberService.deleteMember(member.getId())).thenReturn(true);
 
-        verify(memberService).deleteMember(memberId); // deleteMember 메서드가 호출됐는지 검증
+        // When & Then: DELETE 요청을 MockMvc를 사용하여 전송
+        mockMvc.perform(delete("/members/my-info-delete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, updatedMemberDto, userDetails.getAuthorities()))).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("MEMBER-S004"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("회원 탈퇴 성공"));
     }
 
 

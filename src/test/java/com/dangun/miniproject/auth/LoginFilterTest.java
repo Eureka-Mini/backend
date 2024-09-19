@@ -26,8 +26,7 @@ import java.util.Collections;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 public class LoginFilterTest {
@@ -55,6 +54,7 @@ public class LoginFilterTest {
     void testLoginAuthentication_Success() throws Exception {
         String email = "dummy@naver.com";
         String password = "password1";
+        String nickname = "nickname";
         String token = "dummyToken";
 
         Member member = Member.builder()
@@ -66,20 +66,21 @@ public class LoginFilterTest {
         UserDetailsDto userDetailsDto = new UserDetailsDto(member);
 
         // When
-        // security 로직 검증
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetailsDto, password, userDetailsDto.getAuthorities());
         when(authenticationManager
                 .authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
 
         // authentication 통과 후 jwt 발급
-        when(jwtUtil.createJwt("accessToken", email, 60 * 60 * 1000L)).thenReturn(token);
+        when(jwtUtil.createJwtAccess("accessToken", email, nickname, 60 * 60 * 1000L)).thenReturn(token);
+        when(jwtUtil.createJwtRefresh("refreshToken", email, 7 * 24 * 60 * 60 * 1000L)).thenReturn(token);
 
         mockMvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON) // json body
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(Collections.singletonMap("email", email))))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Authorization", "Bearer " + token));// header 에 응답
+                .andExpect(header().string("Authorization", "Bearer " + token))
+                .andExpect(cookie().exists("refreshToken"));
     }
 
     @Test

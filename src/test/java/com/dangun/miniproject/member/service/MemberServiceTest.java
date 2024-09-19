@@ -1,7 +1,10 @@
 package com.dangun.miniproject.member.service;
 
+import com.dangun.miniproject.board.domain.Board;
+import com.dangun.miniproject.comment.domain.Comment;
 import com.dangun.miniproject.member.domain.Address;
 import com.dangun.miniproject.member.domain.Member;
+import com.dangun.miniproject.member.dto.GetAddressDto;
 import com.dangun.miniproject.member.dto.GetMemberDto;
 import com.dangun.miniproject.member.repository.AddressRepository;
 import com.dangun.miniproject.board.repository.BoardRepository;
@@ -13,15 +16,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.util.ReflectionTestUtils.getField;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceTest {
@@ -48,14 +55,14 @@ public class MemberServiceTest {
     @BeforeEach
     public void setUp() {
         member = Member.builder()
-                .email("Hong@test.com")
-                .nickname("Hong")
+                .email("test@example.com")
+                .nickname("tester")
                 .build();
 
         address = Address.builder()
-                .street("123 주요 거리")
-                .detail("101동 아파트")
-                .zipcode("14352")
+                .street("street")
+                .detail("detail")
+                .zipcode("11111")
                 .member(member)
                 .build();
 
@@ -84,6 +91,22 @@ public class MemberServiceTest {
         assertEquals(address.getZipcode(), result.getAddress().getZipcode());
     }
 
+    @Test
+    public void getMember_NotFound() {
+        // Given
+        Long memberId = 1L;
+        when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+
+        // When
+        GetMemberDto result = memberService.getMember(memberId);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getEmail()).isNull();
+        assertThat(result.getNickname()).isNull();
+        assertThat(result.getAddress()).isNull();
+    }
+
 
     // 본인 정보 조회 테스트
     @Test
@@ -107,65 +130,83 @@ public class MemberServiceTest {
 
     // 회원 수정 테스트
     @Test
-    void updateMember() {
-        // given
+    public void updateMember() {
         Long memberId = 1L;
-        GetMemberDto updateRequest = new GetMemberDto(
-                "Hong@test.com",
-                "Hong",
-                null // 주소는 업데이트하지 않으므로 null
-        );
+        GetMemberDto updateDto = GetMemberDto.builder()
+                .email("newTest@example.com")
+                .nickname("newNickname")
+                .build();
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-        when(memberRepository.save(any(Member.class))).thenReturn(member);
 
-        // when
-        ResponseEntity<GetMemberDto> response = memberService.updateMember(updateRequest, memberId);
+        // When
+        GetMemberDto updatedMemberDto = memberService.updateMember(updateDto, memberId);
 
-        // then
-        Optional<GetMemberDto> optionalBody = Optional.ofNullable(response.getBody());
-        optionalBody.ifPresent(body -> {
-            assertEquals(HttpStatus.OK, response.getStatusCode());
-            assertEquals("Hong@test.com", body.getEmail());
-            assertEquals("Hong", response.getBody().getNickname());
-        });
+        // Then
+        assertThat(updatedMemberDto).isNotNull();
+        assertThat(updatedMemberDto.getEmail()).isEqualTo("newTest@example.com");
+        assertThat(updatedMemberDto.getNickname()).isEqualTo("newNickname");
+        assertThat(updatedMemberDto.getAddress()).isNotNull();
+        assertThat(updatedMemberDto.getAddress().getStreet()).isEqualTo("street");
+        assertThat(updatedMemberDto.getAddress().getDetail()).isEqualTo("detail");
+        assertThat(updatedMemberDto.getAddress().getZipcode()).isEqualTo("11111");
+
+        verify(memberRepository).save(member);
     }
+
 
     // 주소 정보 조회 테스트
     @Test
-    public void getAddressDtoWhenAddressExists() {
-        // given
-        Long memberId = 1L;
-        when(addressRepository.findById(memberId)).thenReturn(Optional.of(address));
+    public void updateAddress() {
+        Long addressId = 1L;
+        GetAddressDto updateDto = GetAddressDto.builder()
+                .street("newStreet")
+                .detail("newDetail")
+                .zipcode("00000")
+                .build();
+
+        when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
 
         // When
-        Optional<Address> result = addressRepository.findById(memberId);
+        GetAddressDto updatedAddressDto = memberService.updateAddress(updateDto, addressId);
 
         // Then
-        assertNotNull(result);
-        assertEquals(address.getStreet(), result.get().getStreet());
-        assertEquals(address.getDetail(), result.get().getDetail());
-        assertEquals(address.getZipcode(), result.get().getZipcode());
+        assertThat(updatedAddressDto).isNotNull();
+        assertThat(updatedAddressDto.getStreet()).isEqualTo("newStreet");
+        assertThat(updatedAddressDto.getDetail()).isEqualTo("newDetail");
+        assertThat(updatedAddressDto.getZipcode()).isEqualTo("00000");
+
+        verify(addressRepository).save(address);
     }
 
 
     @Test
     void deleteMember() {
         // given
-        Long memberId = 1L;
-        Member member = new Member(); // 필요한 멤버 객체 생성
-        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        setField(member, "comments", new ArrayList<Comment>());
+        setField(member, "boards", new ArrayList<Board>());
+        setField(member, "address", new Address());
+
+        // 댓글 및 게시글 추가
+        Comment comment = mock(Comment.class);
+        Board board = mock(Board.class);
+
+        List<Comment> comments = (List<Comment>) getField(member, "comments");
+        comments.add(comment);
+
+        List<Board> boards = (List<Board>) getField(member, "boards");
+        boards.add(board);
+
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
         // when
-        boolean result = memberService.deleteMember(memberId);
+        boolean result = memberService.deleteMember(1L);
 
         // then
-        assertTrue(result);  // 멤버가 존재하면 true
-
-        // Verify that deletions happened
-        verify(commentRepository, times(1)).deleteByMemberId(memberId);
-        verify(boardRepository, times(1)).deleteByMemberId(memberId);
-        verify(addressRepository, times(1)).deleteByMemberId(memberId);
-        verify(memberRepository, times(1)).delete(member);    }
-
+        assertTrue(result);
+        verify(commentRepository).deleteInBatch(member.getComments());
+        verify(boardRepository).deleteInBatch(member.getBoards());
+        verify(addressRepository).delete(member.getAddress());
+        verify(memberRepository).delete(member);
+    }
 }

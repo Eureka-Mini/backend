@@ -1,5 +1,6 @@
 package com.dangun.miniproject.auth.filter;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +20,9 @@ public class JWTExceptionHandlerFilter extends OncePerRequestFilter {
         } catch(io.jsonwebtoken.security.SignatureException ex) {
             sendErrorResponse(response, "유효하지 않은 토큰 서명입니다.");
         } catch(io.jsonwebtoken.JwtException ex) {
+            if (ex instanceof ExpiredJwtException) {
+                throw ex; // 만료된 토큰은 상위에서 예외 처리
+            }
             sendErrorResponse(response, "유효하지 않은 JWT 토큰입니다.");
         } catch(Exception ex) {
             sendErrorResponse(response, "JWTExceptionHandlerFilter 서버에러");

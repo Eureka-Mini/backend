@@ -1,18 +1,18 @@
 package com.dangun.miniproject.board.domain;
 
 
-import static jakarta.persistence.FetchType.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import com.dangun.miniproject.common.domain.BaseEntity;
 import com.dangun.miniproject.comment.domain.Comment;
+import com.dangun.miniproject.common.domain.BaseEntity;
 import com.dangun.miniproject.member.domain.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static jakarta.persistence.FetchType.LAZY;
 
 
 @Entity
@@ -48,7 +48,6 @@ public class Board extends BaseEntity {
         this.boardStatus = boardStatus;
         this.title = title;
     }
-
 
     // 수정 메서드 추가
     public void updateDetails(String title, String content, Integer price, BoardStatus boardStatus) {

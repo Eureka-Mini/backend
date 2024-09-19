@@ -1,34 +1,36 @@
 package com.dangun.miniproject.auth.filter;
 
-import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.auth.dto.UserDetailsDto;
+import com.dangun.miniproject.auth.exception.exceptions.ReissueAccessTokenException;
 import com.dangun.miniproject.auth.jwt.JWTUtil;
+import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Slf4j
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
     private final MemberRepository memberRepository;
+    private final static long ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 1000L;
+    private final static long ACCESS_TOKEN_EXPIRE_TIME_TEST = 20 * 1000L;
 
     @Override
-    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-
+    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
 
         if (uri.startsWith("/auth/") || uri.equals("/") || uri.startsWith("/static/") || uri.startsWith("/resources/") || uri.matches(".*\\.(html|css|js|png|jpg|jpeg|ico)$")) {
@@ -53,11 +55,14 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         try {
-            jwtUtil.isExpiredToken(accessToken);
-        } catch (ExpiredJwtException e) {
-            response.getWriter().write("accessToken expired");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            boolean isExpireAccess = jwtUtil.isExpiredTokenAccess(accessToken);
+
+            if (isExpireAccess) {
+                reissueAccessToken(request, response, filterChain);
+                return;
+            }
+        } catch (JwtException e) {
+            throw e;
         }
 
         String category = jwtUtil.getJwtCategory(accessToken);
@@ -82,5 +87,59 @@ public class JWTFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
+    }
+
+    private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException{
+        String refreshToken = null;
+
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("refreshToken")) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (refreshToken == null) {
+            throw new ReissueAccessTokenException("refreshToken null");
+        }
+
+        try {
+            jwtUtil.isExpiredTokenRefresh(refreshToken);
+        } catch (ExpiredJwtException e) {
+            response.getWriter().write("refreshToken expired");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        String email = jwtUtil.getMemberEmail(refreshToken);
+        Member member = memberRepository.findByEmail(email);
+        String nickname = member.getNickname();
+
+        String accessToken = jwtUtil.createJwtAccess("accessToken", email, nickname, ACCESS_TOKEN_EXPIRE_TIME);
+
+        System.out.println("accessToken 재발급 성공! : " + accessToken);
+        response.setHeader("Authorization", "Bearer " + accessToken);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        setAuthentication(email);
+
+        filterChain.doFilter(request, response);
+    }
+
+    private void setAuthentication(String email) {
+        Member member = memberRepository.findByEmail(email);
+
+        if (member == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        UserDetailsDto customUserDetails = new UserDetailsDto(member);
+        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 }

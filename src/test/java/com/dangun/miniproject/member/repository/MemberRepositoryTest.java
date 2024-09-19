@@ -22,9 +22,9 @@ public class MemberRepositoryTest {
     @BeforeEach
     public void setUp() {
         member = Member.builder()
-                .email("hong@test.com")
-                .nickname("Hong")
-                .password("password123")
+                .email("test@example.com")
+                .nickname("tester")
+                .password("password1234")
                 .build();
     }
 
@@ -32,43 +32,43 @@ public class MemberRepositoryTest {
     @Test
     public void existsByEmail() {
         // Given
-        when(memberRepository.existsByEmail("hong@test.com")).thenReturn(true);
+        when(memberRepository.existsByEmail("test@example.com")).thenReturn(true);
 
         // When
-        Boolean result = memberRepository.existsByEmail("hong@test.com");
+        Boolean result = memberRepository.existsByEmail("test@example.com");
 
         // Then
         assertTrue(result);
-        verify(memberRepository).existsByEmail("hong@test.com");
+        verify(memberRepository).existsByEmail("test@example.com");
     }
 
     // 이메일로 회원 조회 테스트
     @Test
     public void findByEmail() {
         // Given
-        when(memberRepository.findByEmail("hong@test.com")).thenReturn(member);
+        when(memberRepository.findByEmail("test@example.com")).thenReturn(member);
 
         // When
-        Member result = memberRepository.findByEmail("hong@test.com");
+        Member result = memberRepository.findByEmail("test@example.com");
 
         // Then
         assertNotNull(result);
-        assertEquals("hong@test.com", result.getEmail());
-        assertEquals("Hong", result.getNickname());
-        verify(memberRepository).findByEmail("hong@test.com");
+        assertEquals("test@example.com", result.getEmail());
+        assertEquals("tester", result.getNickname());
+        verify(memberRepository).findByEmail("test@example.com");
     }
 
     // 닉네임 존재 여부 확인 테스트
     @Test
     public void existsByNickname() {
         // Given
-        when(memberRepository.existsByNickname("Hong")).thenReturn(true);
+        when(memberRepository.existsByNickname("tester")).thenReturn(true);
 
         // When
-        Boolean result = memberRepository.existsByNickname("Hong");
+        Boolean result = memberRepository.existsByNickname("tester");
 
         // Then
         assertTrue(result);
-        verify(memberRepository).existsByNickname("Hong");
+        verify(memberRepository).existsByNickname("tester");
     }
 }
