@@ -63,7 +63,7 @@ function setupEventListeners(token, boardId) {
     if (form) {
         form.addEventListener('submit', event => {
             event.preventDefault();
-            updateBoard(token, boardId);
+            updateboard(token, boardId);
         });
     } else {
         console.error('Update form not found');
@@ -81,7 +81,7 @@ function setupEventListeners(token, boardId) {
     }
 }
 
-function updateBoard(token, boardId) {
+function updateboard(token, boardId) {
     const updatedData = {
         title: document.getElementById('title').value,
         content: document.getElementById('content').value,

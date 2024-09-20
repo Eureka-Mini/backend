@@ -11,12 +11,14 @@ import com.dangun.miniproject.fixture.CommentFixture;
 import com.dangun.miniproject.member.domain.Address;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.repository.MemberRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -368,6 +370,58 @@ class BoardServiceTest {
         // Then
         assertEquals("Board not found", thrown.getMessage());
     }
+
+
+    @Test
+    public void testUpdateBoard_withNullValues() {
+        // given
+        Long boardId = 1L;
+        Long memberId = 1L;
+        UpdateBoardRequest request = new UpdateBoardRequest(
+                null,  // Title을 null로 설정
+                null,  // Content을 null로 설정
+                null,  // Price를 null로 설정
+                "판매중"  // BoardStatus는 null이 아닌 값으로 설정
+        );
+
+        Member member = new Member();
+        ReflectionTestUtils.setField(member, "id", memberId);
+
+        Board existingBoard = Board.builder()
+                .title("Existing Title")
+                .content("Existing Content")
+                .price(1000)
+                .boardStatus(BoardStatus.판매중)
+                .member(member)
+                .build();
+        ReflectionTestUtils.setField(existingBoard, "id", boardId);
+
+        when(boardRepository.findById(eq(boardId))).thenReturn(Optional.of(existingBoard));
+
+        // when
+        UpdateBoardResponse response = boardService.updateBoard(boardId, request, memberId);
+
+        // then
+        assertNotNull(response);
+        assertEquals("BOARD-S002", response.getCode());
+        assertEquals("Board Update Success", response.getMessage());
+
+        // 변경되지 않아야 할 필드들 확인
+        assertEquals("Existing Title", existingBoard.getTitle());
+        assertEquals("Existing Content", existingBoard.getContent());
+        assertEquals(1000, existingBoard.getPrice());
+
+        // BoardStatus는 변경되어야 함 (request에서 null이 아닌 값으로 제공됨)
+        assertEquals(BoardStatus.판매중, existingBoard.getBoardStatus());
+
+        // boardRepository의 findById 메소드가 호출되었는지 확인
+        verify(boardRepository, times(1)).findById(eq(boardId));
+
+        // memberRepository 관련 검증 제거
+    }
+
+
+
 
     @Test
     @DisplayName("게시글 삭제 성공")
