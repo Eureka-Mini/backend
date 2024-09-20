@@ -59,3 +59,18 @@ h1 {
 #deleteButton:hover {
     background-color: #228b22;
 }
+
+
+.button-container {
+    display: flex;
+    justify-content: space-between; /* 버튼 사이의 간격을 균등하게 배치 */
+}
+
+.button-container button {
+    flex: 1; /* 버튼이 동일한 너비를 가지도록 설정 */
+    margin-right: 10px; /* 오른쪽 버튼과 간격을 줌 */
+}
+
+.button-container button:last-child {
+    margin-right: 0; /* 마지막 버튼의 오른쪽 마진 제거 */
+}
