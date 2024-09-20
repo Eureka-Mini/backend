@@ -3,6 +3,7 @@ package com.dangun.miniproject.auth.filter;
 import com.dangun.miniproject.auth.dto.UserDetailsDto;
 import com.dangun.miniproject.auth.exception.exceptions.ReissueAccessTokenException;
 import com.dangun.miniproject.auth.jwt.JWTUtil;
+import com.dangun.miniproject.auth.service.impl.TokenBlackListService;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -26,6 +27,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
     private final MemberRepository memberRepository;
+    private final TokenBlackListService tokenBlackListService;
     private final static long ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 1000L;
     private final static long ACCESS_TOKEN_EXPIRE_TIME_TEST = 20 * 1000L;
 
@@ -50,6 +52,12 @@ public class JWTFilter extends OncePerRequestFilter {
 
         if (accessToken == null) {
             response.getWriter().write("accessToken null");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        if (tokenBlackListService.isBlackListToken(accessToken)) {
+            response.getWriter().write("accessToken is blackList contains.");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

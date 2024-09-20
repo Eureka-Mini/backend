@@ -25,7 +25,7 @@ public class JWTExceptionHandlerFilter extends OncePerRequestFilter {
             }
             sendErrorResponse(response, "유효하지 않은 JWT 토큰입니다.");
         } catch(Exception ex) {
-            sendErrorResponse(response, "JWTExceptionHandlerFilter 서버에러");
+            sendErrorResponse(response, "JWT 요청 처리 중 에러가 발생했습니다.");
         }
     }
 

@@ -1,5 +1,5 @@
 
-function putHeadersAccessToken() {
+export function putHeadersAccessToken() {
     const accessToken = localStorage.getItem("accessToken");
 
     if (!accessToken) {
