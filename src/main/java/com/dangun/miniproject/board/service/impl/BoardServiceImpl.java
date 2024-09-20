@@ -20,6 +20,7 @@ import com.dangun.miniproject.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -125,6 +126,13 @@ public class BoardServiceImpl implements BoardService {
 				.build();
 	}
 
+
+
+
+
+
+
+
 	/**
 	 * 게시글 수정
 	 */
@@ -148,7 +156,8 @@ public class BoardServiceImpl implements BoardService {
 				request.getTitle() != null ? request.getTitle() : board.getTitle(),
 				request.getContent() != null ? request.getContent() : board.getContent(),
 				request.getPrice() != null ? request.getPrice() : board.getPrice(),
-				request.getBoardStatus() != null ? BoardStatus.valueOf(request.getBoardStatus()) : board.getBoardStatus()
+				//request.getBoardStatus() != null ? BoardStatus.valueOf(request.getBoardStatus()) : board.getBoardStatus()
+				BoardStatus.valueOf(request.getBoardStatus())
 		);
 
 		// 응답 생성
