@@ -55,14 +55,14 @@ public class MemberServiceTest {
     @BeforeEach
     public void setUp() {
         member = Member.builder()
-                .email("test@example.com")
-                .nickname("tester")
+                .email("email@example.com")
+                .nickname("nickname")
                 .build();
 
         address = Address.builder()
                 .street("street")
                 .detail("detail")
-                .zipcode("11111")
+                .zipcode("00000")
                 .member(member)
                 .build();
 
@@ -128,57 +128,215 @@ public class MemberServiceTest {
     }
 
 
-    // 회원 수정 테스트
     @Test
-    public void updateMember() {
+    void testUpdateMember_Success() {
+        // Given
         Long memberId = 1L;
-        GetMemberDto updateDto = GetMemberDto.builder()
-                .email("newTest@example.com")
+        GetMemberDto getMemberDto = GetMemberDto.builder()
                 .nickname("newNickname")
                 .build();
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
 
         // When
-        GetMemberDto updatedMemberDto = memberService.updateMember(updateDto, memberId);
+        GetMemberDto updatedMemberDto = memberService.updateMember(getMemberDto, memberId);
 
         // Then
-        assertThat(updatedMemberDto).isNotNull();
-        assertThat(updatedMemberDto.getEmail()).isEqualTo("newTest@example.com");
-        assertThat(updatedMemberDto.getNickname()).isEqualTo("newNickname");
-        assertThat(updatedMemberDto.getAddress()).isNotNull();
-        assertThat(updatedMemberDto.getAddress().getStreet()).isEqualTo("street");
-        assertThat(updatedMemberDto.getAddress().getDetail()).isEqualTo("detail");
-        assertThat(updatedMemberDto.getAddress().getZipcode()).isEqualTo("11111");
-
+        assertNotNull(updatedMemberDto);
+        assertEquals("newNickname", updatedMemberDto.getNickname());
+        assertEquals(member.getEmail(), updatedMemberDto.getEmail());
         verify(memberRepository).save(member);
     }
 
-
-    // 주소 정보 조회 테스트
     @Test
-    public void updateAddress() {
+    void UpdateMember_ThrowsExceptionWhenNicknameIsNull() {
+        // Given
+        Long memberId = 1L;
+        GetMemberDto getMemberDto = GetMemberDto.builder()
+                .nickname(null) // 닉네임이 null
+                .build();
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            memberService.updateMember(getMemberDto, memberId);
+        });
+
+        assertEquals("닉네임을 입력해주세요.", exception.getMessage());
+        verify(memberRepository, never()).save(any(Member.class)); // save가 호출되지 않아야 함
+    }
+
+    @Test
+    void UpdateMember_ThrowsExceptionWhenNicknameIsBlank() {
+        // Given
+        Long memberId = 1L;
+        GetMemberDto getMemberDto = GetMemberDto.builder()
+                .nickname(" ") // 닉네임이 빈 공백 문자열
+                .build();
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            memberService.updateMember(getMemberDto, memberId);
+        });
+
+        assertEquals("닉네임을 입력해주세요.", exception.getMessage());
+        verify(memberRepository, never()).save(any(Member.class)); // save가 호출되지 않아야 함
+    }
+
+
+
+    @Test
+    void UpdateAddress_Success() {
+        // Given
         Long addressId = 1L;
-        GetAddressDto updateDto = GetAddressDto.builder()
-                .street("newStreet")
-                .detail("newDetail")
+        GetAddressDto getAddressDto = GetAddressDto.builder()
+                .street("new Street")
+                .detail("new Detail")
+                .zipcode("11111")
+                .build();
+
+        // AddressRepository.findById() 호출 시 address를 반환하도록 설정
+        when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
+
+        // When
+        GetAddressDto updatedAddressDto = memberService.updateAddress(getAddressDto, addressId);
+
+        // Then
+        assertNotNull(updatedAddressDto);
+        assertEquals("new Street", updatedAddressDto.getStreet());
+        assertEquals("new Detail", updatedAddressDto.getDetail());
+        assertEquals("11111", updatedAddressDto.getZipcode());
+        verify(addressRepository).save(address); // save가 호출되었는지 확인
+    }
+
+    @Test
+    void UpdateAddress_ThrowsExceptionWhenStreetIsNull() {
+        // Given
+        Long addressId = 1L;
+        GetAddressDto getAddressDto = GetAddressDto.builder()
+                .street(null) // Street가 null
+                .detail("Detail")
                 .zipcode("00000")
                 .build();
 
         when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
 
-        // When
-        GetAddressDto updatedAddressDto = memberService.updateAddress(updateDto, addressId);
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            memberService.updateAddress(getAddressDto, addressId);
+        });
 
-        // Then
-        assertThat(updatedAddressDto).isNotNull();
-        assertThat(updatedAddressDto.getStreet()).isEqualTo("newStreet");
-        assertThat(updatedAddressDto.getDetail()).isEqualTo("newDetail");
-        assertThat(updatedAddressDto.getZipcode()).isEqualTo("00000");
-
-        verify(addressRepository).save(address);
+        assertEquals("주소를 입력해주세요.", exception.getMessage());
+        verify(addressRepository, never()).save(any(Address.class)); // save가 호출되지 않아야 함
     }
 
+    @Test
+    void UpdateAddress_ThrowsExceptionWhenDetailIsNull() {
+        // Given
+        Long addressId = 1L;
+        GetAddressDto getAddressDto = GetAddressDto.builder()
+                .street("Street")
+                .detail(null) // Detail이 null
+                .zipcode("00000")
+                .build();
+
+        when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            memberService.updateAddress(getAddressDto, addressId);
+        });
+
+        assertEquals("상세주소를 입력해주세요.", exception.getMessage());
+        verify(addressRepository, never()).save(any(Address.class)); // save가 호출되지 않아야 함
+    }
+
+    @Test
+    void UpdateAddress_ThrowsExceptionWhenZipcodeIsNull() {
+        // Given
+        Long addressId = 1L;
+        GetAddressDto getAddressDto = GetAddressDto.builder()
+                .street("Street")
+                .detail("Detail")
+                .zipcode(null) // Zipcode가 null
+                .build();
+
+        when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            memberService.updateAddress(getAddressDto, addressId);
+        });
+
+        assertEquals("우편번호를 입력해주세요.", exception.getMessage());
+        verify(addressRepository, never()).save(any(Address.class)); // save가 호출되지 않아야 함
+    }
+
+    @Test
+    void testUpdateAddress_ThrowsExceptionWhenStreetIsBlack() {
+        // Given
+        Long addressId = 1L;
+        GetAddressDto getAddressDto = GetAddressDto.builder()
+                .street("   ") // Street가 빈 공백 문자열
+                .detail("Detail")
+                .zipcode("00000")
+                .build();
+
+        when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            memberService.updateAddress(getAddressDto, addressId);
+        });
+
+        assertEquals("주소를 입력해주세요.", exception.getMessage());
+        verify(addressRepository, never()).save(any(Address.class)); // save가 호출되지 않아야 함
+    }
+
+    @Test
+    void testUpdateAddress_ThrowsExceptionWhenDetailIsBlack() {
+        // Given
+        Long addressId = 1L;
+        GetAddressDto getAddressDto = GetAddressDto.builder()
+                .street("Street")
+                .detail("   ") // Detail이 빈 공백 문자열
+                .zipcode("00000")
+                .build();
+
+        when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            memberService.updateAddress(getAddressDto, addressId);
+        });
+
+        assertEquals("상세주소를 입력해주세요.", exception.getMessage());
+        verify(addressRepository, never()).save(any(Address.class)); // save가 호출되지 않아야 함
+    }
+
+    @Test
+    void testUpdateAddress_ThrowsExceptionWhenZipcodeIsBlack() {
+        // Given
+        Long addressId = 1L;
+        GetAddressDto getAddressDto = GetAddressDto.builder()
+                .street("Street")
+                .detail("Detail")
+                .zipcode("   ") // Zipcode가 빈 공백 문자열
+                .build();
+
+        when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            memberService.updateAddress(getAddressDto, addressId);
+        });
+
+        assertEquals("우편번호를 입력해주세요.", exception.getMessage());
+        verify(addressRepository, never()).save(any(Address.class)); // save가 호출되지 않아야 함
+    }
 
     @Test
     void deleteMember() {

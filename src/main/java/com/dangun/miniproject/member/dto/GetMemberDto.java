@@ -25,8 +25,4 @@ public class GetMemberDto {
         this.nickname = nickname;
         this.address = address;
     }
-
-    public void GetMemberUpdateDto(String nickname) {
-        this.nickname = nickname;
-    }
 }
