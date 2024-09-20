@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!boardId) {
         handleError({ message: '게시글 ID가 제공되지 않았습니다.' });
-        window.location.href = '../index.html';
+        window.location.href =  '../index.html';
         return;
     }
 
