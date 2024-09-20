@@ -1,48 +1,76 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('writeBoardForm');
-    const token = 'eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2Vzc1Rva2VuIiwiZW1haWwiOiJzaWV1bkB0ZXN0LmNvbSIsImlhdCI6MTcyNjczMzM4MSwiZXhwIjoxNzI2NzM2OTgxfQ.26jvVU3RIZpB0rAvbqsjoPFbX3pLg5CvHOu9GITun1g';
+
+
+    const token = getToken();
+    console.log('토큰을 가져왔습니다:', token ? '토큰이 있습니다' : '토큰을 찾을 수 없습니다');
+
 
     if (!token) {
-        alert('로그인이 필요합니다.');
+        handleUnauthorized();
         return;
     }
 
+    console.log('토큰 찾음!');
+
     // 사용자 정보를 불러오기
+    fetchUserInfo(form);
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitBoard();
+    });
+});
+
+function getToken() {
+    return localStorage.getItem('accessToken') || localStorage.getItem('token');
+}
+
+function putHeadersAccessToken() {
+    const token = getToken();
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+}
+
+function fetchUserInfo(form) {
+
     fetch('/members/my-info', {
         method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
+        headers: putHeadersAccessToken()
     })
         .then(response => {
             console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
-            return response.json();
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            console.log('Raw response text:', text);
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('JSON 파싱에 실패:', e);
+                throw new Error('응답에서 유효하지 않은 JSON');
+            }
         })
         .then(data => {
-            console.log('Response data:', data);
-            if (data.status === 'success') {
-                setupFormSubmission(form, token, data.data);
+            if (data.status === 'success' || data.message === '회원 정보 조회 성공' || (data.data && typeof data.data === 'object')) {
+                console.log('User 정보 :', data.data || data);
             } else {
                 throw new Error(data.message || '사용자 정보를 불러오는 데 실패했습니다.');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            alert('사용자 정보를 불러오는 데 실패했습니다. 다시 로그인해 주세요.');
+            //window.location.href = '/auth/login';
         });
-
-    //사용자가 폼을 제출할 때 페이지를 새로 고침하지 않고, 폼 데이터를 비동기적으로 서버로 전송. 이거 없으면 url뒤에 어쩌구 저쩌구 뜸
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        submitBoard(token);
-    });
-});
+}
 
 
-
-
-function submitBoard(token) {
+function submitBoard() {
     const boardData = {
         title: document.getElementById('title').value,
         content: document.getElementById('content').value,
@@ -50,23 +78,25 @@ function submitBoard(token) {
         boardStatus: '판매중'
     };
 
-    console.log('board data:', boardData); //데이터 들어갔는지
+    console.log('Board data:', boardData);
 
     fetch('/boards', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
+        headers: putHeadersAccessToken(),
         body: JSON.stringify(boardData),
         credentials: 'include'
     })
         .then(response => response.text().then(text => {
             if (!response.ok) {
-                console.error('Error response body:', text);
+                console.error('오류 응답 본문:', text);
                 throw new Error(`서버 응답 오류 (${response.status}): ${text}`);
             }
-            return text ? JSON.parse(text) : {};
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('JSON 파싱에 실패했습니다:', e);
+                throw new Error('응답에서 유효하지 않은 JSON');
+            }
         }))
         .then(data => {
             console.log('Success:', data);
@@ -77,4 +107,9 @@ function submitBoard(token) {
             console.error('Error:', error);
             alert('게시글 작성에 실패했습니다. 오류: ' + error.message);
         });
+}
+
+function handleUnauthorized() {
+    alert('로그인이 필요합니다.');
+    window.location.href = '/auth/login';
 }
