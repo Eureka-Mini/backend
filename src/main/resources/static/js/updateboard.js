@@ -113,7 +113,7 @@ function updateboard(boardId) {
         .then(handleResponse)
         .then(() => {
             alert('게시글이 성공적으로 수정되었습니다.');
-            window.location.href = `/boards/${boardId}`;
+            window.location.href = '../index.html';
         })
         .catch(error => {
             console.error('게시글 수정 중 오류 발생:', error);
@@ -129,7 +129,7 @@ function deleteBoard(boardId) {
         .then(handleResponse)
         .then(() => {
             alert('게시글이 삭제되었습니다.');
-            window.location.href = '/boards';
+            window.location.href = '../index.html';
         })
         .catch(error => {
             console.error('게시글 삭제 중 오류 발생:', error);
@@ -139,12 +139,12 @@ function deleteBoard(boardId) {
 
 function handleUnauthorized() {
     alert('로그인이 필요합니다.');
-    window.location.href = '/auth/login';
+    window.location.href = '../html/login.html';
 }
 
 function handleUnauthorizedEdit() {
     alert('해당 게시글의 작성자만 수정할 수 있습니다.');
-    window.location.href = '/boards';
+    window.location.href = '../index.html';
 }
 
 function handleError(error) {

@@ -1,10 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('writeBoardForm');
-
-
     const token = getToken();
-    console.log('토큰을 가져왔습니다:', token ? '토큰이 있습니다' : '토큰을 찾을 수 없습니다');
 
+    console.log('토큰을 가져왔습니다:', token ? '토큰이 있습니다' : '토큰을 찾을 수 없습니다');
 
     if (!token) {
         handleUnauthorized();
@@ -14,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('토큰 찾음!');
 
     // 사용자 정보를 불러오기
-    fetchUserInfo(form);
+    fetchUserInfo();
 
     form.addEventListener('submit', function(event) {
         event.preventDefault();
@@ -26,7 +24,7 @@ function getToken() {
     return localStorage.getItem('accessToken') || localStorage.getItem('token');
 }
 
-function putHeadersAccessToken() {
+function getHeaders() {
     const token = getToken();
     return {
         'Authorization': `Bearer ${token}`,
@@ -34,27 +32,17 @@ function putHeadersAccessToken() {
     };
 }
 
-function fetchUserInfo(form) {
-
+function fetchUserInfo() {
     fetch('/members/my-info', {
         method: 'GET',
-        headers: putHeadersAccessToken()
+        headers: getHeaders()
     })
         .then(response => {
             console.log('Response status:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return response.text();
-        })
-        .then(text => {
-            console.log('Raw response text:', text);
-            try {
-                return JSON.parse(text);
-            } catch (e) {
-                console.error('JSON 파싱에 실패:', e);
-                throw new Error('응답에서 유효하지 않은 JSON');
-            }
+            return response.json();
         })
         .then(data => {
             if (data.status === 'success' || data.message === '회원 정보 조회 성공' || (data.data && typeof data.data === 'object')) {
@@ -64,11 +52,11 @@ function fetchUserInfo(form) {
             }
         })
         .catch(error => {
+            console.error('Error fetching user info:', error);
             alert('사용자 정보를 불러오는 데 실패했습니다. 다시 로그인해 주세요.');
-            //window.location.href = '/auth/login';
+            window.location.href = '../html/login.html';
         });
 }
-
 
 function submitBoard() {
     const boardData = {
@@ -82,26 +70,22 @@ function submitBoard() {
 
     fetch('/boards', {
         method: 'POST',
-        headers: putHeadersAccessToken(),
+        headers: getHeaders(),
         body: JSON.stringify(boardData),
         credentials: 'include'
     })
-        .then(response => response.text().then(text => {
+        .then(response => {
             if (!response.ok) {
-                console.error('오류 응답 본문:', text);
-                throw new Error(`서버 응답 오류 (${response.status}): ${text}`);
+                return response.text().then(text => {
+                    throw new Error(`서버 응답 오류 (${response.status}): ${text}`);
+                });
             }
-            try {
-                return JSON.parse(text);
-            } catch (e) {
-                console.error('JSON 파싱에 실패했습니다:', e);
-                throw new Error('응답에서 유효하지 않은 JSON');
-            }
-        }))
+            return response.json();
+        })
         .then(data => {
             console.log('Success:', data);
             alert('게시글이 성공적으로 작성되었습니다.');
-            window.location.href = '/boards';
+            window.location.href = '../index.html';
         })
         .catch(error => {
             console.error('Error:', error);
@@ -111,5 +95,5 @@ function submitBoard() {
 
 function handleUnauthorized() {
     alert('로그인이 필요합니다.');
-    window.location.href = '/auth/login';
+    window.location.href = '../html/login.html';
 }
