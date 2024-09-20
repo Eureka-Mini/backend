@@ -12,20 +12,22 @@
 <main class="container">
     <h1>게시글 작성</h1>
     <form id="writeBoardForm" class="post-form">
-        <label for="title">제목</label>
+        <label for="title">상품명</label>
         <input type="text" id="title" name="title" required>
 
-        <label for="content">내용</label>
-        <textarea id="content" name="content" rows="4" required></textarea>
+        <label for="content">설명</label>
+        <textarea id="content" name="content" rows="7" required></textarea>
 
         <label for="price">가격</label>
-        <input type="number" id="price" name="price" min="0" required>
+        <input type="number" id="price" name="price" min="0"  required>
 
         <button type="submit">작성 완료</button>
     </form>
 </main>
 
-<script src="../js/script.js"></script>
-<script src="../js/writeboard.js"></script>
+
+<script type="module" src="../js/script.js"></script>
+<script type="module"  src="../js/jwt.js"></script>
+<script type="module"  src="../js/writeboard.js"></script>
 </body>
 </html>
