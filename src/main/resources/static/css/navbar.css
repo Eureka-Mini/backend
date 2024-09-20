@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Noto Sans KR', sans-serif;
-    background-color: #f0f9f0; /* 연한 초록색 배경 */
+    background-color: #f0f9f0;
 }
 
 .navbar {
@@ -28,7 +28,7 @@ body {
 
 .navbar-logo {
     font-size: 24px;
-    color: #006400; /* 짙은 초록색 텍스트 */
+    color: #006400;
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -48,13 +48,13 @@ body {
 
 .navbar-link {
     font-size: 24px;
-    color: #006400; /* 짙은 초록색 텍스트 */
+    color: #006400;
     text-decoration: none;
     margin-right: 20px;
 }
 
 .navbar-link:hover {
-    color: #32cd32; /* 라임 그린색으로 변경 */
+    color: #32cd32;
 }
 
 .navbar-search {
@@ -73,9 +73,10 @@ body {
 }
 
 #searchButton {
+    font-size: 16px;
     padding: 8px 15px;
     margin-left: 10px;
-    background-color: #32cd32; /* 라임 그린색 버튼 */
+    background-color: #32cd32;
     color: white;
     border: none;
     border-radius: 5px;
@@ -83,5 +84,20 @@ body {
 }
 
 #searchButton:hover {
-    background-color: #228b22; /* 포레스트 그린색으로 변경 */
+    background-color: #228b22;
+}
+
+.navbar-link.login-button {
+    margin-left: 40px;
+    font-size: 16px;
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 15px;
+    background-color: #32cd32;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.navbar-link.login-button:hover {
+    background-color: #228b22;
 }
