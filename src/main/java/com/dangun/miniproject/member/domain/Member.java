@@ -43,13 +43,7 @@ public class Member {
     }
 
     public void updateMember(GetMemberDto getMemberDto) {
-        if (getMemberDto.getEmail() != null) {
-            this.email = getMemberDto.getEmail();
-        }
-
-        if (getMemberDto.getNickname() != null) {
-            this.nickname = getMemberDto.getNickname();
-        }
+        this.nickname = getMemberDto.getNickname();
     }
 
     public void addAddress(Address address) {

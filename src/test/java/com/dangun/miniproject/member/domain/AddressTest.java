@@ -1,9 +1,7 @@
 package com.dangun.miniproject.member.domain;
 
-import com.dangun.miniproject.auth.dto.UserDetailsDto;
 import com.dangun.miniproject.member.dto.GetAddressDto;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
