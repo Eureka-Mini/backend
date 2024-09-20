@@ -3,6 +3,7 @@ package com.dangun.miniproject.auth;
 import com.dangun.miniproject.auth.filter.JWTExceptionHandlerFilter;
 import com.dangun.miniproject.auth.filter.JWTFilter;
 import com.dangun.miniproject.auth.jwt.JWTUtil;
+import com.dangun.miniproject.auth.service.impl.TokenBlackListService;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -37,6 +38,9 @@ public class JWTFilterTest {
     @Mock
     private MemberRepository memberRepository;
 
+    @Mock
+    private TokenBlackListService tokenBlackListService;
+
     @InjectMocks
     private JWTFilter jwtFilter;
 
@@ -56,6 +60,7 @@ public class JWTFilterTest {
 
         when(jwtUtil.getJwtCategory(token)).thenReturn("accessToken");
         when(jwtUtil.isExpiredTokenAccess(token)).thenReturn(false);
+        when(tokenBlackListService.isBlackListToken(token)).thenReturn(false);
         when(jwtUtil.getMemberEmail(token)).thenReturn(email);
 
         Member member = Member.builder()
@@ -183,6 +188,29 @@ public class JWTFilterTest {
         // Then
         assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
         assertEquals("refreshToken expired", response.getContentAsString());
+        verify(mockFilterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    @DisplayName("AccessToken 블랙 리스트 에외 처리")
+    void testJwtFilter_tokenIsBlackList() throws Exception {
+        // Given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        String blackListAccessToken = "blackListAccessToken";
+        request.addHeader("Authorization", "Bearer " + blackListAccessToken);
+
+        when(tokenBlackListService.isBlackListToken(blackListAccessToken)).thenReturn(true);
+
+        FilterChain mockFilterChain = mock(FilterChain.class);
+
+        // When
+        jwtFilter.doFilter(request, response, mockFilterChain);
+
+        // Then
+        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+        assertEquals("accessToken is blackList contains.", response.getContentAsString());
         verify(mockFilterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
 }
