@@ -5,8 +5,8 @@ import com.dangun.miniproject.comment.dto.UpdateCommentRequest;
 import com.dangun.miniproject.comment.dto.UpdateCommentResponse;
 import com.dangun.miniproject.comment.dto.WriteCommentRequest;
 import com.dangun.miniproject.comment.dto.WriteCommentResponse;
-import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.comment.service.CommentService;
+import com.dangun.miniproject.member.domain.Member;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -113,6 +111,7 @@ public class CommentControllerTest {
             UpdateCommentRequest request = mock(UpdateCommentRequest.class);
             UpdateCommentResponse response = new UpdateCommentResponse("테스트댓글 수정");
             Member member = mock(Member.class);
+            UserDetails userDetails = new UserDetailsDto(member);
 
             when(request.getContent()).thenReturn("테스트댓글 수정");
             when(commentService.updateComment(eq(boardId), eq(commentId), any(Member.class), any(UpdateCommentRequest.class)))
@@ -122,7 +121,7 @@ public class CommentControllerTest {
             ResultActions result = mockMvc.perform(put("/boards/{boardId}/comments/{commentId}", boardId, commentId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .characterEncoding(StandardCharsets.UTF_8)
-                    .with(authentication(new TestingAuthenticationToken(member, null, AuthorityUtils.createAuthorityList("ROLE_USER"))))
+                    .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
                     .with(csrf())
                     .content(new ObjectMapper().writeValueAsString(request)));
 
@@ -147,6 +146,7 @@ public class CommentControllerTest {
             Long commentId = 2L;
             UpdateCommentRequest request = mock(UpdateCommentRequest.class);
             Member member = mock(Member.class);
+            UserDetails userDetails = new UserDetailsDto(member);
 
             when(request.getContent()).thenReturn("");
 
@@ -154,7 +154,7 @@ public class CommentControllerTest {
             ResultActions result = mockMvc.perform(put("/boards/{boardId}/comments/{commentId}", boardId, commentId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .characterEncoding(StandardCharsets.UTF_8)
-                    .with(authentication(new TestingAuthenticationToken(member, null, AuthorityUtils.createAuthorityList("ROLE_USER"))))
+                    .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
                     .with(csrf())
                     .content(new ObjectMapper().writeValueAsString(request)));
 
@@ -173,6 +173,7 @@ public class CommentControllerTest {
             Long boardId = 1L;
             Long commentId = 2L;
             Member member = mock(Member.class);
+            UserDetails userDetails = new UserDetailsDto(member);
 
             doNothing().when(commentService).deleteComment(eq(boardId), eq(commentId), any(Member.class));
 
@@ -181,7 +182,7 @@ public class CommentControllerTest {
                     delete("/boards/{boardId}/comments/{commentId}", boardId, commentId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .characterEncoding(StandardCharsets.UTF_8)
-                            .with(authentication(new TestingAuthenticationToken(member, null, AuthorityUtils.createAuthorityList("ROLE_USER"))))
+                            .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
                             .with(csrf())
             );
 
