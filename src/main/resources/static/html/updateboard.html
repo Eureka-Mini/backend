@@ -5,23 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게시글 수정</title>
     <link rel="stylesheet" href="../css/updateboard.css">
-    <link rel="stylesheet" href="../css/navbar.css">
 </head>
 <body>
-<nav class="navbar">
-    <div class="navbar-container">
-        <a href="#" class="navbar-logo">
-            <img src="../images/cucumber.png" alt="오이 로고" class="logo-image">
-            오이
-        </a>
-        <a href="#" class="navbar-link">중고거래</a>
-        <div class="navbar-search">
-            <input type="text" id="searchInput" placeholder="검색어를 입력하세요...">
-            <button id="searchButton">검색</button>
-        </div>
-    </div>
-</nav>
-
+<div id="navbar-placeholder"></div>
 <main class="container">
     <h1>게시글 수정</h1>
     <form id="updateBoardForm" class="post-form">
@@ -45,7 +31,7 @@
     <button type="button" id="deleteButton">삭제</button>
 </main>
 
-<script src="../js/navbar.js"></script>
+<script src="/js/script.js"></script>
 <script src="../js/updateBoard.js"></script>
 </body>
 </html>

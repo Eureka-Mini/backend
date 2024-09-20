@@ -1,9 +1,9 @@
 package com.dangun.miniproject.comment.controller;
 
 import com.dangun.miniproject.comment.dto.*;
+import com.dangun.miniproject.comment.service.CommentService;
 import com.dangun.miniproject.common.ApiResponse;
 import com.dangun.miniproject.member.domain.Member;
-import com.dangun.miniproject.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +31,7 @@ public class CommentController {
     }
 
     @PutMapping("/{commentId}")
-    public ResponseEntity<?> updateComment(@AuthenticationPrincipal Member member,
+    public ResponseEntity<?> updateComment(@AuthenticationPrincipal(expression = "member") Member member,
                                            @RequestBody UpdateCommentRequest request,
                                            @PathVariable Long boardId,
                                            @PathVariable Long commentId) {
@@ -45,7 +45,7 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<?> deleteComment(@AuthenticationPrincipal Member member,
+    public ResponseEntity<?> deleteComment(@AuthenticationPrincipal(expression = "member") Member member,
                                            @PathVariable Long boardId,
                                            @PathVariable Long commentId) {
         commentService.deleteComment(boardId, commentId, member);
