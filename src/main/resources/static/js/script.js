@@ -30,6 +30,7 @@ async function loadNavbar(retries = 1) {
 function initializeNavbar() {
     const loginButton = document.getElementById('login-button');
     const searchInput = document.querySelector('.search-input');
+    const writeButton = document.getElementById('write-btn');
 
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken) {
@@ -66,6 +67,14 @@ function initializeNavbar() {
             }
         }
     });
+
+    writeButton.addEventListener('click', function () {
+        if (accessToken) {
+            window.location.href = '../html/writeboard.html';
+        } else {
+            alert("로그인이 필요합니다!");
+        }
+    })
 }
 
 function parseNicknameFromToken(token) {
