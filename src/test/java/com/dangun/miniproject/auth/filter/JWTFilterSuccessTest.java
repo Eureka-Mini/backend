@@ -1,13 +1,9 @@
-package com.dangun.miniproject.auth;
+package com.dangun.miniproject.auth.filter;
 
-import com.dangun.miniproject.auth.filter.JWTExceptionHandlerFilter;
-import com.dangun.miniproject.auth.filter.JWTFilter;
 import com.dangun.miniproject.auth.jwt.JWTUtil;
 import com.dangun.miniproject.auth.service.impl.TokenBlackListService;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.repository.MemberRepository;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -17,6 +13,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class JWTFilterTest {
+public class JWTFilterSuccessTest {
 
     @Mock
     private JWTUtil jwtUtil;
@@ -45,7 +43,7 @@ public class JWTFilterTest {
     private JWTFilter jwtFilter;
 
     @Test
-    @DisplayName("AccessToken 검증 완료 처리")
+    @DisplayName("AccessToken 검증 완료")
     void testJwtFilter_Success() throws Exception{
         // Given
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -81,45 +79,7 @@ public class JWTFilterTest {
     }
 
     @Test
-    @DisplayName("변조된 AccessToken 예외 처리")
-    void testJwtFilter_NotAccessToken() throws Exception {
-        // Given
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-
-        String dummyToken = "dummyToken";
-        request.addHeader("Authorization", "Bearer " + dummyToken);
-
-        when(jwtUtil.isExpiredTokenAccess(dummyToken)).thenThrow(new SignatureException("Invalid signature"));
-
-        FilterChain emptyFilterChain = (servletRequest, servletResponse) -> {
-        };
-
-        JWTExceptionHandlerFilter exceptionHandlerFilter = new JWTExceptionHandlerFilter();
-
-        FilterChain customFilterChain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest req, ServletResponse res) throws IOException, ServletException {
-                exceptionHandlerFilter.doFilter(req, res, new FilterChain() {
-
-                    @Override
-                    public void doFilter(ServletRequest req2, ServletResponse res2) throws IOException, ServletException {
-                        jwtFilter.doFilter(req2, res2, emptyFilterChain);
-                    }
-                });
-            }
-        };
-
-        // When
-        customFilterChain.doFilter(request, response);
-
-        // Then
-        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-        assertEquals("유효하지 않은 토큰 서명입니다.", response.getContentAsString());
-    }
-
-    @Test
-    @DisplayName("만료 된 AccessToken 재발급 완료 처리")
+    @DisplayName("만료 된 AccessToken 재발급 완료")
     void testJwtFilter_AccessTokenReissue() throws Exception {
         // Given
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -160,57 +120,39 @@ public class JWTFilterTest {
         assertEquals(HttpServletResponse.SC_OK, response.getStatus());
     }
 
-    @Test
-    @DisplayName("만료 된 AccessToken 재발급 실패 예외 처리")
-    void testJwtFilter_refreshTokenExpire() throws Exception {
+    @ParameterizedTest
+    @DisplayName("JwtFilter URI 통과 테스트")
+    @ValueSource(strings = {
+            "/auth/login",
+            "/",
+            "/static/",
+            "/resources/",
+            "/images/",
+            "/css/",
+            "/favicon.ico"
+    })
+    void testJwtFilter_URIPass(String uri) throws IOException, ServletException {
         // Given
-        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", uri);
         MockHttpServletResponse response = new MockHttpServletResponse();
-
-        String expireAccessToken = "expireAccessToken";
-        String expireRefreshToken = "expireRefreshToken";
-
-        request.addHeader("Authorization", "Bearer " + expireAccessToken);
-
-        Cookie cookie = new Cookie("refreshToken", expireRefreshToken);
-        request.setCookies(cookie);
-
-        when(jwtUtil.isExpiredTokenAccess(expireAccessToken)).thenReturn(true);
-
-        doThrow(new ExpiredJwtException(null, null, "refresh token expire"))
-                .when(jwtUtil).isExpiredTokenRefresh(expireRefreshToken);
-
         FilterChain mockFilterChain = mock(FilterChain.class);
 
         // When
         jwtFilter.doFilter(request, response, mockFilterChain);
 
         // Then
-        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-        assertEquals("refreshToken expired", response.getContentAsString());
-        verify(mockFilterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
-    }
+        boolean shouldPass = uri.startsWith("/auth/") ||
+                uri.equals("/") ||
+                uri.startsWith("/static/") ||
+                uri.startsWith("/resources/") ||
+                uri.matches(".*\\.(html|css|js|png|jpg|jpeg|ico)$");
 
-    @Test
-    @DisplayName("AccessToken 블랙 리스트 에외 처리")
-    void testJwtFilter_tokenIsBlackList() throws Exception {
-        // Given
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-
-        String blackListAccessToken = "blackListAccessToken";
-        request.addHeader("Authorization", "Bearer " + blackListAccessToken);
-
-        when(tokenBlackListService.isBlackListToken(blackListAccessToken)).thenReturn(true);
-
-        FilterChain mockFilterChain = mock(FilterChain.class);
-
-        // When
-        jwtFilter.doFilter(request, response, mockFilterChain);
-
-        // Then
-        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-        assertEquals("accessToken is blackList contains.", response.getContentAsString());
-        verify(mockFilterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+        if (shouldPass) {
+            verify(mockFilterChain, times(1)).doFilter(request, response);
+            assertEquals(200, response.getStatus());
+        } else {
+            assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+            verify(mockFilterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+        }
     }
 }
