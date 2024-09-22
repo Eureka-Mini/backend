@@ -156,6 +156,11 @@ class BoardServiceTest {
 
             // then -- 예상되는 변화 및 결과
             assertSoftly(softAssertions -> {
+                // board
+                softAssertions.assertThat(result.getContent().get(0).getTitle()).isEqualTo(response.getContent().get(0).getTitle());
+                softAssertions.assertThat(result.getContent().get(0).getBoardStatus()).isEqualTo(response.getContent().get(0).getBoardStatus());
+
+                // page
                 softAssertions.assertThat(result.getTotalPages()).isEqualTo(response.getTotalPages());
                 softAssertions.assertThat(result.getTotalElements()).isEqualTo(response.getTotalElements());
                 softAssertions.assertThat(result.getContent().size()).isEqualTo(response.getSize());

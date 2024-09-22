@@ -11,8 +11,6 @@ import com.dangun.miniproject.board.dto.GetBoardDetailResponse;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
-	void deleteByMemberId(Long memberId);
-
 	// 게시글 상세 조회
 	@Query(value = """
 			SELECT b

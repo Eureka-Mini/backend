@@ -1,4 +1,4 @@
-import {putHeadersAccessToken} from './jwt.js';
+import { putHeadersAccessToken } from './jwt.js';
 
 document.addEventListener('DOMContentLoaded', async function () {
     try {
@@ -12,10 +12,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             sessionStorage.removeItem('viewMyPosts');  // 상태 초기화
         } else if (keyword) {
             await loadBoardsByKeyword(keyword);
-            document.getElementById('my-board-title').textContent = `${keyword} 중고매물`;
+            document.getElementById('my-board-title').innerHTML = `[<span style="color: #EB9928;">${keyword}</span>]의 검색결과`;
         } else {
             await loadBoardsByKeyword('');
-            document.getElementById('my-board-title').textContent = '전체 중고매물';
+            document.getElementById('my-board-title').textContent = '중고거래 매물보기';
         }
     } catch (error) {
         console.error('Error loading boards:', error);
@@ -120,25 +120,38 @@ function createBoardCard(board) {
 
     const cardImage = document.createElement('img');
     cardImage.classList.add('card-image');
-
-    if (board.image) {
-        cardImage.src = board.image;
-    } else {
-        cardImage.src = '/images/defaultItem.png';
-    }
+    cardImage.src = board.image || '/images/defaultItem.png';
     card.appendChild(cardImage);
 
     const cardTitle = document.createElement('h2');
     cardTitle.textContent = board.title;
     card.appendChild(cardTitle);
 
+    const cardInfo = document.createElement('div');
+    cardInfo.classList.add('card-info');
+
     const cardWriter = document.createElement('p');
+    cardWriter.classList.add('card-writer');
     cardWriter.textContent = `작성자: ${board.writer}`;
-    card.appendChild(cardWriter);
 
     const cardDate = document.createElement('p');
-    cardDate.textContent = `작성일: ${new Date(board.createdAt).toLocaleDateString()}`;
-    card.appendChild(cardDate);
+    cardDate.classList.add('card-date');
+    cardDate.textContent = new Date(board.createdAt).toLocaleDateString();  // 작성일자
+
+    cardInfo.appendChild(cardWriter);
+    cardInfo.appendChild(cardDate);
+    card.appendChild(cardInfo);
+
+    const cardPrice = document.createElement('p');
+    cardPrice.classList.add('card-price');
+    cardPrice.textContent = `${board.price}원`;  // 가격 표시
+    card.appendChild(cardPrice);
+
+    const cardStatus = document.createElement('p');
+    cardStatus.classList.add('card-status');
+    cardStatus.textContent = board.boardStatus;  // 판매상태
+    cardStatus.classList.add(board.boardStatus === '판매중' ? 'selling' : 'sold');  // 상태에 따라 클래스 추가
+    card.appendChild(cardStatus);
 
     card.addEventListener('click', function () {
         const boardId = board.id;
