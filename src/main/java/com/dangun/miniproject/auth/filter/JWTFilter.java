@@ -48,13 +48,14 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        String accessToken = authorization.split(" ")[1];
-
-        if (accessToken == null) {
+        String[] authParts = authorization.split(" ");
+        if (authParts.length < 2 || authParts[1] == null || authParts[1].trim().isEmpty()) {
             response.getWriter().write("accessToken null");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
+
+        String accessToken = authParts[1];
 
         if (tokenBlackListService.isBlackListToken(accessToken)) {
             response.getWriter().write("accessToken is blackList contains.");
@@ -97,7 +98,7 @@ public class JWTFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException{
+    public void reissueAccessToken(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException{
         String refreshToken = null;
 
         Cookie[] cookies = request.getCookies();
@@ -112,6 +113,7 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         if (refreshToken == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             throw new ReissueAccessTokenException("refreshToken null");
         }
 
@@ -125,27 +127,28 @@ public class JWTFilter extends OncePerRequestFilter {
 
         String email = jwtUtil.getMemberEmail(refreshToken);
         Member member = memberRepository.findByEmail(email);
+
+        if (member == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            throw new UsernameNotFoundException("User not found");
+        }
+
         String nickname = member.getNickname();
 
         String accessToken = jwtUtil.createJwtAccess("accessToken", email, nickname, ACCESS_TOKEN_EXPIRE_TIME);
 
         System.out.println("accessToken 재발급 성공! : " + accessToken);
+
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        setAuthentication(email);
+        setAuthentication(member);
 
         filterChain.doFilter(request, response);
     }
 
-    private void setAuthentication(String email) {
-        Member member = memberRepository.findByEmail(email);
-
-        if (member == null) {
-            throw new UsernameNotFoundException("User not found");
-        }
-
+    private void setAuthentication(Member member) {
         UserDetailsDto customUserDetails = new UserDetailsDto(member);
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken);
