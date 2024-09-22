@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 boardData.comments.slice(0, 5).forEach(comment => {
                     const commentElement = document.createElement('div');
                     commentElement.classList.add('comment');
+
                     const isOwner = comment.writer === loginNickname;
 
                     const commentContentWithLineBreaks = comment.content.replace(/\n/g, '<br>');
@@ -177,6 +178,15 @@ document.addEventListener('DOMContentLoaded', function () {
     function parseJwt(token) {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        return JSON.parse(atob(base64));
+
+        // Base64 디코딩
+        const decodedData = decodeURIComponent(
+            Array.prototype.map.call(atob(base64), c =>
+                '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+            ).join('')
+        );
+
+        // JSON 파싱 후 반환
+        return JSON.parse(decodedData);
     }
 });
