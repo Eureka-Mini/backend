@@ -1,10 +1,11 @@
 package com.dangun.miniproject.auth.filter;
 
-import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.auth.dto.UserDetailsDto;
 import com.dangun.miniproject.auth.jwt.JWTUtil;
+import com.dangun.miniproject.member.domain.Member;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.Filter;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,15 +15,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.io.IOException;
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -96,5 +101,19 @@ public class LoginFilterTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(Collections.singletonMap("email", email))))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("입출력 오류 시 BadCredentialsException 테스트")
+    void testLoginAuthentication_FailedDueToIOException() throws Exception {
+        // given
+        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
+        when(mockRequest.getInputStream()).thenThrow(new IOException("Input stream error"));
+
+        // when & then
+        assertThrows(BadCredentialsException.class, () -> {
+            // 메서드를 실행하여 예외 발생 여부 확인
+            loginFilter.attemptAuthentication(mockRequest, null);
+        });
     }
 }
