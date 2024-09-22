@@ -6,6 +6,7 @@ import com.dangun.miniproject.board.dto.*;
 import com.dangun.miniproject.board.repository.BoardRepository;
 import com.dangun.miniproject.board.service.impl.BoardServiceImpl;
 import com.dangun.miniproject.comment.domain.Comment;
+import com.dangun.miniproject.comment.dto.GetCommentResponse;
 import com.dangun.miniproject.fixture.BoardFixture;
 import com.dangun.miniproject.fixture.CommentFixture;
 import com.dangun.miniproject.member.domain.Address;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -82,6 +84,7 @@ class BoardServiceTest {
                 softAssertions.assertThat(result).isNotNull();
                 softAssertions.assertThat(result.getId()).isEqualTo(response.getId());
                 softAssertions.assertThat(result.getTitle()).isEqualTo(response.getTitle());
+                softAssertions.assertThat(result.getWriter()).isEqualTo(response.getWriter());
             });
         }
 
@@ -114,7 +117,16 @@ class BoardServiceTest {
             assertSoftly(softAssertions -> {
                 softAssertions.assertThat(result).isNotNull();
                 softAssertions.assertThat(result.getId()).isEqualTo(response.getId());
-                softAssertions.assertThat(result.getComments().size()).isEqualTo(response.getComments().size());
+                softAssertions.assertThat(result.getComments().size()).isEqualTo(2);
+
+                // comment
+                softAssertions.assertThat(result.getId()).isNotNull();
+                softAssertions.assertThat(result.getComments().get(0).getId()).isEqualTo(comment1.getId());
+                softAssertions.assertThat(result.getComments().get(0).getContent()).isEqualTo(comment1.getContent());
+                softAssertions.assertThat(result.getComments().get(0).getWriterId()).isEqualTo(1L);
+                softAssertions.assertThat(result.getComments().get(0).getWriter()).isEqualTo(comment1.getMember().getNickname());
+                softAssertions.assertThat(result.getComments().get(0).isBoardWriter()).isTrue();
+                softAssertions.assertThat(result.getComments().get(0).getCreatedAt()).isEqualTo(comment1.getCreatedAt());
             });
         }
     }
