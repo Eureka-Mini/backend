@@ -32,6 +32,12 @@ function initializeNavbar() {
     const searchInput = document.querySelector('.search-input');
     const writeButton = document.getElementById('write-btn');
 
+    // 검색 폼의 기본 동작 방지
+    const searchForm = document.querySelector('.navbar-search');
+    searchForm.addEventListener('submit', function(event) {
+        event.preventDefault(); // 기본 동작(페이지 리로드) 방지
+    });
+
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken) {
         const nickname = parseNicknameFromToken(accessToken);
@@ -40,9 +46,14 @@ function initializeNavbar() {
             nicknameElement.textContent = "Welcome " + nickname + " !";
             nicknameElement.style.marginRight = '10px';
             nicknameElement.style.color = '#006400';
+            nicknameElement.style.cursor = 'pointer';  // 클릭할 수 있는 것처럼 보이도록 커서 변경
             loginButton.textContent = '로그아웃';
             loginButton.id = "logoutButton";
             loginButton.before(nicknameElement);
+
+            nicknameElement.addEventListener('click', function () {
+                window.location.href = '../html/myPage.html';
+            });
         }
     } else {
         loginButton.textContent = "로그인";
@@ -61,7 +72,7 @@ function initializeNavbar() {
         if (event.key === 'Enter') {
             const query = searchInput.value.trim();
             if (query) {
-                alert('검색어: ' + query);
+                window.location.href = '/html/boardList.html?keyword=' + encodeURIComponent(query);  // 검색어를 URL에 추가
             } else {
                 alert('검색어를 입력하세요.');
             }
@@ -74,8 +85,9 @@ function initializeNavbar() {
         } else {
             alert("로그인이 필요합니다!");
         }
-    })
+    });
 }
+
 
 function parseNicknameFromToken(token) {
     try {

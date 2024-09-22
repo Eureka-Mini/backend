@@ -74,3 +74,30 @@
 #my-board-title {
     margin: 60px 0 10px
 }
+
+.pagination-wrap {
+    display: flex;
+    justify-content: center; /* 버튼을 중앙 정렬 */
+    gap: 10px; /* 버튼 사이 간격 */
+    margin-top: 20px; /* 위쪽 여백 */
+}
+
+.page-button {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.page-button.active {
+    background-color: #006400;
+    color: white;
+    font-weight: bold;
+}
+
+.page-button:hover {
+    background-color: #32cd32;
+    color: white;
+}
