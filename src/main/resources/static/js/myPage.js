@@ -1,22 +1,40 @@
-// 상세 페이지 정보 로드 및 업데이트
-document.addEventListener("DOMContentLoaded", function() {
+import {putHeadersAccessToken} from "./jwt.js";
+
+document.addEventListener("DOMContentLoaded", function () {
+    const token = localStorage.getItem('accessToken');
+
+    if (!token) {
+        document.body.innerHTML = '';
+        alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
+        window.location.href = '/html/login.html';
+        return;
+    }
+
     detail();
 
     const btnUpdateMember = document.querySelector("#btnUpdateMember");
     const btnAddressMember = document.querySelector("#btnAddressMember");
     const btnDeleteAccount = document.querySelector("#btnDeleteAccount");
+    const btnMyPosts = document.querySelector("#btnMyPosts");
 
     if (btnUpdateMember) {
         btnUpdateMember.onclick = updateMember;
     }
 
-    if (btnAddressMember){
+    if (btnAddressMember) {
         btnAddressMember.onclick = updateAddress;
     }
 
-    if (btnDeleteAccount){
+    if (btnDeleteAccount) {
         btnDeleteAccount.onclick = deleteMember;
     }
+
+    // 내 게시물 보러가기 버튼 클릭 시 세션 스토리지에 상태 저장
+    btnMyPosts.onclick = function () {
+        sessionStorage.setItem('viewMyPosts', 'true');
+        window.location.href = '../html/boardList.html';
+    };
+
 });
 
 async function detail() {
@@ -28,19 +46,19 @@ async function detail() {
     let data = await response.json();
 
     if (data.code === "MEMBER-S002") {
-            const email = data.data.email;
-            const nickname = data.data.nickname;
-            const street = data.data.address.street;
-            const detail = data.data.address.detail;
-            const zipcode = data.data.address.zipcode;
+        const email = data.data.email;
+        const nickname = data.data.nickname;
+        const street = data.data.address.street;
+        const detail = data.data.address.detail;
+        const zipcode = data.data.address.zipcode;
 
-            document.querySelector("#email").value = email; // 닉네임 값을 칸에 넣기
-            document.querySelector("#nickName").value = nickname; // 닉네임 값을 칸에 넣기
-            document.querySelector("#street").value = street; // 닉네임 값을 칸에 넣기
-            document.querySelector("#detail").value = detail; // 닉네임 값을 칸에 넣기
-            document.querySelector("#zipcode").value = zipcode; // 닉네임 값을 칸에 넣기
+        document.querySelector("#email").value = email; // 닉네임 값을 칸에 넣기
+        document.querySelector("#nickName").value = nickname; // 닉네임 값을 칸에 넣기
+        document.querySelector("#street").value = street; // 닉네임 값을 칸에 넣기
+        document.querySelector("#detail").value = detail; // 닉네임 값을 칸에 넣기
+        document.querySelector("#zipcode").value = zipcode; // 닉네임 값을 칸에 넣기
 
-            document.querySelector('.main-title').textContent = `${nickname}님의 상세페이지`;
+        document.querySelector('.main-title').textContent = `${nickname}님의 상세페이지`;
     } else {
         alert("상세조회 과정에서 오류가 발생했습니다.");
     }
@@ -123,7 +141,7 @@ async function updateAddress() {
     }
 }
 
-async function deleteMember(){
+async function deleteMember() {
     if (confirm("정말로 회원 탈퇴를 진행하시겠습니까?")) {
         try {
             const response = await fetch('/members/my-info-delete', {
