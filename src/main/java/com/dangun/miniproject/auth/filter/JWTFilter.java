@@ -29,7 +29,6 @@ public class JWTFilter extends OncePerRequestFilter {
     private final MemberRepository memberRepository;
     private final TokenBlackListService tokenBlackListService;
     private final static long ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 1000L;
-    private final static long ACCESS_TOKEN_EXPIRE_TIME_TEST = 20 * 1000L;
 
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -49,7 +48,7 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         String[] authParts = authorization.split(" ");
-        if (authParts.length < 2 || authParts[1] == null || authParts[1].trim().isEmpty()) {
+        if (authParts.length < 2) {
             response.getWriter().write("accessToken null");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -98,17 +97,20 @@ public class JWTFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    public void reissueAccessToken(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException{
+    public void reissueAccessToken(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String refreshToken = null;
 
         Cookie[] cookies = request.getCookies();
 
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("refreshToken")) {
-                    refreshToken = cookie.getValue();
-                    break;
-                }
+        if (cookies == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            throw new ReissueAccessTokenException("cookie null");
+        }
+
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("refreshToken")) {
+                refreshToken = cookie.getValue();
+                break;
             }
         }
 
@@ -136,8 +138,6 @@ public class JWTFilter extends OncePerRequestFilter {
         String nickname = member.getNickname();
 
         String accessToken = jwtUtil.createJwtAccess("accessToken", email, nickname, ACCESS_TOKEN_EXPIRE_TIME);
-
-        System.out.println("accessToken 재발급 성공! : " + accessToken);
 
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.setContentType("application/json");
