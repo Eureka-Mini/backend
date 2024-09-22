@@ -2,25 +2,15 @@ package com.dangun.miniproject.board.controller;
 
 import com.dangun.miniproject.auth.dto.UserDetailsDto;
 import com.dangun.miniproject.board.dto.*;
+import com.dangun.miniproject.board.service.BoardService;
+import com.dangun.miniproject.common.ApiResponse;
+import com.dangun.miniproject.member.domain.Member;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.dangun.miniproject.common.ApiResponse;
-import com.dangun.miniproject.member.domain.Member;
-import com.dangun.miniproject.board.service.BoardService;
-
-import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,7 +37,6 @@ public class BoardController {
 			final Pageable pageable
 	) {
 		if (keyword != null && !keyword.isEmpty()) {
-
 			return ApiResponse.ok(
 				"BOARD-S003",
 				boardService.getBoardList(keyword, pageable),

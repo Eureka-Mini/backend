@@ -1,26 +1,21 @@
 package com.dangun.miniproject.board.service.impl;
 
-import com.dangun.miniproject.auth.dto.UserDetailsDto;
+import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.board.domain.BoardStatus;
 import com.dangun.miniproject.board.dto.*;
+import com.dangun.miniproject.board.repository.BoardRepository;
+import com.dangun.miniproject.board.service.BoardService;
+import com.dangun.miniproject.comment.domain.Comment;
+import com.dangun.miniproject.comment.dto.GetCommentResponse;
+import com.dangun.miniproject.member.domain.Member;
+import com.dangun.miniproject.member.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dangun.miniproject.board.domain.Board;
-import com.dangun.miniproject.comment.domain.Comment;
-import com.dangun.miniproject.member.domain.Member;
-import com.dangun.miniproject.comment.dto.GetCommentResponse;
-import com.dangun.miniproject.board.repository.BoardRepository;
-import com.dangun.miniproject.member.repository.MemberRepository;
-import com.dangun.miniproject.board.service.BoardService;
-
-import lombok.RequiredArgsConstructor;
-
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -58,8 +53,7 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public Page<GetBoardResponse> getBoardList(final Pageable pageable) {
 
-		final PageRequest pageRequest = PageRequest.of(0, 10);
-		final Page<Board> boards = boardRepository.findAllWithMember(pageRequest);
+		final Page<Board> boards = boardRepository.findAllWithMember(pageable);
 
 		return boards.map(GetBoardResponse::from);
 	}
@@ -70,8 +64,7 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public Page<GetBoardResponse> getBoardList(final String keyword, final Pageable pageable) {
 
-		final PageRequest pageRequest = PageRequest.of(0, 10);
-		final Page<Board> boards = boardRepository.searchBoardsByKeyword(keyword, pageRequest);
+		final Page<Board> boards = boardRepository.searchBoardsByKeyword(keyword, pageable);
 
 		return boards.map(GetBoardResponse::from);
 	}
@@ -82,8 +75,7 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public Page<GetBoardResponse> getMyBoardList(final Long memberId, final Pageable pageable) {
 
-		final PageRequest pageRequest = PageRequest.of(0, 10);
-		final Page<Board> boards = boardRepository.findAllByMyBoard(memberId, pageRequest);
+		final Page<Board> boards = boardRepository.findAllByMyBoard(memberId, pageable);
 
 		return boards.map(GetBoardResponse::from);
 	}
