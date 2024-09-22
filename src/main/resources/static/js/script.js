@@ -1,4 +1,4 @@
-import { putHeadersAccessToken } from "./jwt.js";
+import {putHeadersAccessToken} from "./jwt.js";
 
 document.addEventListener('DOMContentLoaded', async function () {
     try {
@@ -29,7 +29,6 @@ async function loadNavbar(retries = 1) {
 
 function initializeNavbar() {
     const loginButton = document.getElementById('login-button');
-    const searchButton = document.getElementById('searchButton');
     const searchInput = document.getElementById('searchInput');
 
     const accessToken = localStorage.getItem('accessToken');
@@ -57,12 +56,14 @@ function initializeNavbar() {
         }
     });
 
-    searchButton.addEventListener('click', function () {
-        const query = searchInput.value;
-        if (query) {
-            alert('검색어: ' + query);
-        } else {
-            alert('검색어를 입력하세요.');
+    searchInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            const query = searchInput.value.trim();
+            if (query) {
+                alert('검색어: ' + query); // 검색어 처리 로직 (이 부분을 실제 로직으로 대체 가능)
+            } else {
+                alert('검색어를 입력하세요.');
+            }
         }
     });
 }

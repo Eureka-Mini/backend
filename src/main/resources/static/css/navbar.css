@@ -1,3 +1,17 @@
+@font-face {
+    font-family: 'HakgyoansimDunggeunmisoTTF-B';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimDunggeunmisoTTF-B.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'HakgyoansimDunggeunmisoTTF-R';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimDunggeunmisoTTF-R.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -12,10 +26,10 @@ body {
 .navbar {
     background-color: #ffffff;
     padding: 15px;
-    box-shadow: 0 4px 2px -2px gray;
     position: sticky;
     top: 0;
     z-index: 1000;
+    width: 100%;
 }
 
 .navbar-container {
@@ -24,22 +38,24 @@ body {
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
+    width: 100%;
+    padding: 10px 20px; /* 패딩 설정 */
 }
 
 .navbar-logo {
-    font-size: 24px;
+    font-size: 32px;
     color: #006400;
     text-decoration: none;
     display: flex;
     align-items: center;
     margin-right: 50px;
+    font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif;
 }
 
 .navbar-logo img.logo-image {
     width: 20px;
     height: 20px;
-    margin-right: 4px;
-    padding-bottom: 3px;
+    margin-right: 10px;
 }
 
 .navbar-logo:hover {
@@ -62,7 +78,7 @@ body {
     align-items: center;
     flex-grow: 1;
     justify-content: flex-end;
-    margin-right: 20px;
+    margin-right: 10px;
 }
 
 #searchInput {
@@ -72,21 +88,6 @@ body {
     border-radius: 5px;
     width: 200px;
     margin-right: 10px;
-}
-
-#searchButton {
-    font-size: 16px;
-    padding: 8px 15px;
-    background-color: #32cd32;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-right: 10px;
-}
-
-#searchButton:hover {
-    background-color: #228b22;
 }
 
 .navbar-user {
@@ -112,4 +113,23 @@ body {
 
 .navbar-link.login-button:hover {
     background-color: #228b22;
+}
+
+
+/* 글 작성 버튼 스타일 */
+.icon-button {
+    background-color: transparent; /* 배경 제거 */
+    margin-left: 50px;
+    border: none;
+    cursor: pointer;
+    padding: 5px; /* 여백 */
+}
+
+.icon-button .icon {
+    width: 24px; /* 아이콘 크기 */
+    height: 24px;
+}
+
+.icon-button:hover {
+    opacity: 0.7; /* 호버 시 아이콘 투명도 조정 */
 }

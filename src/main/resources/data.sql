@@ -69,6 +69,13 @@ INSERT INTO board (id, created_at, updated_at, board_status, content, price, tit
 INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (40, '2024-09-19 13:42:50', '2024-09-19 16:16:50', '판매완료', '관심 있으신 분은 메시지 주세요.', 59000, '물품 40 판매', 4);
 INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (41, '2024-09-20 01:08:33', '2024-09-20 01:08:33', '판매중', '이 물품은 사용한 지 1년밖에 되지 않았습니다.', 18000, '물품 41 판매', 6);
 INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (42, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (43, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (44, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (45, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (46, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (47, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (48, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (49, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
 
 -- Insert statements for Comments
 INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) VALUES (1, '2024-09-01 00:22:00', '2024-09-01 00:22:00', '사진 좀 더 올려주세요.', 1, 3);
