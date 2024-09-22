@@ -3,6 +3,7 @@ package com.dangun.miniproject.board.dto;
 import java.time.LocalDateTime;
 
 import com.dangun.miniproject.board.domain.Board;
+import com.dangun.miniproject.board.domain.BoardStatus;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,8 @@ public class GetBoardResponse {
 	private Long id;
 	private String title;
 	private String writer;
+	private Integer price;
+	private BoardStatus boardStatus;
 	private LocalDateTime createdAt;
 
 	public static GetBoardResponse from(final Board board) {
@@ -21,6 +24,8 @@ public class GetBoardResponse {
 		boardResponse.id = board.getId();
 		boardResponse.title = board.getTitle();
 		boardResponse.writer = board.getMember().getNickname();
+		boardResponse.price = board.getPrice();
+		boardResponse.boardStatus = board.getBoardStatus();
 		boardResponse.createdAt = board.getCreatedAt();
 
 		return boardResponse;

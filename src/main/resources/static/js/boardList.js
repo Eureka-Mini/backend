@@ -132,9 +132,17 @@ function createBoardCard(board) {
     cardTitle.textContent = board.title;
     card.appendChild(cardTitle);
 
+    const cardPrice = document.createElement('p');
+    cardPrice.textContent = board.price;
+    card.appendChild(cardPrice);
+
     const cardWriter = document.createElement('p');
     cardWriter.textContent = `작성자: ${board.writer}`;
     card.appendChild(cardWriter);
+
+    const cardStatus = document.createElement('p');
+    cardStatus.textContent = `판매상태: ${board.boardStatus}`;
+    card.appendChild(cardStatus);
 
     const cardDate = document.createElement('p');
     cardDate.textContent = `작성일: ${new Date(board.createdAt).toLocaleDateString()}`;
