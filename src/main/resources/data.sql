@@ -76,6 +76,7 @@ INSERT INTO board (id, created_at, updated_at, board_status, content, price, tit
 INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (47, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
 INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (48, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
 INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (49, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (50, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
 
 -- Insert statements for Comments
 INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) VALUES (1, '2024-09-01 00:22:00', '2024-09-01 00:22:00', '사진 좀 더 올려주세요.', 1, 3);

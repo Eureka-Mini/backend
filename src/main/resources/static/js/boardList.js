@@ -2,16 +2,75 @@ import {putHeadersAccessToken} from './jwt.js';
 
 document.addEventListener('DOMContentLoaded', async function () {
     try {
-        await loadMyBoards();
+        const viewMyPosts = sessionStorage.getItem('viewMyPosts');
+        const urlParams = new URLSearchParams(window.location.search);
+        const keyword = urlParams.get('keyword');
+
+        if (viewMyPosts === 'true') {
+            await loadMyBoards();
+            document.getElementById('my-board-title').textContent = '내가 올린 매물';
+            sessionStorage.removeItem('viewMyPosts');  // 상태 초기화
+        } else if (keyword) {
+            await loadBoardsByKeyword(keyword);
+            document.getElementById('my-board-title').textContent = `${keyword} 중고매물`;
+        } else {
+            await loadBoardsByKeyword('');
+            document.getElementById('my-board-title').textContent = '전체 중고매물';
+        }
     } catch (error) {
         console.error('Error loading boards:', error);
     }
 });
 
-async function loadMyBoards() {
+async function loadMyBoards(page = 0, size = 9, sort = 'createdAt,desc') {
     try {
-        // GET /boards/my-boards API 호출
-        const response = await fetch('/boards/my-board', {
+        const response = await fetch(`/boards/my-board?page=${page}&size=${size}&sort=${sort}`, {
+            method: 'GET',
+            headers: putHeadersAccessToken()
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch my boards');
+        }
+
+        const boardData = await response.json();
+        const cardWrap = document.querySelector('.card-wrap');
+        cardWrap.innerHTML = '';
+
+        boardData.data.content.forEach(board => {
+            const card = createBoardCard(board);
+            cardWrap.appendChild(card);
+        });
+
+        const totalPages = boardData.data.page.totalPages;
+        setupPaginationForMyBoards(page, totalPages);
+
+    } catch (error) {
+        console.error('Error fetching or displaying my boards:', error);
+    }
+}
+
+function setupPaginationForMyBoards(currentPage, totalPages) {
+    const paginationWrap = document.querySelector('.pagination-wrap');
+    paginationWrap.innerHTML = '';
+
+    for (let i = 0; i < totalPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i + 1;
+        pageButton.classList.add('page-button');
+        if (i === currentPage) {
+            pageButton.classList.add('active');
+        }
+        pageButton.addEventListener('click', function () {
+            loadMyBoards(i);
+        });
+        paginationWrap.appendChild(pageButton);
+    }
+}
+
+async function loadBoardsByKeyword(keyword, page = 0, size = 9, sort = 'createdAt,desc') {
+    try {
+        const response = await fetch(`/boards?keyword=${encodeURIComponent(keyword)}&page=${page}&size=${size}&sort=${sort}`, {
             method: 'GET',
             headers: putHeadersAccessToken()
         });
@@ -20,20 +79,38 @@ async function loadMyBoards() {
             throw new Error('Failed to fetch boards');
         }
 
-        // 응답 데이터를 JSON으로 파싱
         const boardData = await response.json();
-
-        // 카드 요소 생성 및 추가
         const cardWrap = document.querySelector('.card-wrap');
-        cardWrap.innerHTML = ''; // 기존 내용 제거
+        cardWrap.innerHTML = '';
 
         boardData.data.content.forEach(board => {
             const card = createBoardCard(board);
             cardWrap.appendChild(card);
         });
 
+        const totalPages = boardData.data.page.totalPages;
+        setupPaginationForKeywordOrAllBoards(page, totalPages, keyword);
+
     } catch (error) {
         console.error('Error fetching or displaying boards:', error);
+    }
+}
+
+function setupPaginationForKeywordOrAllBoards(currentPage, totalPages, keyword) {
+    const paginationWrap = document.querySelector('.pagination-wrap');
+    paginationWrap.innerHTML = '';
+
+    for (let i = 0; i < totalPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i + 1;
+        pageButton.classList.add('page-button');
+        if (i === currentPage) {
+            pageButton.classList.add('active');
+        }
+        pageButton.addEventListener('click', function () {
+            loadBoardsByKeyword(keyword, i);
+        });
+        paginationWrap.appendChild(pageButton);
     }
 }
 
