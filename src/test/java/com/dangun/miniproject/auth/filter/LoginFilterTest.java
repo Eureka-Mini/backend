@@ -1,8 +1,7 @@
-package com.dangun.miniproject.auth;
+package com.dangun.miniproject.auth.filter;
 
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.auth.dto.UserDetailsDto;
-import com.dangun.miniproject.auth.filter.LoginFilter;
 import com.dangun.miniproject.auth.jwt.JWTUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.Filter;
