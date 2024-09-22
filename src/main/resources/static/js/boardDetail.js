@@ -1,9 +1,17 @@
 import {putHeadersAccessToken} from './jwt.js';
 
 document.addEventListener('DOMContentLoaded', function () {
+    const token = localStorage.getItem('accessToken');
+
+    if (!token) {
+        document.body.innerHTML = '';
+        alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
+        window.location.href = '/html/login.html';
+        return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const boardId = urlParams.get('boardId');
-    const token = localStorage.getItem('accessToken');
     const loginNickname = parseJwt(token).nickname;
     const textarea = document.getElementById('newComment');
 
