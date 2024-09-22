@@ -7,11 +7,11 @@ import com.dangun.miniproject.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,8 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -60,18 +58,8 @@ public class JWTFilterFailedTest {
 
         JWTExceptionHandlerFilter exceptionHandlerFilter = new JWTExceptionHandlerFilter();
 
-        FilterChain customFilterChain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest req, ServletResponse res) throws IOException, ServletException {
-                exceptionHandlerFilter.doFilter(req, res, new FilterChain() {
-
-                    @Override
-                    public void doFilter(ServletRequest req2, ServletResponse res2) throws IOException, ServletException {
-                        jwtFilter.doFilter(req2, res2, emptyFilterChain);
-                    }
-                });
-            }
-        };
+        FilterChain customFilterChain = (req, res) -> exceptionHandlerFilter.doFilter(req, res, (req2, res2)
+                -> jwtFilter.doFilter(req2, res2, emptyFilterChain));
 
         // When
         customFilterChain.doFilter(request, response);
@@ -126,6 +114,27 @@ public class JWTFilterFailedTest {
     }
 
     @Test
+    @DisplayName("AccessToken 검증 실패 - Bearer prefix 없음")
+    void testJwtFilter_noBearerPrefix() throws Exception {
+        // Given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        String accessToken = "accessToken";
+        request.addHeader("Authorization", accessToken);
+
+        FilterChain mockFilterChain = mock(FilterChain.class);
+
+        // When
+        jwtFilter.doFilter(request, response, mockFilterChain);
+
+        // Then
+        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+        assertEquals("authorization null", response.getContentAsString());
+        verify(mockFilterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
     @DisplayName("AccessToken 검증 실패 - AccessToken Null")
     void testJwtFilter_AccessTokenNull() throws Exception {
         // Given
@@ -133,6 +142,26 @@ public class JWTFilterFailedTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         request.addHeader("Authorization", "Bearer ");
+
+        FilterChain mockFilterChain = mock(FilterChain.class);
+
+        // When
+        jwtFilter.doFilter(request, response, mockFilterChain);
+
+        // Then
+        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+        assertEquals("accessToken null", response.getContentAsString());
+        verify(mockFilterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    @DisplayName("AccessToken 검증 실패 - AccessToken Empty")
+    void testJwtFilter_AccessTokenEmpty() throws Exception {
+        // Given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        request.addHeader("Authorization", "Bearer   ");
 
         FilterChain mockFilterChain = mock(FilterChain.class);
 
@@ -282,5 +311,40 @@ public class JWTFilterFailedTest {
         assertEquals("User not found", exception.getMessage());
         assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
         verify(mockFilterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    @DisplayName("AccessToken 재발급 실패 - Cookie null")
+    void testJwtFilter_CookieNull() {
+        // given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        Cookie cookie = new Cookie("notRefreshToken", null);
+        request.setCookies(cookie);
+        FilterChain mockFilterChain = mock(FilterChain.class);
+
+        // when & then
+        Assertions.assertThatThrownBy(
+                () -> jwtFilter.reissueAccessToken(request, response, mockFilterChain))
+                .isInstanceOf(ReissueAccessTokenException.class)
+                .hasMessage("refreshToken null");
+    }
+
+    @Test
+    @DisplayName("AccessToken 재발급 실패 - Cookie notNull, refreshToken null")
+    void testJwtFilter_CookieNotNull_RefreshNull() {
+        // given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        FilterChain mockFilterChain = mock(FilterChain.class);
+
+        // when & then
+        Assertions.assertThatThrownBy(
+                        () -> jwtFilter.reissueAccessToken(request, response, mockFilterChain))
+                .isInstanceOf(ReissueAccessTokenException.class)
+                .hasMessage("cookie null");
+
     }
 }
