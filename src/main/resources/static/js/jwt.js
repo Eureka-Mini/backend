@@ -1,4 +1,3 @@
-
 export function putHeadersAccessToken() {
     const accessToken = localStorage.getItem("accessToken");
 
@@ -20,6 +19,6 @@ fetch("/some/protected/api", {
     method: "GET",
     headers: putHeadersAccessToken()
 })
- */
+*/
 
 

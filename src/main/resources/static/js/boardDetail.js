@@ -1,3 +1,5 @@
+import {putHeadersAccessToken} from './jwt.js';
+
 document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const boardId = urlParams.get('boardId');
@@ -19,10 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (boardId) {
         fetch(`/boards/${boardId}`, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+            headers: putHeadersAccessToken()
         })
             .then(response => response.json())
             .then(data => {
@@ -30,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 document.getElementById('board-title').textContent = boardData.title;
                 document.getElementById('board-created-time').textContent = timeSince(boardData.createdAt);
+                document.getElementById('board-address').textContent = boardData.writerStreetAddress;
                 document.getElementById('board-price').textContent = boardData.price || "가격 없음";
                 document.querySelector('.board-content p').innerHTML = boardData.content.replace(/\n/g, '<br>');
                 document.getElementById('board-nickname').textContent = boardData.writer;
@@ -70,10 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (newComment) {
             fetch(`/boards/${boardId}/comments`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
+                headers: putHeadersAccessToken(),
                 body: JSON.stringify({content: newComment})
             })
                 .then(() => location.reload())
@@ -84,10 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function refreshComments(boardId) {
         fetch(`/boards/${boardId}`, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+            headers: putHeadersAccessToken()
         })
             .then(response => response.json())
             .then(data => {
@@ -127,10 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (newContent) {
             fetch(`/boards/${boardId}/comments/${commentId}`, {
                 method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
+                headers: putHeadersAccessToken(),
                 body: JSON.stringify({content: newContent})
             })
                 .then(() => {
@@ -144,10 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (confirm('정말로 삭제하시겠습니까?')) {
             fetch(`/boards/${boardId}/comments/${commentId}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+                headers: putHeadersAccessToken()
             })
                 .then(() => {
                     refreshComments(boardId);
