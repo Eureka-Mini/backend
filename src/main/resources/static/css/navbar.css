@@ -1,0 +1,115 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f0f9f0;
+}
+
+.navbar {
+    background-color: #ffffff;
+    padding: 15px;
+    box-shadow: 0 4px 2px -2px gray;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.navbar-logo {
+    font-size: 24px;
+    color: #006400;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    margin-right: 50px;
+}
+
+.navbar-logo img.logo-image {
+    width: 20px;
+    height: 20px;
+    margin-right: 4px;
+    padding-bottom: 3px;
+}
+
+.navbar-logo:hover {
+    color: #32cd32;
+}
+
+.navbar-link {
+    font-size: 24px;
+    color: #006400;
+    text-decoration: none;
+    margin-right: 20px;
+}
+
+.navbar-link:hover {
+    color: #32cd32;
+}
+
+.navbar-search {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    justify-content: flex-end;
+    margin-right: 20px;
+}
+
+#searchInput {
+    padding: 8px 15px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 200px;
+    margin-right: 10px;
+}
+
+#searchButton {
+    font-size: 16px;
+    padding: 8px 15px;
+    background-color: #32cd32;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+#searchButton:hover {
+    background-color: #228b22;
+}
+
+.navbar-user {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nickname {
+    font-size: 16px;
+    color: #006400;
+    margin-right: 15px;
+}
+
+.navbar-link.login-button {
+    font-size: 16px;
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 15px;
+    background-color: #32cd32;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.navbar-link.login-button:hover {
+    background-color: #228b22;
+}

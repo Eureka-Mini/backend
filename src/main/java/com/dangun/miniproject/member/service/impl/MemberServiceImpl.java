@@ -11,8 +11,6 @@ import com.dangun.miniproject.member.repository.MemberRepository;
 import com.dangun.miniproject.member.service.MemberService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -71,6 +69,10 @@ public class MemberServiceImpl implements MemberService {
     public GetMemberDto updateMember(GetMemberDto getMemberDto, Long id) {
         Member member = memberRepository.findById(id).orElseThrow();
 
+        if (getMemberDto.getNickname() == null || getMemberDto.getNickname().trim().isBlank()) {
+            throw new IllegalArgumentException("닉네임을 입력해주세요.");
+        }
+
         member.updateMember(getMemberDto);
 
         memberRepository.save(member);
@@ -78,7 +80,7 @@ public class MemberServiceImpl implements MemberService {
         GetMemberDto updatedMemberDto = GetMemberDto.builder()
                 .email(member.getEmail())
                 .nickname(member.getNickname())
-                .address(member.getAddress() != null ? GetAddressDto.fromEntity(member.getAddress()) : null)  // update 시 null 방지
+                .address(GetAddressDto.fromEntity(member.getAddress()))
                 .build();
 
         return updatedMemberDto;
@@ -87,6 +89,16 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public GetAddressDto updateAddress(GetAddressDto getAddressDto, Long id) {
         Address address = addressRepository.findById(id).orElseThrow();
+
+        if (getAddressDto.getStreet() == null || getAddressDto.getStreet().trim().isBlank()) {
+            throw new IllegalArgumentException("주소를 입력해주세요.");
+        }
+        if (getAddressDto.getDetail() == null || getAddressDto.getDetail().trim().isBlank()) {
+            throw new IllegalArgumentException("상세주소를 입력해주세요.");
+        }
+        if (getAddressDto.getZipcode() == null || getAddressDto.getZipcode().trim().isBlank()) {
+            throw new IllegalArgumentException("우편번호를 입력해주세요.");
+        }
 
         address.updateAddress(getAddressDto);
 

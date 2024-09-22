@@ -29,9 +29,6 @@ public class GetAddressDto {
     }
 
     public static GetAddressDto fromEntity(Address address) {
-        if (address == null) {
-            return null;
-        }
         return GetAddressDto.builder()
                 .street(address.getStreet())
                 .detail(address.getDetail())

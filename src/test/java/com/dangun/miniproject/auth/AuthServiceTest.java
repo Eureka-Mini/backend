@@ -3,7 +3,9 @@ package com.dangun.miniproject.auth;
 
 import com.dangun.miniproject.auth.exception.exceptions.DuplicateEmailException;
 import com.dangun.miniproject.auth.exception.exceptions.InvalidEmailException;
+import com.dangun.miniproject.auth.jwt.JWTUtil;
 import com.dangun.miniproject.auth.service.impl.AuthServiceImpl;
+import com.dangun.miniproject.auth.service.impl.TokenBlackListService;
 import com.dangun.miniproject.auth.service.validator.SignupValidator;
 import com.dangun.miniproject.fixture.AddressFixture;
 import com.dangun.miniproject.fixture.MemberFixture;
@@ -12,12 +14,16 @@ import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.dto.GetAddressRequest;
 import com.dangun.miniproject.member.dto.GetMemberRequest;
 import com.dangun.miniproject.member.repository.MemberRepository;
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +41,12 @@ public class AuthServiceTest {
 
     @Mock
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Mock
+    private JWTUtil jwtUtil;
+
+    @Mock
+    private TokenBlackListService tokenBlackListService;
 
     @Mock
     private SignupValidator signupValidator;
@@ -62,6 +74,63 @@ public class AuthServiceTest {
         assertThat(result).isNotNull();
         verify(memberRepository, times(1)).save(result);
         verify(signupValidator, times(1)).validateMember(memberRequest);
+    }
+
+    @Test
+    @DisplayName("로그아웃 성공 테스트")
+    void testLogoutMember_Success() {
+        // Given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        String accessToken = "accessToken";
+        request.addHeader("Authorization", "Bearer " + accessToken);
+
+        when(jwtUtil.isExpiredTokenAccess(accessToken)).thenReturn(false);
+        doNothing().when(tokenBlackListService).addBlackListToken(accessToken);
+
+        // When
+        authService.logoutMember(request, response);
+
+        // Then
+        assertEquals(200, response.getStatus());
+        verify(tokenBlackListService).addBlackListToken(accessToken);
+    }
+
+    @Test
+    @DisplayName("로그아웃 실패 테스트 / token null")
+    void testLogoutMember_Failed_TokenNull() {
+        // Given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        request.addHeader("Authorization", "notBearer ");
+
+        // When
+        authService.logoutMember(request, response);
+
+        // Then
+        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    @DisplayName("로그아웃 실패 테스트 / 액세스 토큰 변조 체크")
+    void testLogoutMember_Failed_InvalidToken() throws Exception {
+        // Given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        String invalidToken = "invalidToken";
+        request.addHeader("Authorization", "Bearer " + invalidToken);
+
+        doThrow(new JwtException("accessToken invalid"))
+                .when(jwtUtil).isExpiredTokenAccess(invalidToken);
+
+        // When
+        authService.logoutMember(request, response);
+
+        // Then
+        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
     }
 
     @Test

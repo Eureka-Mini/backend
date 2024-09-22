@@ -4,6 +4,7 @@ import com.dangun.miniproject.auth.filter.JWTExceptionHandlerFilter;
 import com.dangun.miniproject.auth.filter.JWTFilter;
 import com.dangun.miniproject.auth.filter.LoginFilter;
 import com.dangun.miniproject.auth.jwt.JWTUtil;
+import com.dangun.miniproject.auth.service.impl.TokenBlackListService;
 import com.dangun.miniproject.member.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final MemberRepository memberRepository;
+    private final TokenBlackListService tokenBlackListService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,7 +42,7 @@ public class SecurityConfig {
         LoginFilter loginFilter = new LoginFilter(authenticationManager, jwtUtil);
         loginFilter.setFilterProcessesUrl("/auth/login");
 
-        JWTFilter jwtFilter = new JWTFilter(jwtUtil, memberRepository);
+        JWTFilter jwtFilter = new JWTFilter(jwtUtil, memberRepository, tokenBlackListService);
         JWTExceptionHandlerFilter jwtExceptionHandlerFilter = new JWTExceptionHandlerFilter();
 
         // Http Security Setting
@@ -52,7 +54,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers(HttpMethod.POST, "/auth/signup").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/token/reissue").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/", "error").permitAll()
                         .anyRequest().authenticated())
 

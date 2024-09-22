@@ -5,31 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게시글 수정</title>
     <link rel="stylesheet" href="../css/updateboard.css">
-    <link rel="stylesheet" href="../css/navbar.css">
 </head>
 <body>
-<nav class="navbar">
-    <div class="navbar-container">
-        <a href="#" class="navbar-logo">
-            <img src="../images/cucumber.png" alt="오이 로고" class="logo-image">
-            오이
-        </a>
-        <a href="#" class="navbar-link">중고거래</a>
-        <div class="navbar-search">
-            <input type="text" id="searchInput" placeholder="검색어를 입력하세요...">
-            <button id="searchButton">검색</button>
-        </div>
-    </div>
-</nav>
-
+<div id="navbar-placeholder"></div>
 <main class="container">
     <h1>게시글 수정</h1>
     <form id="updateBoardForm" class="post-form">
-        <label for="title">제목</label>
+        <label for="title">상품명</label>
         <input type="text" id="title" name="title" required>
 
-        <label for="content">내용</label>
-        <textarea id="content" name="content" rows="4" required></textarea>
+        <label for="content">설명</label>
+        <textarea id="content" name="content" rows="7" required></textarea>
 
         <label for="price">가격</label>
         <input type="number" id="price" name="price" min="0" required>
@@ -40,12 +26,15 @@
             <option value="판매완료">판매완료</option>
         </select>
 
-        <button type="submit">수정 완료</button>
+        <div class="button-container">
+            <button type="submit">수정 완료</button>
+            <button type="button" id="deleteButton">삭제</button>
+        </div>
     </form>
-    <button type="button" id="deleteButton">삭제</button>
 </main>
 
-<script src="../js/navbar.js"></script>
-<script src="../js/updateBoard.js"></script>
+<script type="module" src="../js/script.js"></script>
+<script type="module"  src="../js/jwt.js"></script>
+<script type="module" src="../js/updateboard.js"></script>
 </body>
 </html>

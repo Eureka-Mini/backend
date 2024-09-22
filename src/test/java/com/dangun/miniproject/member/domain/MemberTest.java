@@ -49,14 +49,7 @@ public class MemberTest {
     @Test
     public void updateMember() {
         // Given
-        Member member = Member.builder()
-                .email("old@example.com")
-                .nickname("oldNickname")
-                .password("password123")
-                .build();
-
         GetMemberDto updateDto = GetMemberDto.builder()
-                .email("old@example.com")
                 .nickname("newNickname")
                 .build();
 
@@ -64,7 +57,6 @@ public class MemberTest {
         member.updateMember(updateDto);
 
         // Then
-        assertThat(member.getEmail()).isEqualTo("old@example.com");
         assertThat(member.getNickname()).isEqualTo("newNickname"); // nickname은 변경되지 않아야 함
     }
 

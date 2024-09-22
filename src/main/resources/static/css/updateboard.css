@@ -2,14 +2,14 @@
     max-width: 800px;
     margin: 20px auto;
     padding: 20px;
-    background-color: #ffffff; /* 흰색 배경 */
-    border-radius: 8px; /* 둥근 모서리 */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 부드러운 그림자 */
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
     font-size: 28px;
-    color: #006400; /* 짙은 초록색 텍스트 */
+    color: #006400;
     margin-bottom: 20px;
 }
 
@@ -21,7 +21,7 @@ h1 {
 .post-form label {
     margin-top: 10px;
     font-weight: bold;
-    color: #006400; /* 짙은 초록색 텍스트 */
+    color: #006400;
 }
 
 .post-form input,
@@ -46,16 +46,31 @@ h1 {
 #deleteButton {
     margin-top: 20px;
     padding: 10px;
-    background-color: #32cd32; /* 라임 그린색 버튼 */
+    background-color: #32cd32;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
-    width: 100%; /* 버튼 너비를 100%로 설정 */
+    width: 100%;
 }
 
 .post-form button:hover,
 #deleteButton:hover {
-    background-color: #228b22; /* 포레스트 그린색으로 변경 */
+    background-color: #228b22;
+}
+
+
+.button-container {
+    display: flex;
+    justify-content: space-between; /* 버튼 사이의 간격을 균등하게 배치 */
+}
+
+.button-container button {
+    flex: 1; /* 버튼이 동일한 너비를 가지도록 설정 */
+    margin-right: 10px; /* 오른쪽 버튼과 간격을 줌 */
+}
+
+.button-container button:last-child {
+    margin-right: 0; /* 마지막 버튼의 오른쪽 마진 제거 */
 }

@@ -1,6 +1,9 @@
+///    http://localhost:8080/html/updateBoard.html?id=43
+
 document.addEventListener('DOMContentLoaded', function() {
-    const token = 'token';
     const boardId = new URLSearchParams(window.location.search).get('id');
+    const token = getToken();
+    console.log('토큰을 가져왔습니다:', token ? '토큰이 있습니다' : '토큰을 찾을 수 없습니다');
 
     if (!token) {
         handleUnauthorized();
@@ -9,10 +12,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!boardId) {
         handleError({ message: '게시글 ID가 제공되지 않았습니다.' });
+        window.location.href =  '../index.html';
         return;
     }
 
-    fetchBoardAndUserData(token, boardId)
+    fetchBoardAndUserData(boardId)
         .then(([boardResponse, userData]) => {
             if (!boardResponse || !boardResponse.data || !userData) {
                 throw new Error('데이터를 불러오는데 실패했습니다.');
@@ -23,21 +27,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             populateForm(boardData);
-            setupEventListeners(token, boardId);
+            setupEventListeners(boardId);
         })
         .catch(handleError);
 });
 
-function fetchBoardAndUserData(token, boardId) {
+function getToken() {
+    return localStorage.getItem('accessToken') || localStorage.getItem('token');
+}
+
+//토큰
+function putHeadersAccessToken() {
+    const token = getToken();
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+}
+
+function fetchBoardAndUserData(boardId) {
     return Promise.all([
-        fetchData(`/boards/${boardId}`, token),
-        fetchData('/members/my-info', token)
+        fetchData(`/boards/${boardId}`),
+        fetchData('/members/my-info')
     ]);
 }
 
-function fetchData(url, token) {
+function fetchData(url) {
     return fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: putHeadersAccessToken()
     }).then(handleResponse);
 }
 
@@ -56,14 +73,14 @@ function populateForm(boardData) {
     document.getElementById('boardStatus').value = boardData.boardStatus || '판매중';
 }
 
-function setupEventListeners(token, boardId) {
+function setupEventListeners(boardId) {
     const form = document.getElementById('updateBoardForm');
     const deleteBtn = document.getElementById('deleteButton');
 
     if (form) {
         form.addEventListener('submit', event => {
             event.preventDefault();
-            updateBoard(token, boardId);
+            updateboard(boardId);
         });
     } else {
         console.error('Update form not found');
@@ -73,7 +90,7 @@ function setupEventListeners(token, boardId) {
         deleteBtn.addEventListener('click', event => {
             event.preventDefault();
             if (window.confirm('정말 삭제하시겠습니까?')) {
-                deleteBoard(token, boardId);
+                deleteBoard(boardId);
             }
         });
     } else {
@@ -81,7 +98,7 @@ function setupEventListeners(token, boardId) {
     }
 }
 
-function updateBoard(token, boardId) {
+function updateboard(boardId) {
     const updatedData = {
         title: document.getElementById('title').value,
         content: document.getElementById('content').value,
@@ -91,16 +108,13 @@ function updateBoard(token, boardId) {
 
     fetch(`/boards/${boardId}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
+        headers: putHeadersAccessToken(),
         body: JSON.stringify(updatedData)
     })
         .then(handleResponse)
         .then(() => {
             alert('게시글이 성공적으로 수정되었습니다.');
-            window.location.href = `/boards/${boardId}`;
+            window.location.href = '../index.html';
         })
         .catch(error => {
             console.error('게시글 수정 중 오류 발생:', error);
@@ -108,17 +122,15 @@ function updateBoard(token, boardId) {
         });
 }
 
-function deleteBoard(token, boardId) {
+function deleteBoard(boardId) {
     fetch(`/boards/${boardId}`, {
         method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+        headers: putHeadersAccessToken()
     })
         .then(handleResponse)
         .then(() => {
             alert('게시글이 삭제되었습니다.');
-            window.location.href = '/boards';
+            window.location.href = '../index.html';
         })
         .catch(error => {
             console.error('게시글 삭제 중 오류 발생:', error);
@@ -128,12 +140,12 @@ function deleteBoard(token, boardId) {
 
 function handleUnauthorized() {
     alert('로그인이 필요합니다.');
-    window.location.href = '/login';
+    window.location.href = '../html/login.html';
 }
 
 function handleUnauthorizedEdit() {
     alert('해당 게시글의 작성자만 수정할 수 있습니다.');
-    window.location.href = '/boards';
+    window.location.href = '../index.html';
 }
 
 function handleError(error) {

@@ -1,6 +1,3 @@
-// 저장된 토큰 가져오기
-const token = 'eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2Vzc1Rva2VuIiwiZW1haWwiOiJ0ZXN0N0B0ZXN0LmNvbSIsImlhdCI6MTcyNjcyNzcwMSwiZXhwIjoxNzI2NzMxMzAxfQ.BAYUg4lZUiexYQ-p0vAAmL0o2xF3co0u1H80tlc8elI';
-
 // 상세 페이지 정보 로드 및 업데이트
 document.addEventListener("DOMContentLoaded", function() {
     detail();
@@ -26,10 +23,7 @@ async function detail() {
     let url = "/members/my-info";
     let response = await fetch(url, {
         method: 'GET',
-        headers: {
-            'Authorization': 'Bearer ' + token,  // JWT 토큰을 포함
-            'Content-Type': 'application/json'
-        }
+        headers: putHeadersAccessToken()
     });
     let data = await response.json();
 
@@ -63,10 +57,7 @@ async function updateMember() {
         // 사용자 정보 요청
         let response = await fetch('/members/my-info-update', {
             method: "PUT",
-            headers: {
-                'Authorization': 'Bearer ' + token,  // JWT 토큰을 포함
-                'Content-Type': 'application/json'
-            },
+            headers: putHeadersAccessToken(),
             body: JSON.stringify(memberData)
         });
 
@@ -107,10 +98,7 @@ async function updateAddress() {
         // 사용자 정보 요청
         let response = await fetch('/members/my-address-update', {
             method: "PUT",
-            headers: {
-                'Authorization': 'Bearer ' + token,  // JWT 토큰을 포함
-                'Content-Type': 'application/json'
-            },
+            headers: putHeadersAccessToken(),
             body: JSON.stringify(memberData)
         });
 
@@ -140,10 +128,7 @@ async function deleteMember(){
         try {
             const response = await fetch('/members/my-info-delete', {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + token,  // JWT 토큰을 포함
-                    'Content-Type': 'application/json'
-                }
+                headers: putHeadersAccessToken()
             });
 
             // 응답 데이터를 JSON으로 변환
@@ -151,6 +136,7 @@ async function deleteMember(){
 
             // 응답 코드에 따른 처리
             if (data.code === "MEMBER-S004") {
+                localStorage.removeItem('accessToken');
                 alert("회원 탈퇴가 완료되었습니다.");
                 window.location.href = '/index.html';  // 탈퇴 후 메인 페이지로 이동
             } else {
