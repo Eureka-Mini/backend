@@ -91,9 +91,9 @@ async function updateMember() {
         // 응답 코드에 따른 처리
         if (data.code === "MEMBER-S003") { // 응답 코드 확인
             alert("회원 정보가 성공적으로 수정되었습니다.");
-            // 사용자 닉네임으로 페이지 제목 변경
-            const nickname = data.data.nickname; // JSON 응답에서 닉네임 가져오기
-            document.querySelector('.main-title').textContent = `${nickname}님의 상세페이지`;
+
+            // 로그아웃 요청
+            await logoutAndRedirect();
         } else {
             alert(`회원 정보 수정 중 오류가 발생했습니다: ${data.message}`);
         }
@@ -102,6 +102,31 @@ async function updateMember() {
         alert("회원 정보 수정 중 오류가 발생했습니다: " + error.message);
     }
 }
+
+async function logoutAndRedirect() {
+    try {
+        // 로그아웃 요청
+        let response = await fetch("/auth/logout", {
+            method: "POST",
+            headers: putHeadersAccessToken(),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Logout failed with status ${response.status}`);
+        }
+
+        // 로그아웃 성공 시 로컬 스토리지에서 토큰 제거
+        localStorage.removeItem('accessToken');
+
+        // 알림 후 메인 페이지로 리디렉션
+        alert("로그아웃이 완료되었습니다.");
+        window.location.href = "/html/login.html";  // 로그인 페이지로 리디렉션
+    } catch (error) {
+        console.error("Logout failed:", error);
+        alert("로그아웃 중 오류가 발생했습니다: " + error.message);
+    }
+}
+
 
 async function updateAddress() {
     let street = document.querySelector("#street").value;
