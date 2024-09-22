@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Navigation Bar</title>
     <link rel="stylesheet" href="../css/navbar.css">
+    <script src="https://kit.fontawesome.com/b5cbe7bd41.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <nav class="navbar">
@@ -13,13 +14,17 @@
             <img src="../images/cucumber.png" alt="오이 로고" class="logo-image">
             오이
         </a>
+
         <a href="../html/boardList.html" class="navbar-link">중고거래</a>
-        <div class="navbar-search">
-            <input type="text" id="searchInput" placeholder="검색어를 입력하세요...">
-            <button id="write-btn" class="icon-button">
-                <img src="../images/pencil.png" alt="글 작성" class="icon">
-            </button>
-        </div>
+
+        <form class="navbar-search" action="" method="get">
+            <input class="search-input" type="text" placeholder="검색어를 입력하세요.">
+        </form>
+
+        <button id="write-btn" class="icon-button">
+            <img src="../images/pencil.png" alt="글 작성" class="icon">
+        </button>
+
         <div class="navbar-user">
             <a href="#" class="navbar-link login-button" id="login-button"></a>
             <a href="#" class="navbar-link logout-button" id="logout-button" style="display: none;"></a>

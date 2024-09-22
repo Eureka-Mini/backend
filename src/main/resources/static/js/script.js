@@ -29,14 +29,14 @@ async function loadNavbar(retries = 1) {
 
 function initializeNavbar() {
     const loginButton = document.getElementById('login-button');
-    const searchInput = document.getElementById('searchInput');
+    const searchInput = document.querySelector('.search-input');
 
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken) {
         const nickname = parseNicknameFromToken(accessToken);
         if (nickname) {
             const nicknameElement = document.createElement('span');
-            nicknameElement.textContent = "Welcome " + nickname + " !"
+            nicknameElement.textContent = "Welcome " + nickname + " !";
             nicknameElement.style.marginRight = '10px';
             nicknameElement.style.color = '#006400';
             loginButton.textContent = '로그아웃';
@@ -60,7 +60,7 @@ function initializeNavbar() {
         if (event.key === 'Enter') {
             const query = searchInput.value.trim();
             if (query) {
-                alert('검색어: ' + query); // 검색어 처리 로직 (이 부분을 실제 로직으로 대체 가능)
+                alert('검색어: ' + query);
             } else {
                 alert('검색어를 입력하세요.');
             }
