@@ -5,13 +5,6 @@
     font-style: normal;
 }
 
-@font-face {
-    font-family: 'HakgyoansimDunggeunmisoTTF-R';
-    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimDunggeunmisoTTF-R.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-}
-
 * {
     margin: 0;
     padding: 0;
@@ -48,7 +41,6 @@ body {
     text-decoration: none;
     display: flex;
     align-items: center;
-    margin-right: 50px;
     font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif;
 }
 
@@ -73,23 +65,30 @@ body {
     color: #32cd32;
 }
 
+/* 검색창 */
 .navbar-search {
+    height: 50px;
+    width: 500px;
     display: flex;
     align-items: center;
-    flex-grow: 1;
-    justify-content: flex-end;
-    margin-right: 10px;
+    background-color: white;
+    border-radius: 30px;
+    padding: 5px;
+    border: 1px solid #32cd32;
 }
 
-#searchInput {
-    padding: 8px 15px;
+.search-input {
+    border: none;
+    background: none;
+    outline: none;
+    padding: 0 10px;
+    color: #006400;
     font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 200px;
-    margin-right: 10px;
+    line-height: 40px;
+    flex-grow: 1;
 }
 
+/* 로그인 */
 .navbar-user {
     display: flex;
     align-items: center;
@@ -115,21 +114,20 @@ body {
     background-color: #228b22;
 }
 
-
 /* 글 작성 버튼 스타일 */
 .icon-button {
-    background-color: transparent; /* 배경 제거 */
-    margin-left: 50px;
+    background-color: transparent;
+    margin-left: 10px;
     border: none;
     cursor: pointer;
-    padding: 5px; /* 여백 */
+    padding: 5px;
 }
 
 .icon-button .icon {
-    width: 24px; /* 아이콘 크기 */
+    width: 24px;
     height: 24px;
 }
 
 .icon-button:hover {
-    opacity: 0.7; /* 호버 시 아이콘 투명도 조정 */
+    opacity: 0.7;
 }
