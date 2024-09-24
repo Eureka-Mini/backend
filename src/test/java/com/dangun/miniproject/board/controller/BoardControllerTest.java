@@ -119,6 +119,35 @@ class BoardControllerTest {
             result.andExpect(status().isOk());
         }
 
+        @Test
+        @DisplayName("[성공] 키워드가 비어있을 경우, 게시글 전체 목록이 조회된다.")
+        void getBoardList_NotNull_isEmpty_success() throws Exception {
+            // given -- 테스트의 상태 설정
+            final Pageable pageable = PageRequest.of(0, 10);
+
+            final Member member = mock(Member.class);
+            final Board board1 = BoardFixture.instanceOf(member);
+            final Board board2 = BoardFixture.instanceOf(member);
+
+            final List<GetBoardResponse> boardList = List.of(
+                    GetBoardResponse.from(board1),
+                    GetBoardResponse.from(board2)
+            );
+
+            final Page<GetBoardResponse> response = new PageImpl<>(boardList, pageable, boardList.size());
+
+            given(boardService.getBoardList(any())).willReturn(response);
+
+            // when -- 테스트하고자 하는 행동
+            final ResultActions result = mockMvc.perform(
+                    get("/boards?keyword=", " ")
+                            .accept(APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON));
+
+            // then -- 예상되는 변화 및 결과
+            result.andExpect(status().isOk());
+        }
+
 
         @Test
         @DisplayName("[성공] 키워드가 있을 경우, 키워드가 포함된 게시글 목록이 조회된다.")

@@ -9,6 +9,7 @@ import com.dangun.miniproject.comment.dto.UpdateCommentRequest;
 import com.dangun.miniproject.comment.dto.UpdateCommentResponse;
 import com.dangun.miniproject.comment.dto.WriteCommentRequest;
 import com.dangun.miniproject.comment.dto.WriteCommentResponse;
+import com.dangun.miniproject.comment.exception.CommentNotFoundException;
 import com.dangun.miniproject.comment.repository.CommentRepository;
 import com.dangun.miniproject.comment.service.impl.CommentServiceImpl;
 import com.dangun.miniproject.member.domain.Member;
@@ -166,6 +167,22 @@ public class CommentServiceTest {
                     .isInstanceOf(AccessDeniedException.class)
                     .hasMessage("Is not writer");
         }
+
+        @Test
+        void 존재하지_않는_댓글을_수정한다_400(){
+                // given
+                Long commentId = 10L;
+                Long boardId = 20L;
+                UpdateCommentRequest request = mock(UpdateCommentRequest.class);
+                Member member = mock(Member.class);
+
+                when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+                // when & then
+            assertThatThrownBy(() -> commentService.updateComment(boardId, commentId, member, request))
+                    .isInstanceOf(CommentNotFoundException.class)
+                    .hasMessage("Comment not found");
+            }
     }
 
     @Nested

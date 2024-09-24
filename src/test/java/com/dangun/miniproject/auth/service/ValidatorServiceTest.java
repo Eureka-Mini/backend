@@ -13,8 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +24,28 @@ public class ValidatorServiceTest {
 
     @InjectMocks
     private SignupValidator signupValidator;
+
+    @Test
+    @DisplayName("회원 가입 검증 성공")
+    void testSignupMember_success() {
+        // given
+        GetMemberRequest memberRequest = GetMemberRequest.builder()
+                .email("asdf@asdf.com")
+                .nickname("nickname")
+                .password("password")
+                .address(GetAddressRequest.builder()
+                        .street("street")
+                        .detail("detail")
+                        .zipcode("zipcode")
+                        .build())
+                .build();
+
+        when(memberRepository.existsByEmail(memberRequest.getEmail())).thenReturn(false);
+        when(memberRepository.existsByNickname(memberRequest.getNickname())).thenReturn(false);
+
+        // When & Then
+        assertDoesNotThrow(() -> signupValidator.validateMember(memberRequest));
+    }
 
     @Test
     @DisplayName("회원 가입 실패 - 잘못된 이메일 양식 예외 발생")
@@ -74,6 +95,29 @@ public class ValidatorServiceTest {
     }
 
     @Test
+    @DisplayName("회원 가입 실패 - 닉네임 null 예외 발생")
+    void testSignupMember_InvalidInputException_NullNickname() {
+        // Given
+        GetMemberRequest memberRequest = GetMemberRequest.builder()
+                .email("test@gmail.com")
+                .password("password")
+                .address(GetAddressRequest.builder()
+                        .street("street")
+                        .detail("detail")
+                        .zipcode("zipcode")
+                        .build())
+                .build();
+
+        // When
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
+            signupValidator.validateMember(memberRequest);
+        });
+
+        // Then
+        assertEquals("닉네임 값을 입력해주세요.", exception.getMessage());
+    }
+
+    @Test
     @DisplayName("회원 가입 실패 - 비밀번호 공란 예외 발생")
     void testSignupMember_InvalidInputExceptionPassword() {
         // Given
@@ -81,6 +125,29 @@ public class ValidatorServiceTest {
                 .email("test@gmail.com")
                 .nickname("nickname")
                 .password("")
+                .address(GetAddressRequest.builder()
+                        .street("street")
+                        .detail("detail")
+                        .zipcode("zipcode")
+                        .build())
+                .build();
+
+        // When
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
+            signupValidator.validateMember(memberRequest);
+        });
+
+        // Then
+        assertEquals("비밀번호를 입력해주세요.", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("회원 가입 실패 - 비밀번호 null 예외 발생")
+    void testSignupMember_InvalidInputExceptionNullPassword() {
+        // Given
+        GetMemberRequest memberRequest = GetMemberRequest.builder()
+                .email("test@gmail.com")
+                .nickname("nickname")
                 .address(GetAddressRequest.builder()
                         .street("street")
                         .detail("detail")
@@ -174,6 +241,29 @@ public class ValidatorServiceTest {
     }
 
     @Test
+    @DisplayName("회원 가입 실패 - 주소 null 예외 처리")
+    void testSignupMember_InvalidInputExceptionNullStreet() {
+        // Given
+        GetMemberRequest memberRequest = GetMemberRequest.builder()
+                .email("test@gmail.com")
+                .password("password")
+                .nickname("nickname")
+                .address(GetAddressRequest.builder()
+                        .detail("detail")
+                        .zipcode("zipcode")
+                        .build())
+                .build();
+
+        // When
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
+            signupValidator.validateMember(memberRequest);
+        });
+
+        // Then
+        assertEquals("주소를 입력해주세요.", exception.getMessage());
+    }
+
+    @Test
     @DisplayName("회원 가입 실패 - 상세 주소 공란 예외 처리")
     void testSignupMember_InvalidInputExceptionDetail() {
         // Given
@@ -184,6 +274,29 @@ public class ValidatorServiceTest {
                 .address(GetAddressRequest.builder()
                         .street("street")
                         .detail("")
+                        .zipcode("zipcode")
+                        .build())
+                .build();
+
+        // When
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
+            signupValidator.validateMember(memberRequest);
+        });
+
+        // Then
+        assertEquals("상세주소를 입력해주세요.", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("회원 가입 실패 - 상세 주소 공란 예외 처리")
+    void testSignupMember_InvalidInputExceptionNullDetail() {
+        // Given
+        GetMemberRequest memberRequest = GetMemberRequest.builder()
+                .email("test@gmail.com")
+                .password("password")
+                .nickname("nickname")
+                .address(GetAddressRequest.builder()
+                        .street("street")
                         .zipcode("zipcode")
                         .build())
                 .build();
@@ -209,6 +322,29 @@ public class ValidatorServiceTest {
                         .street("street")
                         .detail("detail")
                         .zipcode("")
+                        .build())
+                .build();
+
+        // When
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
+            signupValidator.validateMember(memberRequest);
+        });
+
+        // Then
+        assertEquals("우편번호를 입력해주세요.", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("회원 가입 실패 - 우편번호 공란 예외 처리")
+    void testSignupMember_InvalidInputExceptionNullZipcode() {
+        // Given
+        GetMemberRequest memberRequest = GetMemberRequest.builder()
+                .email("test@gmail.com")
+                .password("password")
+                .nickname("nickname")
+                .address(GetAddressRequest.builder()
+                        .street("street")
+                        .detail("detail")
                         .build())
                 .build();
 

@@ -6,7 +6,6 @@ import com.dangun.miniproject.auth.jwt.JWTUtil;
 import com.dangun.miniproject.auth.service.impl.TokenBlackListService;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.repository.MemberRepository;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -119,12 +118,10 @@ public class JWTFilter extends OncePerRequestFilter {
             throw new ReissueAccessTokenException("refreshToken null");
         }
 
-        try {
-            jwtUtil.isExpiredTokenRefresh(refreshToken);
-        } catch (ExpiredJwtException e) {
+        if(jwtUtil.isExpiredTokenRefresh(refreshToken)){
             response.getWriter().write("refreshToken expired");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            throw new ReissueAccessTokenException("refreshToken expired");
         }
 
         String email = jwtUtil.getMemberEmail(refreshToken);

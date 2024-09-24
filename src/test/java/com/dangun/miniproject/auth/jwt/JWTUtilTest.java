@@ -1,6 +1,5 @@
 package com.dangun.miniproject.auth.jwt;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class JWTUtilTest {
 
     private JWTUtil jwtUtil;
-    private final String secretKey = "dpfwnldbfpzkrkqhwkrndpfwnldbfpzkrkqhwkrn";
+    private final String secretKey = "dpfwnldbfpzkrkqhwkrndpfwnldbfpzkrkqhwkrndpfwnldbfpzkrkqhwkrn";
 
     @BeforeEach
     void setUp() {
@@ -98,12 +97,28 @@ public class JWTUtilTest {
     }
 
     @Test
-    @DisplayName("Refresh Token 만료 검사")
+    @DisplayName("만료된 Refresh Token 만료 검사")
     void testExpiredRefreshToken() {
         // Given
-        String expiredRefreshToken = jwtUtil.createJwtRefresh("refreshToken", "test@test.com", -1000L);
+        String expiredRefreshToken = jwtUtil.createJwtRefresh("refreshToken", "email", -100L);
 
-        // When & Then
-        assertThrows(ExpiredJwtException.class, () -> jwtUtil.isExpiredTokenRefresh(expiredRefreshToken));
+        // When
+        boolean isExpired = jwtUtil.isExpiredTokenRefresh(expiredRefreshToken);
+
+        // Then
+        assertTrue(isExpired);
+    }
+
+    @Test
+    @DisplayName("만료되지 않은 Refresh Token 검사")
+    void testNotExpiredRefreshToken() {
+        // Given
+        String expiredRefreshToken = jwtUtil.createJwtRefresh("refreshToken", "email", 100000L);
+
+        // When
+        boolean isExpired = jwtUtil.isExpiredTokenRefresh(expiredRefreshToken);
+
+        // Then
+        assertFalse(isExpired);
     }
 }

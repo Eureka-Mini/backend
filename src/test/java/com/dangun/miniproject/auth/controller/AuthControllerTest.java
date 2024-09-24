@@ -57,7 +57,7 @@ public class AuthControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(new ObjectMapper().writeValueAsString(memberRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.code").value("SING-UP-S001"))
+                .andExpect(jsonPath("$.code").value("AUTH-S001"))
                 .andExpect(jsonPath("$.message").value("Sign up Success"))
                 .andExpect(jsonPath("$.data.nickname").value(member.getNickname()));
 
@@ -77,7 +77,7 @@ public class AuthControllerTest {
                         .header("Authorization", accessToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("AUTH_S002"))
+                .andExpect(jsonPath("$.code").value("AUTH-S002"))
                 .andExpect(jsonPath("$.message").value("logout Success"))
                 .andExpect(jsonPath("$.data.result").value("set token blacklist / cookie delete"));
 

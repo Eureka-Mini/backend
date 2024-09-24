@@ -2,6 +2,7 @@ package com.dangun.miniproject.comment.repository;
 
 import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.comment.domain.Comment;
+import com.dangun.miniproject.common.config.JpaAuditingConfig;
 import com.dangun.miniproject.member.domain.Member;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(JpaAuditingConfig.class)
 public class CommentRepositoryTest {
 
     @Autowired
@@ -54,5 +57,7 @@ public class CommentRepositoryTest {
         assertThat(comment.getMember().getId()).isEqualTo(6L);
         assertThat(comment.getBoard().getId()).isEqualTo(1L);
         assertThat(comment.getContent()).isEqualTo(commentContent);
+        assertThat(comment.getCreatedAt()).isNotNull();
+        assertThat(comment.getUpdatedAt()).isNotNull();
     }
 }
