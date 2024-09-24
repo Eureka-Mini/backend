@@ -30,7 +30,7 @@ public class AuthController {
         Map<String, String> data = new HashMap<>();
         data.put("nickname", member.getNickname());
 
-        return ApiResponse.ok("SING-UP-S001", data, "Sign up Success");
+        return ApiResponse.ok("AUTH-S001", data, "Sign up Success");
     }
 
     @PostMapping("/logout")
@@ -40,6 +40,6 @@ public class AuthController {
         Map<String, String> data = new HashMap<>();
         data.put("result", "set token blacklist / cookie delete");
 
-        return ApiResponse.ok("AUTH_S002", data,"logout Success");
+        return ApiResponse.ok("AUTH_S002", data, "logout Success");
     }
 }
