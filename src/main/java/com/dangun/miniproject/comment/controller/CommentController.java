@@ -35,11 +35,12 @@ public class CommentController {
                                            @RequestBody UpdateCommentRequest request,
                                            @PathVariable Long boardId,
                                            @PathVariable Long commentId) {
-        UpdateCommentResponse response = commentService.updateComment(boardId, commentId, member, request);
 
         if (request.getContent().isBlank()) {
             return ApiResponse.badRequest("COMMENT-F001", "Content is blank");
         }
+
+        UpdateCommentResponse response = commentService.updateComment(boardId, commentId, member, request);
 
         return ApiResponse.ok("COMMENT-S002", response, "Update Success");
     }

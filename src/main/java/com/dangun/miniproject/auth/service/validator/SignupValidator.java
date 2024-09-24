@@ -1,7 +1,7 @@
 package com.dangun.miniproject.auth.service.validator;
 
-import com.dangun.miniproject.auth.exception.DuplicateException;
-import com.dangun.miniproject.auth.exception.InvalidInputException;
+import com.dangun.miniproject.common.exception.DuplicateException;
+import com.dangun.miniproject.common.exception.InvalidInputException;
 import com.dangun.miniproject.member.dto.GetMemberRequest;
 import com.dangun.miniproject.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;

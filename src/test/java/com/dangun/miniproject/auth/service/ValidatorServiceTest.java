@@ -1,33 +1,30 @@
 package com.dangun.miniproject.auth.service;
 
-import com.dangun.miniproject.auth.exception.DuplicateException;
-import com.dangun.miniproject.auth.exception.InvalidInputException;
 import com.dangun.miniproject.auth.service.validator.SignupValidator;
+import com.dangun.miniproject.common.exception.DuplicateException;
+import com.dangun.miniproject.common.exception.InvalidInputException;
 import com.dangun.miniproject.member.dto.GetAddressRequest;
 import com.dangun.miniproject.member.dto.GetMemberRequest;
 import com.dangun.miniproject.member.repository.MemberRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class ValidatorServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
 
+    @InjectMocks
     private SignupValidator signupValidator;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-        signupValidator = new SignupValidator(memberRepository);
-    }
 
     @Test
     @DisplayName("회원 가입 실패 - 잘못된 이메일 양식 예외 발생")

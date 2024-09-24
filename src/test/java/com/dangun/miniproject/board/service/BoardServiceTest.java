@@ -307,7 +307,7 @@ class BoardServiceTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("BOARD-S002", response.getCode());
+        assertEquals("BOARD-S003", response.getCode());
         assertEquals("Board Update Success", response.getMessage());
         assertNotNull(response.getData());
         assertEquals("새 내용", response.getData().getContent());
@@ -417,7 +417,7 @@ class BoardServiceTest {
 
         // then
         assertNotNull(response);
-        assertEquals("BOARD-S002", response.getCode());
+        assertEquals("BOARD-S003", response.getCode());
         assertEquals("Board Update Success", response.getMessage());
 
         // 변경되지 않아야 할 필드들 확인
@@ -470,7 +470,7 @@ class BoardServiceTest {
         verify(boardRepository).delete(board);
 
         assertNotNull(response);
-        assertEquals("BOARD-S001", response.getCode());
+        assertEquals("BOARD-S004", response.getCode());
         assertEquals("Board Delete Success", response.getMessage());
     }
 

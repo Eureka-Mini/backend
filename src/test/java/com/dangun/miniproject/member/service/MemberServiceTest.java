@@ -2,13 +2,13 @@ package com.dangun.miniproject.member.service;
 
 import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.comment.domain.Comment;
+import com.dangun.miniproject.common.exception.InvalidInputException;
 import com.dangun.miniproject.member.domain.Address;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.dto.GetAddressDto;
 import com.dangun.miniproject.member.dto.GetMemberDto;
+import com.dangun.miniproject.member.exception.MemberNotFoundException;
 import com.dangun.miniproject.member.repository.AddressRepository;
-import com.dangun.miniproject.board.repository.BoardRepository;
-import com.dangun.miniproject.comment.repository.CommentRepository;
 import com.dangun.miniproject.member.repository.MemberRepository;
 import com.dangun.miniproject.member.service.impl.MemberServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,16 +16,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
@@ -38,15 +36,8 @@ public class MemberServiceTest {
     @Mock
     private AddressRepository addressRepository;
 
-    @Mock
-    private CommentRepository commentRepository;
-
-    @Mock
-    private BoardRepository boardRepository;
-
     @InjectMocks
     private MemberServiceImpl memberService;
-
 
     private Member member;
     private Address address;
@@ -97,14 +88,10 @@ public class MemberServiceTest {
         Long memberId = 1L;
         when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
 
-        // When
-        GetMemberDto result = memberService.getMember(memberId);
-
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getEmail()).isNull();
-        assertThat(result.getNickname()).isNull();
-        assertThat(result.getAddress()).isNull();
+        // When & Then
+        assertThatThrownBy(() -> memberService.getMember(memberId))
+                .isInstanceOf(MemberNotFoundException.class)
+                .hasMessage("Member not found");
     }
 
 
@@ -159,7 +146,7 @@ public class MemberServiceTest {
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
             memberService.updateMember(getMemberDto, memberId);
         });
 
@@ -178,7 +165,7 @@ public class MemberServiceTest {
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
             memberService.updateMember(getMemberDto, memberId);
         });
 
@@ -225,7 +212,7 @@ public class MemberServiceTest {
         when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
             memberService.updateAddress(getAddressDto, addressId);
         });
 
@@ -246,7 +233,7 @@ public class MemberServiceTest {
         when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
             memberService.updateAddress(getAddressDto, addressId);
         });
 
@@ -267,7 +254,7 @@ public class MemberServiceTest {
         when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
             memberService.updateAddress(getAddressDto, addressId);
         });
 
@@ -288,7 +275,7 @@ public class MemberServiceTest {
         when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
             memberService.updateAddress(getAddressDto, addressId);
         });
 
@@ -309,7 +296,7 @@ public class MemberServiceTest {
         when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
             memberService.updateAddress(getAddressDto, addressId);
         });
 
@@ -330,7 +317,7 @@ public class MemberServiceTest {
         when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
             memberService.updateAddress(getAddressDto, addressId);
         });
 

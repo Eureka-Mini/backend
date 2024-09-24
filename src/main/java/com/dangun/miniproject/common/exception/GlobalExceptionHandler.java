@@ -1,7 +1,5 @@
 package com.dangun.miniproject.common.exception;
 
-import com.dangun.miniproject.auth.exception.DuplicateException;
-import com.dangun.miniproject.auth.exception.InvalidInputException;
 import com.dangun.miniproject.common.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;

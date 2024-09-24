@@ -1,7 +1,7 @@
 package com.dangun.miniproject.auth.controller;
 
-import com.dangun.miniproject.auth.exception.DuplicateException;
-import com.dangun.miniproject.auth.exception.InvalidInputException;
+import com.dangun.miniproject.common.exception.DuplicateException;
+import com.dangun.miniproject.common.exception.InvalidInputException;
 import com.dangun.miniproject.member.dto.GetAddressRequest;
 import com.dangun.miniproject.member.dto.GetMemberRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
