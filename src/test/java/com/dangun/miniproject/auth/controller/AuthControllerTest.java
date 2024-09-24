@@ -57,7 +57,7 @@ public class AuthControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(new ObjectMapper().writeValueAsString(memberRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("SING-UP-S001"))
+                .andExpect(jsonPath("$.code").value("AUTH-S001"))
                 .andExpect(jsonPath("$.message").value("Sign up Success"))
                 .andExpect(jsonPath("$.data.nickname").value(member.getNickname()));
 

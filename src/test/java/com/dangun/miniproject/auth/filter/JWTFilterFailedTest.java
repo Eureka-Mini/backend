@@ -1,6 +1,6 @@
 package com.dangun.miniproject.auth.filter;
 
-import com.dangun.miniproject.auth.exception.exceptions.ReissueAccessTokenException;
+import com.dangun.miniproject.auth.exception.ReissueAccessTokenException;
 import com.dangun.miniproject.auth.jwt.JWTUtil;
 import com.dangun.miniproject.auth.service.impl.TokenBlackListService;
 import com.dangun.miniproject.member.repository.MemberRepository;

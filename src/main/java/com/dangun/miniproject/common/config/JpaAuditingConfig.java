@@ -1,4 +1,4 @@
-package com.dangun.miniproject.common;
+package com.dangun.miniproject.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
