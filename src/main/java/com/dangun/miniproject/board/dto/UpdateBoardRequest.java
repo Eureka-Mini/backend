@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 public class UpdateBoardRequest {
     private String title;
     private String content;
-    private Integer price;
+    private Long price;
     private String boardStatus;
 }
