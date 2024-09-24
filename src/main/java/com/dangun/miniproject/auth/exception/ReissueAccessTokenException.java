@@ -1,4 +1,4 @@
-package com.dangun.miniproject.auth.exception.exceptions;
+package com.dangun.miniproject.auth.exception;
 
 public class ReissueAccessTokenException extends RuntimeException {
 
