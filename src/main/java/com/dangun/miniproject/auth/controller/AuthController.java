@@ -30,7 +30,7 @@ public class AuthController {
         Map<String, String> data = new HashMap<>();
         data.put("nickname", member.getNickname());
 
-        return ApiResponse.ok("AUTH-S001", data, "Sign up Success");
+        return ApiResponse.created("", "SING-UP-S001", data, "Sign up Success");
     }
 
     @PostMapping("/logout")

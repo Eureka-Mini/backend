@@ -74,7 +74,7 @@ function initializeNavbar() {
             if (query) {
                 window.location.href = '/html/boardList.html?keyword=' + encodeURIComponent(query);  // 검색어를 URL에 추가
             } else {
-                alert('검색어를 입력하세요.');
+                window.location.href = '/html/boardList.html';
             }
         }
     });
