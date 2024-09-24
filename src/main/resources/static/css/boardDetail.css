@@ -84,10 +84,20 @@ textarea {
 
 .board-comment-container {
     width: 100%;
+    margin-bottom: 20px;
     background-color: #ffffff;
     padding: 20px;
     border-radius: 8px;
     border: 1px solid #e0e0e0;
+}
+
+h4 {
+    margin-top: 20px;
+    margin-bottom: 5px;
+    text-align: left;
+    width: 100%;
+    margin-left: 0;
+    padding-left: 0;
 }
 
 .comment {
@@ -122,6 +132,11 @@ textarea {
     flex-direction: column;
 }
 
+.comment-form label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
 .comment-form textarea {
     padding: 10px;
     border: 1px solid #ccc;
@@ -130,8 +145,21 @@ textarea {
     margin-bottom: 10px;
 }
 
+.comment-form p {
+    text-align: right;
+    color: #555555;
+    margin-top: -5px;
+}
+
+#charCount {
+    margin-left: 10px;
+    color: #555555;
+    font-size: 12px;
+}
+
 .btn-primary {
     padding: 10px;
+    margin-top: 40px;
     background-color: #4caf50;
     color: white;
     border: none;
