@@ -166,3 +166,26 @@ h4 {
     border-radius: 5px;
     cursor: pointer;
 }
+
+.comment-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    top: 10px;
+}
+
+.edit-btn,
+.delete-btn {
+    font-size: 12px;
+    background: transparent;
+    border: none;
+    color: #2C8A7E;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.edit-btn:hover,
+.delete-btn:hover {
+    color: #1A5C5E;
+}
