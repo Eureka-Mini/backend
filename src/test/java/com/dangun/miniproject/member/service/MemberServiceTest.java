@@ -345,7 +345,6 @@ public class MemberServiceTest {
         setField(member, "boards", new ArrayList<Board>());
         setField(member, "address", new Address());
 
-        // 댓글 및 게시글 추가
         Comment comment = mock(Comment.class);
         Board board = mock(Board.class);
 
@@ -362,8 +361,9 @@ public class MemberServiceTest {
 
         // then
         assertTrue(result);
-        verify(commentRepository).deleteInBatch(member.getComments());
-        verify(boardRepository).deleteInBatch(member.getBoards());
+
+        verify(memberRepository).deleteCommentsByMemberId(member.getId());
+        verify(memberRepository).deleteBoardsByMemberId(member.getId());
         verify(addressRepository).delete(member.getAddress());
         verify(memberRepository).delete(member);
     }

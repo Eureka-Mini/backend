@@ -129,12 +129,12 @@ public class MemberServiceImpl implements MemberService {
     public boolean deleteMember(Long id) {
         Optional<Member> memberOptional = memberRepository.findById(id);
 
-            Member member = memberOptional.get();
+        Member member = memberOptional.get();
 
-            commentRepository.deleteInBatch(member.getComments());
-            boardRepository.deleteInBatch(member.getBoards());
-            addressRepository.delete(member.getAddress());
-            memberRepository.delete(member);
+        memberRepository.deleteCommentsByMemberId(member.getId());
+        memberRepository.deleteBoardsByMemberId(member.getId());
+        addressRepository.delete(member.getAddress());
+        memberRepository.delete(member);
 
             return true;
     }
