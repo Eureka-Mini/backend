@@ -127,7 +127,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     @Transactional
     public UpdateBoardResponse updateBoard(Long boardId, UpdateBoardRequest request, Long memberId) {
-        if (memberId == null) {
+        if (memberId == 0) {
             throw new InternalAuthenticationServiceException("Token Not Exist") {
             };
         }
