@@ -7,28 +7,34 @@
     <link rel="stylesheet" href="/css/boardDetail.css">
 </head>
 <body>
-
 <div id="navbar-placeholder"></div>
 <div class="wrapper">
     <article class="board-container">
         <section class="image-section">
             <img src="/images/defaultItem.png" alt="상품 사진">
         </section>
+
         <section id="board-profile">
             <div id="board-nickname">닉네임</div>
             <div id="board-address">주소</div>
         </section>
+
         <section id="board-content-section">
             <h1 id="board-title">글 제목</h1>
             <p class="created-time" id="board-created-time">12시간 전</p>
-            <p id="board-price">가격</p>
-            <p id="board-status">상태</p>
+            <div style="display: flex; justify-content: space-between;">
+                <p id="board-price">가격</p>
+                <p id="board-status" style="margin-left: 10px;">상태</p>
+            </div>
             <div class="board-content">
                 <p>이곳에 글 내용이 들어갑니다.</p>
             </div>
         </section>
+
+        <h4>전체 댓글</h4>
         <section class="board-comment-container">
         </section>
+
         <div class="comment-form">
             <label for="newComment">댓글 작성</label>
             <textarea id="newComment" placeholder="댓글을 작성하세요. 최대 200자까지 입력할 수 있습니다."></textarea>
