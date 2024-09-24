@@ -1,7 +1,10 @@
 package com.dangun.miniproject.member.dto;
 
 import com.dangun.miniproject.member.domain.Member;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
@@ -20,11 +23,7 @@ public class GetMemberRequest {
                 .password(password)
                 .build();
 
-        if (address != null) {
-            member.addAddress(address.toEntity(member));
-        } else {
-            throw new RuntimeException("Signup address null");
-        }
+        member.addAddress(address.toEntity(member));
 
         return member;
     }
