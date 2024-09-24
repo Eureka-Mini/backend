@@ -13,13 +13,14 @@ textarea {
     border-radius: 8px;
     border: 1px solid #e0e0e0;
     box-sizing: border-box;
-    overflow-y: auto; /* 스크롤 추가 */
-    resize: none; /* 크기 조절 불가 */
+    overflow-y: auto;
+    resize: none;
 }
 
 .wrapper {
-    min-height: calc(100vh - 100px); /* footer의 높이를 뺀 값으로 설정 */
-    padding-bottom: 20px; /* footer와의 간격을 위한 padding */
+    position: relative;
+    min-height: calc(100vh - 100px);
+    padding-bottom: 60px;
 }
 
 .board-container {
@@ -34,6 +35,8 @@ textarea {
     background-color: #ffffff;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    padding-bottom: 80px;
 }
 
 .image-section img {
@@ -174,18 +177,29 @@ h4 {
     top: 10px;
 }
 
+#board-button {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    position: absolute;
+    bottom: -60px;
+    right: 0;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
 .edit-btn,
 .delete-btn {
-    font-size: 12px;
-    background: transparent;
+    font-size: 14px;
+    padding: 10px 15px;
+    background-color: #4caf50;
+    color: white;
     border: none;
-    color: #2C8A7E;
+    border-radius: 5px;
     cursor: pointer;
-    text-decoration: underline;
-    padding: 0;
 }
 
 .edit-btn:hover,
 .delete-btn:hover {
-    color: #1A5C5E;
+    background-color: #388e3c;
 }
