@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('board-title').textContent = boardData.title;
                 document.getElementById('board-created-time').textContent = timeSince(boardData.createdAt);
                 document.getElementById('board-address').textContent = boardData.writerStreetAddress;
-                document.getElementById('board-price').textContent = boardData.price || "가격 없음";
+                document.getElementById('board-price').textContent = `${boardData.price}원` || "가격 없음";
                 document.getElementById('board-status').textContent = boardData.boardStatus || "상태 없음";
                 document.querySelector('.board-content p').innerHTML = boardData.content.replace(/\n/g, '<br>');
                 document.getElementById('board-nickname').textContent = boardData.writer;
