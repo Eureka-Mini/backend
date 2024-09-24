@@ -151,7 +151,7 @@ public class BoardServiceImpl implements BoardService {
 
         // 응답 생성
         return UpdateBoardResponse.builder()
-                .code("BOARD-S002")
+                .code("BOARD-S003")
                 .message("Board Update Success")
                 .data(UpdateBoardResponse.Data.builder()
                         .content(board.getContent())
@@ -177,7 +177,7 @@ public class BoardServiceImpl implements BoardService {
         boardRepository.delete(board);
 
         return DeleteBoardResponse.builder()
-                .code("BOARD-S001")
+                .code("BOARD-S004")
                 .message("Board Delete Success")
                 .timestamp(LocalDateTime.now())
                 .build();

@@ -38,14 +38,14 @@ public class BoardController {
 	) {
 		if (keyword != null && !keyword.isEmpty()) {
 			return ApiResponse.ok(
-				"BOARD-S003",
+				"BOARD-S002",
 				boardService.getBoardList(keyword, pageable),
 				"Board Sorted List Success"
 			);
 		}
 
 		return ApiResponse.ok(
-			"BOARD-S003",
+			"BOARD-S002",
 			boardService.getBoardList(pageable),
 			"Board Sorted List Success"
 		);
@@ -59,7 +59,7 @@ public class BoardController {
 	) {
 
 		return ApiResponse.ok(
-			"BOARD-S004",
+			"BOARD-S002",
 			boardService.getMyBoardList(member.getId(), pageable),
 			"My Board List Success"
 		);
