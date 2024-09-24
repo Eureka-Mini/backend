@@ -8,5 +8,5 @@ import lombok.Getter;
 public class WriteBoardRequest {
     private final String title;
     private final String content;
-    private final int price;
+    private final Long price;
 }

@@ -59,6 +59,13 @@ function fetchUserInfo() {
 }
 
 function submitBoard() {
+    const price = parseInt(document.getElementById('price').value);
+
+    if (price > 100000000) {
+        alert('1억을 넘는 상품은 판매할 수 없습니다!');
+        return;
+    }
+
     const boardData = {
         title: document.getElementById('title').value,
         content: document.getElementById('content').value,
