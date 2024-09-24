@@ -5,9 +5,11 @@ import com.dangun.miniproject.auth.dto.UserDetailsDto;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.dto.GetAddressDto;
 import com.dangun.miniproject.member.dto.GetMemberDto;
+import com.dangun.miniproject.member.exception.AddressNotFoundException;
 import com.dangun.miniproject.member.service.MemberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -184,11 +186,31 @@ public class MemberControllerTest {
         // When & Then: DELETE 요청을 MockMvc를 사용하여 전송
         mockMvc.perform(delete("/members/my-info-delete")
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, updatedMemberDto, userDetails.getAuthorities()))).with(csrf()))
+                        .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, updatedMemberDto, userDetails.getAuthorities()))).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("MEMBER-S004"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("회원 탈퇴 성공"));
     }
 
+    @Test
+    void 회원_주소_변경_실패_찾을_수_없는_주소() throws Exception {
+        // given
+        Member member = new Member();
+        setField(member, "id", 1L);
+        UserDetails userDetails = new UserDetailsDto(member);
 
+        Mockito.when(memberService.updateAddress(any(GetAddressDto.class), anyLong()))
+                .thenThrow(new AddressNotFoundException());
+
+        // When & Then
+        mockMvc.perform(put("/members/my-address-update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"street\": \"st\", \"detail\": \"detail\", \"zipcode\": \"12345\" }")
+                        .with(csrf())
+                        .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, null))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MEMBER-F101"))
+                .andExpect(jsonPath("$.message").value("Address not found"));
+
+    }
 }

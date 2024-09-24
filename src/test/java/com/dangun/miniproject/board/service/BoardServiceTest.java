@@ -357,7 +357,7 @@ class BoardServiceTest {
     public void testUpdateBoardWithNoToken() {
         // Given
         Long boardId = 1L;
-        Long memberId = null; // 인증되지 않은 사용자 (토큰이 없음)
+        Long memberId = 0L; // 인증되지 않은 사용자 (토큰이 없음)
         UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
 
         // When

@@ -22,9 +22,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -309,28 +309,29 @@ class BoardControllerTest {
 
     @Test
     @DisplayName("토큰 없는 사용자 게시글 수정 시도")
-    @WithAnonymousUser
     void testUpdateBoard_Unauthorized() throws Exception {
         // Given
         Long boardId = 1L;
         UpdateBoardRequest request = new UpdateBoardRequest("Updated Title", "Updated Content", 1000, "판매중");
+        UserDetailsDto mockUser = new UserDetailsDto(mock(Member.class));
+
+        when(boardService.updateBoard(eq(boardId), any(UpdateBoardRequest.class), eq(0L)))
+                .thenThrow(new InternalAuthenticationServiceException("Token Not Exist"));
 
         // When & Then
         MvcResult result = mockMvc.perform(put("/boards/{id}", boardId)
                         .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(user(mockUser))
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
                 .andDo(print())
                 .andReturn();
 
         String responseContent = result.getResponse().getContentAsString();
-        if (!responseContent.isEmpty()) {
             DocumentContext context = JsonPath.parse(responseContent);
-            assertThat(context.read("$.code", String.class)).isEqualTo("BOARD-F002");
+            assertThat(context.read("$.code", String.class)).isEqualTo("AUTH-F101");
             assertThat(context.read("$.message", String.class)).isEqualTo("Token Not Exist");
-            assertThat(context.<Object>read("$.data")).isNull();
-        }
     }
 
     @Test

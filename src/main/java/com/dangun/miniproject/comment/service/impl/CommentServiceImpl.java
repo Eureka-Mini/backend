@@ -44,7 +44,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         if (!comment.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException("You are not the owner of this comment");
+            throw new AccessDeniedException("Is not writer");
         }
 
         comment.updateContent(request.getContent());

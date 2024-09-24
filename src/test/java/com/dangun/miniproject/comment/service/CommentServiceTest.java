@@ -164,7 +164,7 @@ public class CommentServiceTest {
             // when, then
             assertThatThrownBy(() -> commentService.updateComment(boardId, commentId, anotherMember, request))
                     .isInstanceOf(AccessDeniedException.class)
-                    .hasMessage("You are not the owner of this comment");
+                    .hasMessage("Is not writer");
         }
     }
 
