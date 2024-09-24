@@ -3,30 +3,27 @@ package com.dangun.miniproject.board.service;
 import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.board.domain.BoardStatus;
 import com.dangun.miniproject.board.dto.*;
+import com.dangun.miniproject.board.exception.BoardNotFoundException;
 import com.dangun.miniproject.board.repository.BoardRepository;
 import com.dangun.miniproject.board.service.impl.BoardServiceImpl;
 import com.dangun.miniproject.comment.domain.Comment;
-import com.dangun.miniproject.comment.dto.GetCommentResponse;
 import com.dangun.miniproject.fixture.BoardFixture;
 import com.dangun.miniproject.fixture.CommentFixture;
 import com.dangun.miniproject.member.domain.Address;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.repository.MemberRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -351,7 +348,7 @@ class BoardServiceTest {
         RuntimeException thrown = assertThrows(RuntimeException.class, () ->
                 boardService.updateBoard(boardId, request, nonExistentMemberId)
         );
-        assertEquals("User Not Found", thrown.getMessage());
+        assertEquals("Is not writer", thrown.getMessage());
     }
 
 
@@ -381,7 +378,7 @@ class BoardServiceTest {
         when(boardRepository.findById(nonExistentBoardId)).thenReturn(Optional.empty());
 
         // When
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+        RuntimeException thrown = assertThrows(BoardNotFoundException.class, () -> {
             boardService.updateBoard(nonExistentBoardId, request, 1L);
         });
         // Then
