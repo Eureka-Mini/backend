@@ -27,8 +27,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final static long ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 1000L;
     private final static long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;
-    private final static long REFRESH_TOKEN_EXPIRE_TIME_TEST = 30 * 1000L;
-    private final static long ACCESS_TOKEN_EXPIRE_TIME_TEST = 20 * 1000L;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -48,7 +46,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                                      FilterChain chain, Authentication authentication) throws IOException {
+                                            FilterChain chain, Authentication authentication) throws IOException {
         String email = authentication.getName();
         String nickname = ((UserDetailsDto) authentication.getPrincipal()).getNickname();
 

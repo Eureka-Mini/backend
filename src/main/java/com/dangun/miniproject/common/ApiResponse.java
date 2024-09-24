@@ -33,4 +33,12 @@ public class ApiResponse<T> {
     public static <T> ResponseEntity<ApiResponse<T>> badRequest(String code, String message) {
         return ResponseEntity.badRequest().body(new ApiResponse<>(code, null, message));
     }
+
+    public static <T> ResponseEntity<ApiResponse<T>> forbidden(String code, String message) {
+        return ResponseEntity.status(403).body(new ApiResponse<>(code, null, message));
+    }
+
+    public static <T> ResponseEntity<ApiResponse<T>> unAuthorized(String code, String message) {
+        return ResponseEntity.status(401).body(new ApiResponse<>(code, null, message));
+    }
 }

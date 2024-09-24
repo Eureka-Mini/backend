@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
@@ -161,6 +162,32 @@ public class CommentControllerTest {
             // then
             result.andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.message").value("Content is blank"));
+        }
+
+        @Test
+        void 댓글_작성자가_아닌_유저의_수정_시도_400() throws Exception {
+            // given
+            Long boardId = 1L;
+            Long commentId = 2L;
+            UpdateCommentRequest request = mock(UpdateCommentRequest.class);
+            Member member = mock(Member.class);
+            UserDetails userDetails = new UserDetailsDto(member);
+
+            when(request.getContent()).thenReturn("테스트댓글 수정");
+            when(commentService.updateComment(eq(boardId), eq(commentId), any(Member.class), any(UpdateCommentRequest.class)))
+                    .thenThrow(new AccessDeniedException("Is not writer"));
+
+            // when
+            ResultActions result = mockMvc.perform(put("/boards/{boardId}/comments/{commentId}", boardId, commentId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .characterEncoding(StandardCharsets.UTF_8)
+                    .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
+                    .with(csrf())
+                    .content(new ObjectMapper().writeValueAsString(request)));
+
+            // then
+            result.andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.message").value("Is not writer"));
         }
     }
 

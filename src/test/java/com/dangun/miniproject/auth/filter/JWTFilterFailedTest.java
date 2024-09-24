@@ -1,10 +1,11 @@
 package com.dangun.miniproject.auth.filter;
 
-import com.dangun.miniproject.auth.exception.exceptions.ReissueAccessTokenException;
+import com.dangun.miniproject.auth.exception.ReissueAccessTokenException;
 import com.dangun.miniproject.auth.jwt.JWTUtil;
 import com.dangun.miniproject.auth.service.impl.TokenBlackListService;
 import com.dangun.miniproject.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
@@ -67,6 +68,92 @@ public class JWTFilterFailedTest {
         // Then
         assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
         assertEquals("유효하지 않은 토큰 서명입니다.", response.getContentAsString());
+    }
+
+    @Test
+    @DisplayName("AccessToken 검증 실패 - 유효하지 않은 AccessToken")
+    void testJwtFilter_invalidAccessToken() throws Exception {
+        // Given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        String dummyToken = "dummyToken";
+        request.addHeader("Authorization", "Bearer " + dummyToken);
+
+        when(jwtUtil.isExpiredTokenAccess(dummyToken)).thenThrow(new JwtException("유효하지 않은 JWT 토큰입니다."));
+
+        FilterChain emptyFilterChain = (servletRequest, servletResponse) -> {
+        };
+
+        JWTExceptionHandlerFilter exceptionHandlerFilter = new JWTExceptionHandlerFilter();
+
+        FilterChain customFilterChain = (req, res) -> exceptionHandlerFilter.doFilter(req, res, (req2, res2)
+                -> jwtFilter.doFilter(req2, res2, emptyFilterChain));
+
+        // When
+        customFilterChain.doFilter(request, response);
+
+        // Then
+        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+        assertEquals("유효하지 않은 JWT 토큰입니다.", response.getContentAsString());
+    }
+
+    @Test
+    @DisplayName("AccessToken 검증 실패 - 예상하지 못한 예외")
+    void testJwtFilter_Exception() throws Exception {
+        // Given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        String dummyToken = "dummyToken";
+        request.addHeader("Authorization", "Bearer " + dummyToken);
+
+        when(jwtUtil.isExpiredTokenAccess(dummyToken)).thenThrow(new RuntimeException("JWT 요청 처리 중 에러가 발생했습니다.")); // Mocking
+
+        FilterChain emptyFilterChain = (servletRequest, servletResponse) -> {
+        };
+
+        JWTExceptionHandlerFilter exceptionHandlerFilter = new JWTExceptionHandlerFilter();
+
+        FilterChain customFilterChain = (req, res) -> {
+            exceptionHandlerFilter.doFilter(req, res, (req2, res2) -> {
+                jwtFilter.doFilter(req2, res2, emptyFilterChain);
+            });
+        };
+
+        // When
+        exceptionHandlerFilter.doFilter(request, response, customFilterChain); // 예외 핸들러 필터가 호출되도록 수정
+
+        // Then
+        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+        assertEquals("JWT 요청 처리 중 에러가 발생했습니다.", response.getContentAsString());
+    }
+
+    @Test
+    @DisplayName("AccessToken 검증 실패 - 예상하지 못한 예외")
+    void testJwtFilter_UnExpected_Exception() {
+        // Given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        String dummyToken = "dummyToken";
+        request.addHeader("Authorization", "Bearer " + dummyToken);
+
+        when(jwtUtil.isExpiredTokenAccess(dummyToken)).thenThrow(mock(ExpiredJwtException.class)); // Mocking
+
+        FilterChain emptyFilterChain = (servletRequest, servletResponse) -> {};
+
+        JWTExceptionHandlerFilter exceptionHandlerFilter = new JWTExceptionHandlerFilter();
+
+        FilterChain customFilterChain = (req, res) -> {
+            exceptionHandlerFilter.doFilter(req, res, (req2, res2) -> {
+                jwtFilter.doFilter(req2, res2, emptyFilterChain);
+            });
+        };
+
+        // When && then
+        Assertions.assertThatThrownBy(() -> exceptionHandlerFilter.doFilter(request, response, customFilterChain))
+                .isInstanceOf(ExpiredJwtException.class);
     }
 
     @Test
@@ -241,14 +328,12 @@ public class JWTFilterFailedTest {
         request.setCookies(cookie);
 
         when(jwtUtil.isExpiredTokenAccess(expireAccessToken)).thenReturn(true);
-
-        doThrow(new ExpiredJwtException(null, null, "refresh token expire"))
-                .when(jwtUtil).isExpiredTokenRefresh(expireRefreshToken);
+        when(jwtUtil.isExpiredTokenRefresh(expireRefreshToken)).thenReturn(true);
 
         FilterChain mockFilterChain = mock(FilterChain.class);
 
         // When
-        jwtFilter.doFilter(request, response, mockFilterChain);
+        Assertions.assertThatThrownBy(() -> jwtFilter.doFilter(request, response, mockFilterChain)).isInstanceOf(ReissueAccessTokenException.class).hasMessage("refreshToken expired");
 
         // Then
         assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
@@ -326,7 +411,7 @@ public class JWTFilterFailedTest {
 
         // when & then
         Assertions.assertThatThrownBy(
-                () -> jwtFilter.reissueAccessToken(request, response, mockFilterChain))
+                        () -> jwtFilter.reissueAccessToken(request, response, mockFilterChain))
                 .isInstanceOf(ReissueAccessTokenException.class)
                 .hasMessage("refreshToken null");
     }

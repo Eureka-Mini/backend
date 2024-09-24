@@ -1,8 +1,7 @@
 package com.dangun.miniproject.auth.controller;
 
-import com.dangun.miniproject.auth.exception.exceptions.DuplicateEmailException;
-import com.dangun.miniproject.auth.exception.exceptions.DuplicateNicknameException;
-import com.dangun.miniproject.auth.exception.exceptions.InvalidEmailException;
+import com.dangun.miniproject.common.exception.DuplicateException;
+import com.dangun.miniproject.common.exception.InvalidInputException;
 import com.dangun.miniproject.member.dto.GetAddressRequest;
 import com.dangun.miniproject.member.dto.GetMemberRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,7 +46,7 @@ public class GlobalExceptionTest {
                         .build())
                 .build();
 
-        doThrow(new InvalidEmailException("유효하지 않은 이메일 형식입니다."))
+        doThrow(new InvalidInputException("유효하지 않은 이메일 형식입니다."))
                 .when(authController).signupMember(any(GetMemberRequest.class));
 
         // When & Then
@@ -56,12 +55,12 @@ public class GlobalExceptionTest {
                         .content(new ObjectMapper().writeValueAsString(memberRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("유효하지 않은 이메일 형식입니다."))
-                .andExpect(jsonPath("$.code").value("MEMBER-F000"));
+                .andExpect(jsonPath("$.code").value("AUTH-F001"));
     }
 
     @Test
-    @DisplayName("HandleIllegalArgumentException 처리")
-    void testHandleIllegalArgumentException() throws Exception {
+    @DisplayName("HandleInvalidInputException 처리")
+    void testHandleInvalidInputException() throws Exception {
         // Given
         GetMemberRequest memberRequest = GetMemberRequest.builder()
                 .email("test@test.com")
@@ -74,7 +73,7 @@ public class GlobalExceptionTest {
                         .build())
                 .build();
 
-        doThrow(new IllegalArgumentException("닉네임 값을 입력해주세요."))
+        doThrow(new InvalidInputException("닉네임 값을 입력해주세요."))
                 .when(authController).signupMember(any(GetMemberRequest.class));
 
         // When & Then
@@ -83,7 +82,7 @@ public class GlobalExceptionTest {
                         .content(new ObjectMapper().writeValueAsString(memberRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("닉네임 값을 입력해주세요."))
-                .andExpect(jsonPath("$.code").value("MEMBER-F000"));
+                .andExpect(jsonPath("$.code").value("AUTH-F001"));
     }
 
     @Test
@@ -101,7 +100,7 @@ public class GlobalExceptionTest {
                         .build())
                 .build();
 
-        doThrow(new DuplicateEmailException("이미 존재하는 이메일 입니다."))
+        doThrow(new DuplicateException("이미 존재하는 이메일 입니다."))
                 .when(authController).signupMember(any(GetMemberRequest.class));
 
         // When & Then
@@ -110,7 +109,7 @@ public class GlobalExceptionTest {
                         .content(new ObjectMapper().writeValueAsString(memberRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("이미 존재하는 이메일 입니다."))
-                .andExpect(jsonPath("$.code").value("MEMBER-F009"));
+                .andExpect(jsonPath("$.code").value("AUTH-F002"));
     }
 
     @Test
@@ -128,7 +127,7 @@ public class GlobalExceptionTest {
                         .build())
                 .build();
 
-        doThrow(new DuplicateNicknameException("이미 존재하는 닉네임 입니다."))
+        doThrow(new DuplicateException("이미 존재하는 닉네임 입니다."))
                 .when(authController).signupMember(any(GetMemberRequest.class));
 
         // When & Then
@@ -137,6 +136,6 @@ public class GlobalExceptionTest {
                         .content(new ObjectMapper().writeValueAsString(memberRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("이미 존재하는 닉네임 입니다."))
-                .andExpect(jsonPath("$.code").value("MEMBER-F009"));
+                .andExpect(jsonPath("$.code").value("AUTH-F002"));
     }
 }

@@ -22,9 +22,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -112,6 +112,35 @@ class BoardControllerTest {
             // when -- 테스트하고자 하는 행동
             final ResultActions result = mockMvc.perform(
                     get("/boards")
+                            .accept(APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON));
+
+            // then -- 예상되는 변화 및 결과
+            result.andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("[성공] 키워드가 비어있을 경우, 게시글 전체 목록이 조회된다.")
+        void getBoardList_NotNull_isEmpty_success() throws Exception {
+            // given -- 테스트의 상태 설정
+            final Pageable pageable = PageRequest.of(0, 10);
+
+            final Member member = mock(Member.class);
+            final Board board1 = BoardFixture.instanceOf(member);
+            final Board board2 = BoardFixture.instanceOf(member);
+
+            final List<GetBoardResponse> boardList = List.of(
+                    GetBoardResponse.from(board1),
+                    GetBoardResponse.from(board2)
+            );
+
+            final Page<GetBoardResponse> response = new PageImpl<>(boardList, pageable, boardList.size());
+
+            given(boardService.getBoardList(any())).willReturn(response);
+
+            // when -- 테스트하고자 하는 행동
+            final ResultActions result = mockMvc.perform(
+                    get("/boards?keyword=", " ")
                             .accept(APPLICATION_JSON)
                             .contentType(APPLICATION_JSON));
 
@@ -309,28 +338,29 @@ class BoardControllerTest {
 
     @Test
     @DisplayName("토큰 없는 사용자 게시글 수정 시도")
-    @WithAnonymousUser
     void testUpdateBoard_Unauthorized() throws Exception {
         // Given
         Long boardId = 1L;
         UpdateBoardRequest request = new UpdateBoardRequest("Updated Title", "Updated Content", 1000, "판매중");
+        UserDetailsDto mockUser = new UserDetailsDto(mock(Member.class));
+
+        when(boardService.updateBoard(eq(boardId), any(UpdateBoardRequest.class), eq(0L)))
+                .thenThrow(new InternalAuthenticationServiceException("Token Not Exist"));
 
         // When & Then
         MvcResult result = mockMvc.perform(put("/boards/{id}", boardId)
                         .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(user(mockUser))
+                        .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
                 .andDo(print())
                 .andReturn();
 
         String responseContent = result.getResponse().getContentAsString();
-        if (!responseContent.isEmpty()) {
             DocumentContext context = JsonPath.parse(responseContent);
-            assertThat(context.read("$.code", String.class)).isEqualTo("BOARD-F002");
+            assertThat(context.read("$.code", String.class)).isEqualTo("AUTH-F101");
             assertThat(context.read("$.message", String.class)).isEqualTo("Token Not Exist");
-            assertThat(context.<Object>read("$.data")).isNull();
-        }
     }
 
     @Test

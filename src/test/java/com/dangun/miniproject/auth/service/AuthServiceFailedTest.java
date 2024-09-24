@@ -44,6 +44,22 @@ public class AuthServiceFailedTest {
     }
 
     @Test
+    @DisplayName("로그아웃 실패 테스트 - AccessToken header Null")
+    void testLogoutMember_Failed_Token_header_Null() {
+        // Given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        request.addHeader("NotAuthorization", "notBearer ");
+
+        // When
+        authService.logoutMember(request, response);
+
+        // Then
+        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
     @DisplayName("로그아웃 실패 테스트 - AccessToken 변조")
     void testLogoutMember_Failed_InvalidToken() {
         // Given

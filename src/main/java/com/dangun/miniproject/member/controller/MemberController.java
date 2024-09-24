@@ -6,7 +6,6 @@ import com.dangun.miniproject.member.dto.GetAddressDto;
 import com.dangun.miniproject.member.dto.GetMemberDto;
 import com.dangun.miniproject.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +19,11 @@ public class MemberController {
 
     // 다른 회원들의 정보 조회 가능
     @GetMapping("/{memberId}")
-    public GetMemberDto getMember(@PathVariable Long memberId) {
-        return memberService.getMember(memberId);
+    public ResponseEntity<?> getMember(@PathVariable Long memberId) {
+        GetMemberDto getMemberDto = memberService.getMember(memberId);
+
+
+        return ApiResponse.ok("MEMBER-S002", getMemberDto, "회원 정보 조회 성공");
     }
 
     // 로그인 한 사용자만 자신의 정보만 조회 가능

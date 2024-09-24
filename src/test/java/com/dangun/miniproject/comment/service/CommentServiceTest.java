@@ -2,15 +2,17 @@ package com.dangun.miniproject.comment.service;
 
 import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.board.domain.BoardStatus;
+import com.dangun.miniproject.board.exception.BoardNotFoundException;
+import com.dangun.miniproject.board.repository.BoardRepository;
 import com.dangun.miniproject.comment.domain.Comment;
-import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.comment.dto.UpdateCommentRequest;
 import com.dangun.miniproject.comment.dto.UpdateCommentResponse;
 import com.dangun.miniproject.comment.dto.WriteCommentRequest;
 import com.dangun.miniproject.comment.dto.WriteCommentResponse;
-import com.dangun.miniproject.board.repository.BoardRepository;
+import com.dangun.miniproject.comment.exception.CommentNotFoundException;
 import com.dangun.miniproject.comment.repository.CommentRepository;
 import com.dangun.miniproject.comment.service.impl.CommentServiceImpl;
+import com.dangun.miniproject.member.domain.Member;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,7 +86,7 @@ public class CommentServiceTest {
             // when & then
             assertThatThrownBy(
                     () -> commentService.writeComment(member, 0L, request)
-            ).isInstanceOf(NoSuchElementException.class).hasMessage("Board Not Found.");
+            ).isInstanceOf(BoardNotFoundException.class).hasMessage("Board not found");
         }
     }
 
@@ -137,8 +138,8 @@ public class CommentServiceTest {
 
             // when, then
             assertThatThrownBy(() -> commentService.updateComment(invalidBoardId, commentId, member, request))
-                    .isInstanceOf(NoSuchElementException.class)
-                    .hasMessage("Board Not Found");
+                    .isInstanceOf(BoardNotFoundException.class)
+                    .hasMessage("Board not found");
         }
 
         @Test
@@ -164,8 +165,24 @@ public class CommentServiceTest {
             // when, then
             assertThatThrownBy(() -> commentService.updateComment(boardId, commentId, anotherMember, request))
                     .isInstanceOf(AccessDeniedException.class)
-                    .hasMessage("You are not the owner of this comment");
+                    .hasMessage("Is not writer");
         }
+
+        @Test
+        void 존재하지_않는_댓글을_수정한다_400(){
+                // given
+                Long commentId = 10L;
+                Long boardId = 20L;
+                UpdateCommentRequest request = mock(UpdateCommentRequest.class);
+                Member member = mock(Member.class);
+
+                when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+                // when & then
+            assertThatThrownBy(() -> commentService.updateComment(boardId, commentId, member, request))
+                    .isInstanceOf(CommentNotFoundException.class)
+                    .hasMessage("Comment not found");
+            }
     }
 
     @Nested
@@ -213,8 +230,8 @@ public class CommentServiceTest {
 
             // when & then
             assertThatThrownBy(() -> commentService.deleteComment(invalidBoardId, commentId, member))
-                    .isInstanceOf(NoSuchElementException.class)
-                    .hasMessage("Board Not Found");
+                    .isInstanceOf(BoardNotFoundException.class)
+                    .hasMessage("Board not found");
         }
 
         @Test
@@ -239,7 +256,7 @@ public class CommentServiceTest {
             // when & then
             assertThatThrownBy(() -> commentService.deleteComment(boardId, commentId, anotherMember))
                     .isInstanceOf(AccessDeniedException.class)
-                    .hasMessage("You are not the owner of this comment");
+                    .hasMessage("Is not writer");
         }
     }
 }
