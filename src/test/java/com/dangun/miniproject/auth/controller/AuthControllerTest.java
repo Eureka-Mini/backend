@@ -56,7 +56,7 @@ public class AuthControllerTest {
         mockMvc.perform(post("/auth/signup")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(new ObjectMapper().writeValueAsString(memberRequest)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code").value("SING-UP-S001"))
                 .andExpect(jsonPath("$.message").value("Sign up Success"))
                 .andExpect(jsonPath("$.data.nickname").value(member.getNickname()));
