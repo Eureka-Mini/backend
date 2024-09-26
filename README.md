@@ -7,8 +7,8 @@
 
 ## _Intro._
 - 자신의 중고 물품을 판매하고, 거래할 수 있는 커뮤니티 공간입니다.
-- 유저는 구매하고자 하는 물품의 게시글에 댓글을 작성할 수 있습니다.
-- 찾고자 하는 물품이 있다면, 검색창에 키워드 입력하여 관련된 게시글을 조회할 수 있습니다.
+- 유저는 구매하고자 하는 물품 게시글에 댓글을 작성할 수 있습니다.
+- 찾고자 하는 물품이 있다면, 검색창에 키워드를 입력하여 관련된 게시글을 조회할 수 있습니다.
 
 <br />
 
@@ -52,7 +52,7 @@
 - Comment CRUD
 - Comment Test Code 작성
 - Comment UI
-- Board 및 Comment 상세 조회 UI
+- Board 상세 조회 UI
 
 #### 김정동(QA)
 - Auth (login/logout)
@@ -80,12 +80,7 @@
 
 도메인별 모든 메소드의 단위 테스트를 진행했고 약 150개의 테스트를 작성하였습니다.
 그 결과, JpaAuditingConfig 를 제외한 핵심 비즈니스 로직과 기능의 **테스트 커버리지를 100%** 충족했습니다.
+
 ![image](https://github.com/user-attachments/assets/2f502ef7-aa8f-406c-b8ea-5ffcad9a4471)
 ![image](https://github.com/user-attachments/assets/cd32f76c-ee6b-4ec7-89d7-5f9a7bf233b9)
-
-
-
-
-
-
 
