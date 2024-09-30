@@ -179,3 +179,10 @@ INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) V
 INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) VALUES (98, '2024-09-20 14:09:16', '2024-09-20 14:09:16', '예약 가능한가요?', 42, 3);
 INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) VALUES (99, '2024-09-20 14:14:16', '2024-09-20 14:14:16', '상품 상태가 궁금합니다.', 41, 6);
 INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) VALUES (100, '2024-09-20 14:19:16', '2024-09-20 14:19:16', '예약 가능한가요?', 42, 4);
+
+--code
+
+INSERT INTO group_code VALUES ("010", "판매상태", "판매 상태를 알리는 코드");
+
+INSERT INTO code VALUES ("010", "010", "판매중", "sale", 1);
+INSERT INTO code VALUES ("010", "020", "판매완료", "done", 2);
