@@ -2,13 +2,15 @@ package com.dangun.miniproject.common.code;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@ToString
 public class GroupCode {
     @Id
     @Column(name = "group_code")
