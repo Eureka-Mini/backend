@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Getter
+@AllArgsConstructor
 public class WriteBoardResponse {
     private Long id;
-
-    public WriteBoardResponse(Long id) {
-        this.id = id;
-    }
 }
