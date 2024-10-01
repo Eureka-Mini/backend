@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CodeServiceTest {
@@ -38,6 +38,7 @@ public class CodeServiceTest {
             // then
             assertThat(result).isNotNull();
             assertThat(result.getResult()).isEqualTo("success");
+            verify(codeRepository, times(1)).save(code);
         }
 
         @Test
@@ -53,6 +54,43 @@ public class CodeServiceTest {
             // then
             assertThat(result).isNotNull();
             assertThat(result.getResult()).isEqualTo("fail");
+            verify(codeRepository, times(1)).save(code);
+        }
+    }
+
+    @Nested
+    class updateCode {
+
+        @Test
+        void 공통_코드_수정_성공() {
+            // given
+            Code code = new Code();
+
+            when(codeRepository.save(code)).thenReturn(code);
+
+            // when
+            CodeResultDto result = codeService.updateCode(code);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getResult()).isEqualTo("success");
+            verify(codeRepository, times(1)).save(code);
+        }
+
+        @Test
+        void 공통_코드_수정_실패() {
+            // given
+            Code code = new Code();
+
+            when(codeRepository.save(code)).thenThrow(new RuntimeException());
+
+            // when
+            CodeResultDto result = codeService.updateCode(code);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getResult()).isEqualTo("fail");
+            verify(codeRepository, times(1)).save(code);
         }
     }
 }
