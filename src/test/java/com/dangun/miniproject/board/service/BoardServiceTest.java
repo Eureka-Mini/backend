@@ -1,19 +1,16 @@
 package com.dangun.miniproject.board.service;
 
-import com.dangun.miniproject.board.domain.Board;
-import com.dangun.miniproject.board.domain.BoardStatus;
-import com.dangun.miniproject.board.dto.*;
-import com.dangun.miniproject.board.exception.BoardNotFoundException;
-import com.dangun.miniproject.board.repository.BoardRepository;
-import com.dangun.miniproject.board.service.impl.BoardServiceImpl;
-import com.dangun.miniproject.comment.domain.Comment;
-import com.dangun.miniproject.common.code.CodeKey;
-import com.dangun.miniproject.common.exception.InvalidInputException;
-import com.dangun.miniproject.fixture.BoardFixture;
-import com.dangun.miniproject.fixture.CommentFixture;
-import com.dangun.miniproject.member.domain.Address;
-import com.dangun.miniproject.member.domain.Member;
-import com.dangun.miniproject.member.repository.MemberRepository;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.data.domain.Sort.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,24 +24,30 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.data.domain.Sort.Direction;
-import static org.springframework.data.domain.Sort.by;
+import com.dangun.miniproject.board.domain.Board;
+import com.dangun.miniproject.board.domain.BoardStatus;
+import com.dangun.miniproject.board.dto.DeleteBoardResponse;
+import com.dangun.miniproject.board.dto.GetBoardDetailResponse;
+import com.dangun.miniproject.board.dto.GetBoardResponse;
+import com.dangun.miniproject.board.dto.UpdateBoardRequest;
+import com.dangun.miniproject.board.dto.UpdateBoardResponse;
+import com.dangun.miniproject.board.dto.WriteBoardRequest;
+import com.dangun.miniproject.board.dto.WriteBoardResponse;
+import com.dangun.miniproject.board.exception.BoardNotFoundException;
+import com.dangun.miniproject.board.repository.BoardRepository;
+import com.dangun.miniproject.board.service.impl.BoardServiceImpl;
+import com.dangun.miniproject.comment.domain.Comment;
+import com.dangun.miniproject.common.code.CodeKey;
+import com.dangun.miniproject.common.exception.InvalidInputException;
+import com.dangun.miniproject.fixture.BoardFixture;
+import com.dangun.miniproject.fixture.CommentFixture;
+import com.dangun.miniproject.member.domain.Address;
+import com.dangun.miniproject.member.domain.Member;
+import com.dangun.miniproject.member.repository.MemberRepository;
 
 
 @ExtendWith(MockitoExtension.class)
 class BoardServiceTest {
-
-    @InjectMocks
-    private BoardServiceImpl boardServiceImpl;
 
     @InjectMocks
     private BoardServiceImpl boardService;
@@ -78,7 +81,7 @@ class BoardServiceTest {
             given(boardRepository.findBoardById(any())).willReturn(response);
 
             // when -- 테스트하고자 하는 행동
-            final GetBoardDetailResponse result = boardServiceImpl.getBoardDetail(1L);
+            final GetBoardDetailResponse result = boardService.getBoardDetail(1L);
 
             // then -- 예상되는 변화 및 결과
             assertSoftly(softAssertions -> {
@@ -120,7 +123,7 @@ class BoardServiceTest {
             given(boardRepository.findBoardById(any())).willReturn(response);
 
             // when -- 테스트하고자 하는 행동
-            final GetBoardDetailResponse result = boardServiceImpl.getBoardDetail(1L);
+            final GetBoardDetailResponse result = boardService.getBoardDetail(1L);
 
             // then -- 예상되는 변화 및 결과
             assertSoftly(softAssertions -> {
@@ -161,7 +164,7 @@ class BoardServiceTest {
             given(boardRepository.findAllWithMember(any())).willReturn(response);
 
             // when -- 테스트하고자 하는 행동
-            final Page<GetBoardResponse> result = boardServiceImpl.getBoardList(pageRequest);
+            final Page<GetBoardResponse> result = boardService.getBoardList(pageRequest);
 
             // then -- 예상되는 변화 및 결과
             assertSoftly(softAssertions -> {
@@ -196,7 +199,7 @@ class BoardServiceTest {
             given(boardRepository.searchBoardsByKeyword(eq("키워드"), any())).willReturn(response);
 
             // when -- 테스트하고자 하는 행동
-            final Page<GetBoardResponse> result = boardServiceImpl.getBoardList("키워드", pageRequest);
+            final Page<GetBoardResponse> result = boardService.getBoardList("키워드", pageRequest);
 
             // then -- 예상되는 변화 및 결과
             assertSoftly(softAssertions -> {
@@ -227,7 +230,7 @@ class BoardServiceTest {
                 given(boardRepository.findAllByMyBoard(any(), any())).willReturn(response);
 
                 // when -- 테스트하고자 하는 행동
-                final Page<GetBoardResponse> result = boardServiceImpl.getMyBoardList(1L, pageRequest);
+                final Page<GetBoardResponse> result = boardService.getMyBoardList(1L, pageRequest);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softAssertions -> {

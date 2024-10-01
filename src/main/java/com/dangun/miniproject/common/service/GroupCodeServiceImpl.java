@@ -1,18 +1,20 @@
 package com.dangun.miniproject.common.service;
 
-import com.dangun.miniproject.common.code.GroupCode;
-import com.dangun.miniproject.common.dto.CodeResultDto;
-import com.dangun.miniproject.common.dto.GroupCodeDto;
-import com.dangun.miniproject.common.repository.GroupCodeRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import com.dangun.miniproject.common.code.GroupCode;
+import com.dangun.miniproject.common.dto.CodeResultDto;
+import com.dangun.miniproject.common.dto.GroupCodeDto;
+import com.dangun.miniproject.common.repository.GroupCodeRepository;
+
+import lombok.RequiredArgsConstructor;
 
 
 @Service
@@ -20,10 +22,11 @@ import java.util.Optional;
 public class GroupCodeServiceImpl implements GroupCodeService{
 
 	private final GroupCodeRepository groupCodeRepository;
+
 	@Override
 	public CodeResultDto insertGroupCode(GroupCode groupCode) {
 		CodeResultDto codeResultDto = new CodeResultDto();
-		System.out.println(groupCode.getGroupCode());
+
 		try {
 			groupCodeRepository.save(groupCode);
 			codeResultDto.setResult("success");
@@ -31,12 +34,14 @@ public class GroupCodeServiceImpl implements GroupCodeService{
 			e.printStackTrace();
 			codeResultDto.setResult("fail");
 		}
+
 		return codeResultDto;
 	}
 
 	@Override
 	public CodeResultDto updateGroupCode(GroupCode groupCode) {
 		CodeResultDto codeResultDto = new CodeResultDto();
+
 		try {
 			// select 후 update
 			groupCodeRepository.save(groupCode);
@@ -45,12 +50,14 @@ public class GroupCodeServiceImpl implements GroupCodeService{
 			e.printStackTrace();
 			codeResultDto.setResult("fail");
 		}
+
 		return codeResultDto;
 	}
 
 	@Override
 	public CodeResultDto deleteGroupCode(String groupCode) {
 		CodeResultDto codeResultDto = new CodeResultDto();
+
 		try {
 			groupCodeRepository.deleteById(groupCode);
 			codeResultDto.setResult("success");
@@ -58,12 +65,14 @@ public class GroupCodeServiceImpl implements GroupCodeService{
 			e.printStackTrace();
 			codeResultDto.setResult("fail");
 		}
+
 		return codeResultDto;		
 	}
 
 	@Override
 	public CodeResultDto listGroupCode(int pageNumber, int pageSize) {
 		CodeResultDto codeResultDto = new CodeResultDto();
+
 		try {
 			Pageable pageable = PageRequest.of(pageNumber, pageSize);
 			Page<GroupCode> page = groupCodeRepository.findAll(pageable);
@@ -79,14 +88,7 @@ public class GroupCodeServiceImpl implements GroupCodeService{
 			e.printStackTrace();
 			codeResultDto.setResult("fail");
 		}
-		return codeResultDto;
-	}
 
-	@Override
-	public CodeResultDto countGroupCode() {
-		CodeResultDto codeResultDto = new CodeResultDto();
-		long count = groupCodeRepository.count();
-		codeResultDto.setCount(count);
 		return codeResultDto;
 	}
 
@@ -94,6 +96,7 @@ public class GroupCodeServiceImpl implements GroupCodeService{
 	public CodeResultDto detailGroupCode(String groupCode) {
 		CodeResultDto codeResultDto = new CodeResultDto();
 		Optional<GroupCode> optionalGroupCode = groupCodeRepository.findById(groupCode);
+
 		optionalGroupCode.ifPresentOrElse(
 				detailGroupCode -> {
 					codeResultDto.setGroupCodeDto( GroupCodeDto.fromGroupCode(detailGroupCode) );
@@ -102,6 +105,7 @@ public class GroupCodeServiceImpl implements GroupCodeService{
 				() -> {
 					codeResultDto.setResult("fail");
 				});
+
 		return codeResultDto;
 	}
 }
