@@ -1,7 +1,6 @@
 package com.dangun.miniproject.comment.service;
 
 import com.dangun.miniproject.board.domain.Board;
-import com.dangun.miniproject.board.domain.BoardStatus;
 import com.dangun.miniproject.board.exception.BoardNotFoundException;
 import com.dangun.miniproject.board.repository.BoardRepository;
 import com.dangun.miniproject.comment.domain.Comment;
@@ -12,6 +11,7 @@ import com.dangun.miniproject.comment.dto.WriteCommentResponse;
 import com.dangun.miniproject.comment.exception.CommentNotFoundException;
 import com.dangun.miniproject.comment.repository.CommentRepository;
 import com.dangun.miniproject.comment.service.impl.CommentServiceImpl;
+import com.dangun.miniproject.common.code.CodeKey;
 import com.dangun.miniproject.member.domain.Member;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ public class CommentServiceTest {
                     .build();
             Board board = Board.builder()
                     .title("test")
-                    .boardStatus(BoardStatus.판매완료)
+                    .codeKey(mock(CodeKey.class))
                     .member(member)
                     .price(10000)
                     .content("팝니다")
@@ -169,20 +169,20 @@ public class CommentServiceTest {
         }
 
         @Test
-        void 존재하지_않는_댓글을_수정한다_400(){
-                // given
-                Long commentId = 10L;
-                Long boardId = 20L;
-                UpdateCommentRequest request = mock(UpdateCommentRequest.class);
-                Member member = mock(Member.class);
+        void 존재하지_않는_댓글을_수정한다_400() {
+            // given
+            Long commentId = 10L;
+            Long boardId = 20L;
+            UpdateCommentRequest request = mock(UpdateCommentRequest.class);
+            Member member = mock(Member.class);
 
-                when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+            when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
-                // when & then
+            // when & then
             assertThatThrownBy(() -> commentService.updateComment(boardId, commentId, member, request))
                     .isInstanceOf(CommentNotFoundException.class)
                     .hasMessage("Comment not found");
-            }
+        }
     }
 
     @Nested
