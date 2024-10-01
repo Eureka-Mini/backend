@@ -2,6 +2,7 @@ package com.dangun.miniproject.member.controller;
 
 
 import com.dangun.miniproject.auth.dto.UserDetailsDto;
+import com.dangun.miniproject.common.code.CodeKey;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.dto.GetAddressDto;
 import com.dangun.miniproject.member.dto.GetMemberDto;
@@ -52,7 +53,8 @@ public class MemberControllerTest {
     void getMember() throws Exception {
         // given: GetAddressRequest 객체 생성, GetMemberRequest 객체 생성
         GetAddressDto mockAddress = new GetAddressDto("testStreet", "testDetail", "12345");
-        GetMemberDto mockResponse = new GetMemberDto("test@test.com", "testUser", mockAddress);
+        CodeKey mockCodeKey = new CodeKey("020", "010");
+        GetMemberDto mockResponse = new GetMemberDto("test@test.com", "testUser", mockAddress, mockCodeKey);
 
         // when: MemberService의 getMember가 호출될 때, mockResponse를 반환하도록 설정
         when(memberService.getMember(anyLong())).thenReturn(mockResponse);
@@ -65,14 +67,17 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.data.nickname").value("testUser"))
                 .andExpect(jsonPath("$.data.address.street").value("testStreet"))
                 .andExpect(jsonPath("$.data.address.detail").value("testDetail"))
-                .andExpect(jsonPath("$.data.address.zipcode").value("12345"));
+                .andExpect(jsonPath("$.data.address.zipcode").value("12345"))
+                .andExpect(jsonPath("$.data.codeKey.groupCode").value("020"))
+                .andExpect(jsonPath("$.data.codeKey.code").value("010"));
     }
 
     @Test
     void myInfoWhenLoggedIn() throws Exception {
         // given: Member 정보 설정
         GetAddressDto mockAddress = new GetAddressDto("testStreet", "testDetail", "12345");
-        GetMemberDto mockResponse = new GetMemberDto("test@example.com", "tester", mockAddress);
+        CodeKey mockCodeKey = new CodeKey("020", "010");
+        GetMemberDto mockResponse = new GetMemberDto("test@example.com", "tester", mockAddress, mockCodeKey);
 
         Member member = new Member();
         setField(member, "id", 1L);
@@ -96,7 +101,9 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.data.nickname").value("tester"))
                 .andExpect(jsonPath("$.data.address.street").value("testStreet"))
                 .andExpect(jsonPath("$.data.address.detail").value("testDetail"))
-                .andExpect(jsonPath("$.data.address.zipcode").value("12345"));
+                .andExpect(jsonPath("$.data.address.zipcode").value("12345"))
+                .andExpect(jsonPath("$.data.codeKey.groupCode").value("020"))
+                .andExpect(jsonPath("$.data.codeKey.code").value("010"));
     }
 
 
@@ -104,8 +111,9 @@ public class MemberControllerTest {
     void UpdateMemberWhenLoggedIn() throws Exception {
         // Given: 테스트에 사용할 DTO 데이터 정의
         GetAddressDto mockAddress = new GetAddressDto("street", "detail", "11111");
+        CodeKey mockCodeKey = new CodeKey("010", "020");
         given(memberService.updateMember(any(), anyLong()))
-                .willReturn(new GetMemberDto("newMinah@naver.com", "newMinah", mockAddress));
+                .willReturn(new GetMemberDto("newMinah@naver.com", "newMinah", mockAddress, mockCodeKey));
 
         Member member = new Member();
         setField(member, "id", 4L);
