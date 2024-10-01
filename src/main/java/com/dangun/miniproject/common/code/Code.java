@@ -7,16 +7,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.service.annotation.GetExchange;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Setter
 public class Code {
 
     @EmbeddedId
+    @Setter
     CodeKey codeKey;
 
     @Column(name = "code_name")
