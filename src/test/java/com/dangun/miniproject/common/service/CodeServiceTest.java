@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -182,6 +183,43 @@ public class CodeServiceTest {
             // then
             assertThat(result).isNotNull();
             assertThat(result.getResult()).isEqualTo("fail");
+        }
+    }
+
+    @Nested
+    class detailCode {
+
+        @Test
+        void 코드_상세_정보_조회() {
+            // given
+            CodeKey codeKey = new CodeKey("010", "010");
+            Code code = new Code(codeKey, "판매중", "sale", 1);
+
+            when(codeRepository.findById(codeKey)).thenReturn(Optional.of(code));
+
+            // when
+            CodeResultDto result = codeService.detailCode(codeKey);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getResult()).isEqualTo("success");
+            assertThat(result.getCodeDto()).isEqualTo(CodeDto.fromCode(code));
+        }
+
+        @Test
+        void 유효하지_않은_codeKey_를_이용해_조회_시도() {
+            // given
+            CodeKey codeKey = new CodeKey("999", "010");
+
+            when(codeRepository.findById(codeKey)).thenReturn(Optional.empty());
+
+            // when
+            CodeResultDto result = codeService.detailCode(codeKey);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getResult()).isEqualTo("fail");
+            assertThat(result.getCodeDto()).isNull();
         }
     }
 }
