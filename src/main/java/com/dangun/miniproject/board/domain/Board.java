@@ -2,6 +2,7 @@ package com.dangun.miniproject.board.domain;
 
 
 import com.dangun.miniproject.comment.domain.Comment;
+import com.dangun.miniproject.common.code.CodeKey;
 import com.dangun.miniproject.common.domain.BaseEntity;
 import com.dangun.miniproject.member.domain.Member;
 import jakarta.persistence.*;
@@ -30,9 +31,8 @@ public class Board extends BaseEntity {
 
     private Integer price;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "board_status")
-    private BoardStatus boardStatus;
+    @Embedded
+    private CodeKey codeKey;
 
     @ManyToOne(fetch = LAZY)
     private Member member;
@@ -41,19 +41,19 @@ public class Board extends BaseEntity {
     private List<Comment> comments = new ArrayList<>();
 
     @Builder
-    private Board(String content, Member member, Integer price, BoardStatus boardStatus, String title) {
+    private Board(String content, Member member, Integer price, String title, CodeKey codeKey) {
         this.content = content;
         this.member = member;
         this.price = price;
-        this.boardStatus = boardStatus;
+        this.codeKey = codeKey;
         this.title = title;
     }
 
     // 수정 메서드 추가
-    public void updateDetails(String title, String content, Integer price, BoardStatus boardStatus) {
+    public void updateDetails(String title, String content, Integer price, CodeKey codeKey) {
         this.title = title;
         this.content = content;
         this.price = price;
-        this.boardStatus = boardStatus;
+        this.codeKey = codeKey;
     }
 }

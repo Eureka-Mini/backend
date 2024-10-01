@@ -105,7 +105,7 @@ public class BoardServiceImpl implements BoardService {
                 .title(request.getTitle())
                 .content(request.getContent())
                 .member(member)
-                .boardStatus(BoardStatus.판매중)
+//                .boardStatus(BoardStatus.판매중)
                 .price(request.getPrice())
                 .build();
 
@@ -144,9 +144,9 @@ public class BoardServiceImpl implements BoardService {
         board.updateDetails(
                 request.getTitle() != null ? request.getTitle() : board.getTitle(),
                 request.getContent() != null ? request.getContent() : board.getContent(),
-                request.getPrice() != null ? request.getPrice() : board.getPrice(),
+                request.getPrice() != null ? request.getPrice() : board.getPrice(), null
                 //request.getBoardStatus() != null ? BoardStatus.valueOf(request.getBoardStatus()) : board.getBoardStatus()
-                BoardStatus.valueOf(request.getBoardStatus())
+//                BoardStatus.valueOf(request.getBoardStatus())
         );
 
         // 응답 생성

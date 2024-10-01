@@ -32,7 +32,7 @@ public class GetBoardDetailResponse {
         boardResponse.writer = board.getMember().getNickname();
         boardResponse.writerStreetAddress = board.getMember().getAddress().getStreet();
         boardResponse.price = board.getPrice();
-        boardResponse.boardStatus = board.getBoardStatus();
+//        boardResponse.boardStatus = board.getBoardStatus();
         boardResponse.createdAt = board.getCreatedAt();
 
         return boardResponse;

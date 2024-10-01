@@ -25,7 +25,7 @@ public class GetBoardResponse {
 		boardResponse.title = board.getTitle();
 		boardResponse.writer = board.getMember().getNickname();
 		boardResponse.price = board.getPrice();
-		boardResponse.boardStatus = board.getBoardStatus();
+//		boardResponse.boardStatus = board.getBoardStatus();
 		boardResponse.createdAt = board.getCreatedAt();
 
 		return boardResponse;
