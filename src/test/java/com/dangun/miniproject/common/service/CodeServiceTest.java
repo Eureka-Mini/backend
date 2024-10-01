@@ -1,15 +1,24 @@
 package com.dangun.miniproject.common.service;
 
+import com.dangun.miniproject.board.domain.BoardStatus;
 import com.dangun.miniproject.common.code.Code;
 import com.dangun.miniproject.common.code.CodeKey;
+import com.dangun.miniproject.common.dto.CodeDto;
 import com.dangun.miniproject.common.dto.CodeResultDto;
 import com.dangun.miniproject.common.repository.CodeRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -122,6 +131,53 @@ public class CodeServiceTest {
 
             // when
             CodeResultDto result = codeService.deleteCode(code);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getResult()).isEqualTo("fail");
+        }
+    }
+
+    @Nested
+    class listCode {
+
+        @Test
+        void 공통코드_리스트를_페이지로_조회한다() {
+            // given
+            String groupCode = BoardStatus.판매중.getGroupId();
+            int pageNumber = 0;
+            int pageSize = 10;
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+            Code code = new Code(new CodeKey("010", "010"), "판매중", "sale", 1);
+            Page<Code> codePage = new PageImpl<>(List.of(code));
+
+            when(codeRepository.findByGroupCode(groupCode, pageable)).thenReturn(codePage);
+            when(codeRepository.count()).thenReturn(1L);
+
+            // when
+            CodeResultDto result = codeService.listCode(groupCode, pageNumber, pageSize);
+
+            // then
+            Assertions.assertThat(result).isNotNull();
+            assertThat(result.getResult()).isEqualTo("success");
+            assertThat(result.getCount()).isEqualTo(1);
+            assertThat(result.getCodeDtoList().size()).isEqualTo(1);
+            assertThat(result.getCodeDtoList().contains(CodeDto.fromCode(code))).isTrue();
+            verify(codeRepository, times(1)).findByGroupCode(groupCode, pageable);
+        }
+
+        @Test
+        void 공통코드_리스트_조회_실패() {
+            // given
+            String groupCode = BoardStatus.판매중.getGroupId();
+            int pageNumber = 0;
+            int pageSize = 10;
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+            when(codeRepository.findByGroupCode(groupCode, pageable)).thenThrow(new RuntimeException());
+
+            // when
+            CodeResultDto result = codeService.listCode(groupCode, pageNumber, pageSize);
 
             // then
             assertThat(result).isNotNull();
