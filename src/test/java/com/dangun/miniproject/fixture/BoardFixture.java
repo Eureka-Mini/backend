@@ -15,12 +15,13 @@ public class BoardFixture {
 		final String content = "Test Content " + current().nextInt(100, 1000);
 		final int price = current().nextInt(5000, 50000);
 		final BoardStatus status = current().nextBoolean() ? BoardStatus.판매중 : BoardStatus.판매완료;
+		final CodeKey codeKey = new CodeKey(status.getGroupId(), status.getCodeId());
 
 		return Board.builder()
 			.title(title)
 			.content(content)
 			.price(price)
-			.codeKey(new CodeKey("010", "010"))
+			.codeKey(codeKey)
 			.member(member)
 			.build();
 	}
@@ -29,12 +30,13 @@ public class BoardFixture {
 
 		final int price = current().nextInt(5000, 50000);
 		final BoardStatus status = current().nextBoolean() ? BoardStatus.판매중 : BoardStatus.판매완료;
+		final CodeKey codeKey = new CodeKey(status.getGroupId(), status.getCodeId());
 
 		return Board.builder()
 			.title(title)
 			.content(content)
 			.price(price)
-			.codeKey(new CodeKey("010", "010"))
+			.codeKey(codeKey)
 			.member(member)
 			.build();
 	}

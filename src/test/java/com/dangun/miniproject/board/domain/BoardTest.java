@@ -17,15 +17,14 @@ public class BoardTest {
 			.email("test@test.com")
 			.build();
 
-		final CodeKey codeKey = new CodeKey("010", "010");
+		final CodeKey codeKey = new CodeKey(BoardStatus.판매중.getGroupId(), BoardStatus.판매완료.getCodeId());
 
 		// when -- 테스트하고자 하는 행동
 		final Board result = Board.builder()
 			.title("title")
 			.content("content")
 			.price(10000)
-				.codeKey(codeKey)
-			//.boardStatus(BoardStatus.판매중)
+			.codeKey(codeKey)
 			.member(member)
 			.build();
 
@@ -35,10 +34,8 @@ public class BoardTest {
 			softAssertions.assertThat(result.getTitle()).isEqualTo("title");
 			softAssertions.assertThat(result.getContent()).isEqualTo("content");
 			softAssertions.assertThat(result.getPrice()).isEqualTo(10000);
-			softAssertions.assertThat(result.getCodeKey()).isEqualTo(codeKey);
-			softAssertions.assertThat(result.getCodeKey().getGroupCode()).isEqualTo("010");
-			softAssertions.assertThat(result.getCodeKey().getCode()).isEqualTo("010");
-			//softAssertions.assertThat(result.getBoardStatus()).isEqualTo(BoardStatus.판매중);
+			softAssertions.assertThat(result.getCodeKey().getGroupCode()).isEqualTo(codeKey.getGroupCode());
+			softAssertions.assertThat(result.getCodeKey().getCode()).isEqualTo(codeKey.getCode());
 			softAssertions.assertThat(result.getMember()).isEqualTo(member);
 		});
 	}

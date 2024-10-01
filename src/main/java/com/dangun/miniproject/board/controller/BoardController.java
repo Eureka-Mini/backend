@@ -65,17 +65,20 @@ public class BoardController {
 		);
 	}
 
-
-
-
 	// 게시글 생성
 	@PostMapping
-	public ResponseEntity<WriteBoardResponse> writeBoard(
-			@AuthenticationPrincipal UserDetailsDto userDetailsDto,
-			@RequestBody WriteBoardRequest writeBoardRequest) {
-		Long memberId = userDetailsDto.getMember().getId();
-		WriteBoardResponse response = boardService.writeBoard(writeBoardRequest, memberId);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	public ResponseEntity<?> writeBoard(
+			@AuthenticationPrincipal(expression = "member") final Member member,
+			@RequestBody final WriteBoardRequest writeBoardRequest
+	) {
+		final Long memberId = member.getId();
+
+		return ApiResponse.created(
+			"",
+			"BOARD-S001",
+			boardService.writeBoard(writeBoardRequest, memberId),
+			"Board Write Success"
+		);
 	}
 
 	// 게시글 수정
