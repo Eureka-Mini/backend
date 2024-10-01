@@ -135,16 +135,12 @@ public class BoardServiceImpl implements BoardService {
             throw new AccessDeniedException("Is not writer");
         }
 
-        // 부분 업데이트 로직
-        //null이면 그 필드는 업데이트하지 않고 기존 값을 유지
-        BoardStatus updatedStatus = tryParseBoardStatus(request.getBoardStatus());
-
         board.updateDetails(
                 request.getTitle() != null ? request.getTitle() : board.getTitle(),
                 request.getContent() != null ? request.getContent() : board.getContent(),
                 request.getPrice() != null ? request.getPrice() : board.getPrice(),
                 request.getBoardStatus() != null
-                        ? new CodeKey(updatedStatus.getGroupId(), updatedStatus.getCodeId()) : board.getCodeKey()
+                        ? tryParseBoardStatus(request.getBoardStatus()) : board.getCodeKey()
         );
 
         // 응답 생성
@@ -174,9 +170,10 @@ public class BoardServiceImpl implements BoardService {
                 .build();
     }
 
-    private BoardStatus tryParseBoardStatus(String status) {
+    private CodeKey tryParseBoardStatus(String status) {
         try {
-            return BoardStatus.valueOf(status);
+            BoardStatus boardStatus = BoardStatus.valueOf(status);
+            return new CodeKey(boardStatus.getGroupId(), boardStatus.getCodeId());
         } catch (IllegalArgumentException e) {
             throw new InvalidInputException("Invalid Board Status");
         }
