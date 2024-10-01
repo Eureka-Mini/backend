@@ -1,6 +1,7 @@
 package com.dangun.miniproject.common.service;
 
 import com.dangun.miniproject.common.code.Code;
+import com.dangun.miniproject.common.code.CodeKey;
 import com.dangun.miniproject.common.dto.CodeResultDto;
 import com.dangun.miniproject.common.repository.CodeRepository;
 import org.junit.jupiter.api.Nested;
@@ -91,6 +92,40 @@ public class CodeServiceTest {
             assertThat(result).isNotNull();
             assertThat(result.getResult()).isEqualTo("fail");
             verify(codeRepository, times(1)).save(code);
+        }
+    }
+
+    @Nested
+    class deleteCode {
+
+        @Test
+        void 공통_코드_삭제_성공() {
+            // given
+            CodeKey code = new CodeKey();
+
+            doNothing().when(codeRepository).deleteById(code);
+
+            // when
+            CodeResultDto result = codeService.deleteCode(code);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getResult()).isEqualTo("success");
+        }
+
+        @Test
+        void 공통_코드_삭제_실패() {
+            // given
+            CodeKey code = new CodeKey();
+
+            doThrow(new RuntimeException()).when(codeRepository).deleteById(code);
+
+            // when
+            CodeResultDto result = codeService.deleteCode(code);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getResult()).isEqualTo("fail");
         }
     }
 }
