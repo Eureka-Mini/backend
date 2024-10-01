@@ -8,11 +8,13 @@ import com.dangun.miniproject.board.repository.BoardRepository;
 import com.dangun.miniproject.board.service.impl.BoardServiceImpl;
 import com.dangun.miniproject.comment.domain.Comment;
 import com.dangun.miniproject.common.code.CodeKey;
+import com.dangun.miniproject.common.exception.InvalidInputException;
 import com.dangun.miniproject.fixture.BoardFixture;
 import com.dangun.miniproject.fixture.CommentFixture;
 import com.dangun.miniproject.member.domain.Address;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.repository.MemberRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -426,6 +428,79 @@ class BoardServiceTest {
 
         // boardRepository의 findById 메소드가 호출되었는지 확인
         verify(boardRepository, times(1)).findById(eq(boardId));
+    }
+
+    @Test
+    public void 게시글_수정_요청_시_boardStatus_null() {
+        // given
+        Long boardId = 1L;
+        Long memberId = 1L;
+        UpdateBoardRequest request = new UpdateBoardRequest(
+                "updated title",
+                "updated content",
+                10000,
+                null
+        );
+
+        Member member = mock(Member.class);
+
+        Board existingBoard = spy(Board.builder()
+                .title("Existing Title")
+                .content("Existing Content")
+                .price(1000)
+                .codeKey(new CodeKey(BoardStatus.판매중.getCodeId(), BoardStatus.판매중.getGroupId()))
+                .member(member)
+                .build());
+
+        when(member.getId()).thenReturn(memberId);
+        when(boardRepository.findById(eq(boardId))).thenReturn(Optional.of(existingBoard));
+
+        // when
+        UpdateBoardResponse response = boardService.updateBoard(boardId, request, memberId);
+
+        // then
+        assertNotNull(response);
+
+        assertEquals(request.getTitle(), existingBoard.getTitle());
+        assertEquals(request.getContent(), existingBoard.getContent());
+        assertEquals(request.getPrice(), existingBoard.getPrice());
+
+        assertEquals(BoardStatus.판매중.getCodeId(), existingBoard.getCodeKey().getCode());
+        assertEquals(BoardStatus.판매중.getGroupId(), existingBoard.getCodeKey().getGroupCode());
+
+        verify(boardRepository, times(1)).findById(eq(boardId));
+    }
+
+    @Test
+    void 유효하지_않은_게시판_상태_수정_요청_시도() {
+        // given
+        Long boardId = 1L;
+        Long memberId = 1L;
+        String wrongBoardState = "잘못된게시판상태";
+        UpdateBoardRequest request = new UpdateBoardRequest(
+                null,
+                null,
+                null,
+                wrongBoardState
+        );
+
+        Member member = mock(Member.class);
+
+        Board existingBoard = spy(Board.builder()
+                .title("Existing Title")
+                .content("Existing Content")
+                .price(1000)
+                .codeKey(new CodeKey(BoardStatus.판매중.getCodeId(), BoardStatus.판매중.getGroupId()))
+                .member(member)
+                .build());
+
+        when(member.getId()).thenReturn(memberId);
+        when(boardRepository.findById(eq(boardId))).thenReturn(Optional.of(existingBoard));
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> boardService.updateBoard(boardId, request, memberId))
+                .isInstanceOf(InvalidInputException.class)
+                .hasMessage("Invalid Board Status");
     }
 
 
