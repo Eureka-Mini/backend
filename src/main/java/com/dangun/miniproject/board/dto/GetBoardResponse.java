@@ -28,10 +28,7 @@ public class GetBoardResponse {
 		boardResponse.writer = board.getMember().getNickname();
 		boardResponse.price = board.getPrice();
 		boardResponse.codeKey = board.getCodeKey();
-
-		String codeId = board.getCodeKey().getCode();
-		boardResponse.boardStatus = BoardStatus.fromCodeId(codeId);
-
+		boardResponse.boardStatus = BoardStatus.from(board.getCodeKey());
 		boardResponse.createdAt = board.getCreatedAt();
 
 		return boardResponse;
