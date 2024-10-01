@@ -10,6 +10,5 @@ public interface GroupCodeService {
 	CodeResultDto deleteGroupCode(String groupCode);	
 	
 	CodeResultDto listGroupCode(int pageNumber, int pageSize);
-	CodeResultDto countGroupCode();
 	CodeResultDto detailGroupCode(String groupCode);
 }
