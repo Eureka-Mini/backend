@@ -165,7 +165,6 @@ class BoardServiceTest {
             assertSoftly(softAssertions -> {
                 // board
                 softAssertions.assertThat(result.getContent().get(0).getTitle()).isEqualTo(response.getContent().get(0).getTitle());
-                // softAssertions.assertThat(result.getContent().get(0).getBoardStatus().getCodeId()).isEqualTo(response.getContent().get(0).getCodeKey().getCode());
 
                 // page
                 softAssertions.assertThat(result.getTotalPages()).isEqualTo(response.getTotalPages());
@@ -237,6 +236,7 @@ class BoardServiceTest {
             }
         }
     }
+
 
     @Test
     @DisplayName("게시글 생성")
