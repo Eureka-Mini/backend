@@ -6,6 +6,8 @@ import com.dangun.miniproject.common.code.CodeKey;
 import com.dangun.miniproject.common.dto.CodeDto;
 import com.dangun.miniproject.common.dto.CodeResultDto;
 import com.dangun.miniproject.common.repository.CodeRepository;
+import com.dangun.miniproject.fixture.CodeFixture;
+import com.dangun.miniproject.fixture.CodeKeyFixture;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -149,7 +151,7 @@ public class CodeServiceTest {
             int pageNumber = 0;
             int pageSize = 10;
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            Code code = new Code(new CodeKey("010", "010"), "판매중", "sale", 1);
+            Code code = CodeFixture.instanceOf(CodeKeyFixture.instanceOf());
             Page<Code> codePage = new PageImpl<>(List.of(code));
 
             when(codeRepository.findByGroupCode(groupCode, pageable)).thenReturn(codePage);
@@ -192,8 +194,8 @@ public class CodeServiceTest {
         @Test
         void 코드_상세_정보_조회() {
             // given
-            CodeKey codeKey = new CodeKey("010", "010");
-            Code code = new Code(codeKey, "판매중", "sale", 1);
+            CodeKey codeKey = CodeKeyFixture.instanceOf();
+            Code code = CodeFixture.instanceOf(codeKey);
 
             when(codeRepository.findById(codeKey)).thenReturn(Optional.of(code));
 
