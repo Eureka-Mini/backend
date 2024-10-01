@@ -8,6 +8,8 @@ import com.dangun.miniproject.board.repository.BoardRepository;
 import com.dangun.miniproject.board.service.BoardService;
 import com.dangun.miniproject.comment.domain.Comment;
 import com.dangun.miniproject.comment.dto.GetCommentResponse;
+import com.dangun.miniproject.common.code.CodeKey;
+import com.dangun.miniproject.common.exception.InvalidInputException;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.exception.MemberNotFoundException;
 import com.dangun.miniproject.member.repository.MemberRepository;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -126,7 +129,7 @@ public class BoardServiceImpl implements BoardService {
      */
     @Override
     @Transactional
-    public UpdateBoardResponse updateBoard(Long boardId, UpdateBoardRequest request, Long memberId) {
+    public Map<String, String> updateBoard(Long boardId, UpdateBoardRequest request, Long memberId) {
         if (memberId == 0) {
             throw new InternalAuthenticationServiceException("Token Not Exist") {
             };
@@ -141,23 +144,18 @@ public class BoardServiceImpl implements BoardService {
 
         // 부분 업데이트 로직
         //null이면 그 필드는 업데이트하지 않고 기존 값을 유지
+        BoardStatus updatedStatus = tryParseBoardStatus(request.getBoardStatus());
+
         board.updateDetails(
                 request.getTitle() != null ? request.getTitle() : board.getTitle(),
                 request.getContent() != null ? request.getContent() : board.getContent(),
-                request.getPrice() != null ? request.getPrice() : board.getPrice(), null
-                //request.getBoardStatus() != null ? BoardStatus.valueOf(request.getBoardStatus()) : board.getBoardStatus()
-//                BoardStatus.valueOf(request.getBoardStatus())
+                request.getPrice() != null ? request.getPrice() : board.getPrice(),
+                request.getBoardStatus() != null
+                        ? new CodeKey(updatedStatus.getGroupId(), updatedStatus.getCodeId()) : board.getCodeKey()
         );
 
         // 응답 생성
-        return UpdateBoardResponse.builder()
-                .code("BOARD-S003")
-                .message("Board Update Success")
-                .data(UpdateBoardResponse.Data.builder()
-                        .content(board.getContent())
-                        .build())
-                .timestamp(LocalDateTime.now())
-                .build();
+        return Map.of("content", board.getContent());
     }
 
 
@@ -182,4 +180,13 @@ public class BoardServiceImpl implements BoardService {
                 .timestamp(LocalDateTime.now())
                 .build();
     }
+
+    private BoardStatus tryParseBoardStatus(String status) {
+        try {
+            return BoardStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidInputException("Invalid Board Status");
+        }
+    }
+
 }

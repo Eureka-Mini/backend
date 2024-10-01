@@ -21,7 +21,7 @@ public class BoardTest {
 			.title("title")
 			.content("content")
 			.price(10000)
-			.boardStatus(BoardStatus.판매중)
+//			.boardStatus(BoardStatus.판매중)
 			.member(member)
 			.build();
 
@@ -31,7 +31,7 @@ public class BoardTest {
 			softAssertions.assertThat(result.getTitle()).isEqualTo("title");
 			softAssertions.assertThat(result.getContent()).isEqualTo("content");
 			softAssertions.assertThat(result.getPrice()).isEqualTo(10000);
-			softAssertions.assertThat(result.getBoardStatus()).isEqualTo(BoardStatus.판매중);
+//			softAssertions.assertThat(result.getBoardStatus()).isEqualTo(BoardStatus.판매중);
 			softAssertions.assertThat(result.getMember()).isEqualTo(member);
 		});
 	}

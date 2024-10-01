@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.*;
@@ -40,8 +41,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = BoardController.class)
 @WithMockUser
@@ -278,22 +278,18 @@ class BoardControllerTest {
         Long boardId = 1L;
         Long memberId = 1L;
         UpdateBoardRequest request = new UpdateBoardRequest("Updated Title", "Updated Content", 1000, "판매중");
-        UpdateBoardResponse response = UpdateBoardResponse.builder()
-                .code("BOARD-S002")
-                .message("Board Update Success")
-                .data(UpdateBoardResponse.Data.builder().content("test content").build())
-                .build();
+        String response = "Updated Content";
 
-        Member mockMember = Member.builder()
+        Member mockMember = spy(Member.builder()
                 .email("test@example.com")
                 .nickname("testUser")
                 .password("password")
-                .build();
-        ReflectionTestUtils.setField(mockMember, "id", memberId);
+                .build());
         UserDetailsDto userDetailsDto = new UserDetailsDto(mockMember);
 
+        when(mockMember.getId()).thenReturn(memberId);
         when(boardService.updateBoard(eq(boardId), any(UpdateBoardRequest.class), eq(memberId)))
-                .thenReturn(response);
+                .thenReturn(Map.of("content", response));
 
         // When & Then
         mockMvc.perform(put("/boards/{boardId}", boardId)
@@ -302,7 +298,7 @@ class BoardControllerTest {
                         .with(csrf())
                         .with(user(userDetailsDto)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(response)));
+                .andExpect(jsonPath("$.data.content").value(response));
     }
 
 

@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/boards")
@@ -80,13 +82,17 @@ public class BoardController {
 
 	// 게시글 수정
 	@PutMapping("/{boardId}")
-	public ResponseEntity<UpdateBoardResponse> updateBoard(
+	public ResponseEntity<?> updateBoard(
 			@AuthenticationPrincipal UserDetailsDto userDetailsDto,
 			@PathVariable Long boardId,
 			@RequestBody UpdateBoardRequest updateBoardRequest) {
 		Long memberId = userDetailsDto.getMember().getId();
-		UpdateBoardResponse response = boardService.updateBoard(boardId, updateBoardRequest, memberId);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		Map<String, String> response = boardService.updateBoard(boardId, updateBoardRequest, memberId);
+		return ApiResponse.ok(
+				"BOARD-S003",
+				response,
+				"Board Update Success"
+		);
 	}
 
 	// 게시글 삭제

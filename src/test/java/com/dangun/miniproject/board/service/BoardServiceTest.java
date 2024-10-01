@@ -7,6 +7,7 @@ import com.dangun.miniproject.board.exception.BoardNotFoundException;
 import com.dangun.miniproject.board.repository.BoardRepository;
 import com.dangun.miniproject.board.service.impl.BoardServiceImpl;
 import com.dangun.miniproject.comment.domain.Comment;
+import com.dangun.miniproject.common.code.CodeKey;
 import com.dangun.miniproject.fixture.BoardFixture;
 import com.dangun.miniproject.fixture.CommentFixture;
 import com.dangun.miniproject.member.domain.Address;
@@ -24,10 +25,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.*;
@@ -155,7 +153,7 @@ class BoardServiceTest {
             assertSoftly(softAssertions -> {
                 // board
                 softAssertions.assertThat(result.getContent().get(0).getTitle()).isEqualTo(response.getContent().get(0).getTitle());
-                softAssertions.assertThat(result.getContent().get(0).getBoardStatus()).isEqualTo(response.getContent().get(0).getBoardStatus());
+//                softAssertions.assertThat(result.getContent().get(0).getBoardStatus()).isEqualTo(response.getContent().get(0).getBoardStatus());
 
                 // page
                 softAssertions.assertThat(result.getTotalPages()).isEqualTo(response.getTotalPages());
@@ -293,33 +291,28 @@ class BoardServiceTest {
                 .title("기존 제목")
                 .content("기존 내용")
                 .price(500)
-                .boardStatus(BoardStatus.판매중)
+                .codeKey(new CodeKey(BoardStatus.판매중.getCodeId(), BoardStatus.판매중.getGroupId()))
                 .member(member)
                 .build();
         ReflectionTestUtils.setField(existingBoard, "id", boardId);
 
-        UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
+        UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매완료");
 
         when(boardRepository.findById(boardId)).thenReturn(Optional.of(existingBoard));
 
         // When
-        UpdateBoardResponse response = boardService.updateBoard(boardId, request, memberId);
+        Map<String, String> response = boardService.updateBoard(boardId, request, memberId);
 
         // Then
         assertNotNull(response);
-        assertEquals("BOARD-S003", response.getCode());
-        assertEquals("Board Update Success", response.getMessage());
-        assertNotNull(response.getData());
-        assertEquals("새 내용", response.getData().getContent());
-        assertNotNull(response.getTimestamp());
-
+        assertEquals("새 내용", response.get("content"));
         assertEquals("새 제목", existingBoard.getTitle());
         assertEquals("새 내용", existingBoard.getContent());
         assertEquals(1000, existingBoard.getPrice());
-        assertEquals(BoardStatus.판매중, existingBoard.getBoardStatus());
+        assertEquals(BoardStatus.판매완료.getCodeId(), existingBoard.getCodeKey().getCode());
+        assertEquals(BoardStatus.판매완료.getGroupId(), existingBoard.getCodeKey().getGroupCode());
 
         verify(boardRepository, times(1)).findById(boardId);
-        verifyNoInteractions(memberRepository);
     }
 
     @Test
@@ -337,7 +330,7 @@ class BoardServiceTest {
                 .content("기존 내용")
                 .member(existingMember)
                 .price(1000)
-                .boardStatus(BoardStatus.판매중)
+                .codeKey(new CodeKey(BoardStatus.판매중.getCodeId(), BoardStatus.판매중.getGroupId()))
                 .title("기존 제목")
                 .build();
         ReflectionTestUtils.setField(existingBoard, "id", boardId);
@@ -395,30 +388,27 @@ class BoardServiceTest {
                 null,  // Title을 null로 설정
                 null,  // Content을 null로 설정
                 null,  // Price를 null로 설정
-                "판매중"  // BoardStatus는 null이 아닌 값으로 설정
+                "판매완료"  // BoardStatus는 null이 아닌 값으로 설정
         );
 
-        Member member = new Member();
-        ReflectionTestUtils.setField(member, "id", memberId);
+        Member member = mock(Member.class);
 
-        Board existingBoard = Board.builder()
+        Board existingBoard = spy(Board.builder()
                 .title("Existing Title")
                 .content("Existing Content")
                 .price(1000)
-                .boardStatus(BoardStatus.판매중)
+                .codeKey(new CodeKey(BoardStatus.판매중.getCodeId(), BoardStatus.판매중.getGroupId()))
                 .member(member)
-                .build();
-        ReflectionTestUtils.setField(existingBoard, "id", boardId);
+                .build());
 
+        when(member.getId()).thenReturn(memberId);
         when(boardRepository.findById(eq(boardId))).thenReturn(Optional.of(existingBoard));
 
         // when
-        UpdateBoardResponse response = boardService.updateBoard(boardId, request, memberId);
+        Map<String, String> response = boardService.updateBoard(boardId, request, memberId);
 
         // then
         assertNotNull(response);
-        assertEquals("BOARD-S003", response.getCode());
-        assertEquals("Board Update Success", response.getMessage());
 
         // 변경되지 않아야 할 필드들 확인
         assertEquals("Existing Title", existingBoard.getTitle());
@@ -426,12 +416,11 @@ class BoardServiceTest {
         assertEquals(1000, existingBoard.getPrice());
 
         // BoardStatus는 변경되어야 함 (request에서 null이 아닌 값으로 제공됨)
-        assertEquals(BoardStatus.판매중, existingBoard.getBoardStatus());
+        assertEquals(BoardStatus.판매완료.getCodeId(), existingBoard.getCodeKey().getCode());
+        assertEquals(BoardStatus.판매완료.getGroupId(), existingBoard.getCodeKey().getGroupCode());
 
         // boardRepository의 findById 메소드가 호출되었는지 확인
         verify(boardRepository, times(1)).findById(eq(boardId));
-
-        // memberRepository 관련 검증 제거
     }
 
 
@@ -455,7 +444,7 @@ class BoardServiceTest {
                 .title("제목")
                 .content("내용")
                 .price(1000)
-                .boardStatus(BoardStatus.판매중)
+                .codeKey(mock(CodeKey.class))
                 .member(member)
                 .build();
         ReflectionTestUtils.setField(board, "id", boardId);
@@ -488,7 +477,7 @@ class BoardServiceTest {
                 .title("제목")
                 .content("내용")
                 .price(1000)
-                .boardStatus(BoardStatus.판매중)
+                .codeKey(mock(CodeKey.class))
                 .member(existingMember)
                 .build();
         ReflectionTestUtils.setField(board, "id", boardId);

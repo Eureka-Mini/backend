@@ -4,6 +4,8 @@ import com.dangun.miniproject.board.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Map;
+
 public interface BoardService {
 
 	// 게시글 상세 조회
@@ -22,7 +24,7 @@ public interface BoardService {
 	WriteBoardResponse writeBoard(WriteBoardRequest request, Long memberId);
 
 	// 게시글 수정
-	UpdateBoardResponse updateBoard(Long boardId, UpdateBoardRequest request, Long memberId);
+	Map<String, String> updateBoard(Long boardId, UpdateBoardRequest request, Long memberId);
 
 	// 게시글 삭제
 	DeleteBoardResponse deleteBoard(Long boardId, Long memberId);
