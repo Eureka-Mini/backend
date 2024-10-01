@@ -13,12 +13,12 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 -- Insert statements for Users
-INSERT INTO member (id, email, nickname, password) VALUES (1, 'jeongdong@google.com', 'jeongdong', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
-INSERT INTO member (id, email, nickname, password) VALUES (2, 'youngchul@google.com', 'youngchul', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
-INSERT INTO member (id, email, nickname, password) VALUES (3, 'sieun@google.com', 'sieun', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
-INSERT INTO member (id, email, nickname, password) VALUES (4, 'minah@naver.com', 'minah', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
-INSERT INTO member (id, email, nickname, password) VALUES (5, 'seunghee@naver.com', 'seunghee', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
-INSERT INTO member (id, email, nickname, password) VALUES (6, 'asdf@asdf.com', 'asdf', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
+INSERT INTO member (id, email, nickname, password, code, group_code) VALUES (1, 'jeongdong@google.com', 'jeongdong', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y', '010','020');
+INSERT INTO member (id, email, nickname, password, code, group_code) VALUES (2, 'youngchul@google.com', 'youngchul', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y', '010','020');
+INSERT INTO member (id, email, nickname, password, code, group_code) VALUES (3, 'sieun@google.com', 'sieun', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y', '010','020');
+INSERT INTO member (id, email, nickname, password, code, group_code) VALUES (4, 'minah@naver.com', 'minah', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y', '010','020');
+INSERT INTO member (id, email, nickname, password, code, group_code) VALUES (5, 'seunghee@naver.com', 'seunghee', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y', '010','020');
+INSERT INTO member (id, email, nickname, password, code, group_code) VALUES (6, 'asdf@asdf.com', 'asdf', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y', '010','020');
 
 -- Insert statements for Addresses
 INSERT INTO address (member_id, detail, street, zipcode) VALUES (1, '1동 203호', '서울특별시 종로구 세종대로 175', '03172');
@@ -188,3 +188,9 @@ INSERT INTO group_code (group_code, group_code_desc, group_code_name) VALUES ('0
 
 INSERT INTO code (order_no, code, code_name, code_name_brief, group_code) VALUES (1, '010', '판매중', 'sale', '010');
 INSERT INTO code (order_no, code, code_name, code_name_brief, group_code) VALUES (2, '020', '판매완료', 'done', '010');
+
+INSERT INTO group_code (group_code, group_code_desc, group_code_name) VALUES ('020', '회원 등급을 알리는 코드', '회원등급');
+
+INSERT INTO code (order_no, code, code_name, code_name_brief, group_code) VALUES (1, '010', '실버', 'silver', '020');
+INSERT INTO code (order_no, code, code_name, code_name_brief, group_code) VALUES (2, '020', '골드', 'gold', '020');
+INSERT INTO code (order_no, code, code_name, code_name_brief, group_code) VALUES (3, '030', 'VIP', 'vip', '020');

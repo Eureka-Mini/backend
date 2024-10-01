@@ -39,6 +39,7 @@ public class MemberServiceImpl implements MemberService {
                     getMemberDtoBuilder
                             .email(member.getEmail())
                             .nickname(member.getNickname())
+                            .codeKey(member.getCodeKey())
                             .address(getAddressDto(member.getId()));
                 },
                 () -> optionalMember.orElseThrow(MemberNotFoundException::new)
