@@ -5,18 +5,20 @@ truncate comment;
 truncate address;
 truncate board;
 truncate member;
+truncate group_code;
+truncate code;
 
 -- 외래 키 제약 조건 다시 활성화
 SET FOREIGN_KEY_CHECKS = 1;
 
 
 -- Insert statements for Users
-INSERT INTO member (id, email, nickname, password) VALUES (1, 'jeongdong@google.com', 'jeongdong', 'password1');
-INSERT INTO member (id, email, nickname, password) VALUES (2, 'youngchul@google.com', 'youngchul', 'password2');
-INSERT INTO member (id, email, nickname, password) VALUES (3, 'sieun@google.com', 'sieun', 'password3');
-INSERT INTO member (id, email, nickname, password) VALUES (4, 'minah@naver.com', 'minah', 'password4');
-INSERT INTO member (id, email, nickname, password) VALUES (5, 'seunghee@naver.com', 'seunghee', 'password5');
-INSERT INTO member (id, email, nickname, password) VALUES (6, 'asdf@asdf.com', 'asdf', 'asdf');
+INSERT INTO member (id, email, nickname, password) VALUES (1, 'jeongdong@google.com', 'jeongdong', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
+INSERT INTO member (id, email, nickname, password) VALUES (2, 'youngchul@google.com', 'youngchul', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
+INSERT INTO member (id, email, nickname, password) VALUES (3, 'sieun@google.com', 'sieun', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
+INSERT INTO member (id, email, nickname, password) VALUES (4, 'minah@naver.com', 'minah', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
+INSERT INTO member (id, email, nickname, password) VALUES (5, 'seunghee@naver.com', 'seunghee', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
+INSERT INTO member (id, email, nickname, password) VALUES (6, 'asdf@asdf.com', 'asdf', '$2a$10$KyM8TTg2dL6tWzudPjfqvuas3I6dwUZ2dbVeUSQSxu4YhoJU1Ox7y');
 
 -- Insert statements for Addresses
 INSERT INTO address (member_id, detail, street, zipcode) VALUES (1, '1동 203호', '서울특별시 종로구 세종대로 175', '03172');
@@ -27,48 +29,56 @@ INSERT INTO address (member_id, detail, street, zipcode) VALUES (5, '5동 203호
 INSERT INTO address (member_id, detail, street, zipcode) VALUES (6, '6동 101호', '서울특별시 서초구 강남대로 373', '06524');
 
 -- Insert statements for Boards
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (1, '2024-09-01 00:00:00', '2024-09-01 00:00:00', '판매중', '이 가격에 이 물건은 정말 저렴합니다.', 55000, '물품 1 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (2, '2024-09-01 11:25:42', '2024-09-19 17:01:50', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 83000, '물품 2 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (3, '2024-09-01 22:51:25', '2024-09-02 00:36:25', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 21000, '물품 3 판매', 2);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (4, '2024-09-02 10:17:08', '2024-09-02 12:58:08', '판매완료', '직거래만 가능합니다. 안전하게 거래해요.', 7000, '물품 4 판매', 4);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (5, '2024-09-02 21:42:51', '2024-09-19 16:51:50', '판매완료', '급하게 처분합니다. 상태는 양호합니다.', 79000, '물품 5 판매', 4);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (6, '2024-09-03 09:08:34', '2024-09-03 09:08:34', '판매중', '이 물품은 사용한 지 1년밖에 되지 않았습니다.', 30000, '물품 6 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (7, '2024-09-03 20:34:16', '2024-09-03 23:00:16', '판매완료', '이 가격에 이 물건은 정말 저렴합니다.', 27000, '물품 7 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (8, '2024-09-04 07:59:59', '2024-09-04 07:59:59', '판매중', '상태는 매우 좋습니다. 직접 확인 가능합니다.', 75000, '물품 8 판매', 4);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (9, '2024-09-04 19:25:42', '2024-09-04 22:08:42', '판매완료', '직거래만 가능합니다. 안전하게 거래해요.', 66000, '물품 9 판매', 1);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (10, '2024-09-05 06:51:25', '2024-09-05 09:30:25', '판매완료', '급하게 처분합니다. 상태는 양호합니다.', 97000, '물품 10 판매', 5);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (11, '2024-09-05 18:17:08', '2024-09-05 18:17:08', '판매중', '관심 있으신 분은 메시지 주세요.', 23000, '물품 11 판매', 1);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (12, '2024-09-06 05:42:51', '2024-09-06 08:20:51', '판매완료', '직거래만 가능합니다. 안전하게 거래해요.', 52000, '물품 12 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (13, '2024-09-06 17:08:33', '2024-09-06 17:08:33', '판매중', '상태는 매우 좋습니다. 직접 확인 가능합니다.', 54000, '물품 13 판매', 1);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (14, '2024-09-07 04:34:16', '2024-09-19 17:06:50', '판매완료', '거의 새것입니다. 관심 있으시면 연락 주세요.', 28000, '물품 14 판매', 1);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (15, '2024-09-07 15:59:59', '2024-09-07 15:59:59', '판매중', '구매 후 몇 번 쓰지 않았습니다.', 45000, '물품 15 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (16, '2024-09-08 03:25:42', '2024-09-08 03:25:42', '판매중', '관심 있으신 분은 메시지 주세요.', 39000, '물품 16 판매', 1);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (17, '2024-09-08 14:51:25', '2024-09-08 17:02:25', '판매완료', '상태는 매우 좋습니다. 직접 확인 가능합니다.', 9000, '물품 17 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (18, '2024-09-09 02:17:08', '2024-09-19 16:31:50', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 80000, '물품 18 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (19, '2024-09-09 13:42:50', '2024-09-09 16:17:50', '판매완료', '거의 새것입니다. 관심 있으시면 연락 주세요.', 20000, '물품 19 판매', 2);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (20, '2024-09-10 01:08:33', '2024-09-10 01:08:33', '판매중', '관심 있으신 분은 메시지 주세요.', 29000, '물품 20 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (21, '2024-09-10 12:34:16', '2024-09-19 16:41:50', '판매완료', '거의 새것입니다. 관심 있으시면 연락 주세요.', 33000, '물품 21 판매', 1);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (22, '2024-09-10 23:59:59', '2024-09-10 23:59:59', '판매중', '이 가격에 이 물건은 정말 저렴합니다.', 46000, '물품 22 판매', 5);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (23, '2024-09-11 11:25:42', '2024-09-11 11:25:42', '판매중', '가격을 낮췄습니다. 빠른 거래 원해요.', 31000, '물품 23 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (24, '2024-09-11 22:51:25', '2024-09-12 01:18:25', '판매완료', '급하게 처분합니다. 상태는 양호합니다.', 17000, '물품 24 판매', 2);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (25, '2024-09-12 10:17:07', '2024-09-12 10:17:07', '판매중', '사용감이 있지만, 성능에 문제는 없습니다.', 82000, '물품 25 판매', 1);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (26, '2024-09-12 21:42:50', '2024-09-19 16:36:50', '판매완료', '직거래만 가능합니다. 안전하게 거래해요.', 63000, '물품 26 판매', 4);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (27, '2024-09-13 09:08:33', '2024-09-13 09:08:33', '판매중', '사용감이 있지만, 성능에 문제는 없습니다.', 62000, '물품 27 판매', 5);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (28, '2024-09-13 20:34:16', '2024-09-13 20:34:16', '판매중', '거의 새것입니다. 관심 있으시면 연락 주세요.', 19000, '물품 28 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (29, '2024-09-14 07:59:59', '2024-09-14 07:59:59', '판매중', '이 물품은 사용한 지 1년밖에 되지 않았습니다.', 65000, '물품 29 판매', 2);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (30, '2024-09-14 19:25:42', '2024-09-14 20:39:42', '판매완료', '이 물품은 사용한 지 1년밖에 되지 않았습니다.', 42000, '물품 30 판매', 2);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (31, '2024-09-15 06:51:24', '2024-09-19 16:26:50', '판매완료', '이 가격에 이 물건은 정말 저렴합니다.', 31000, '물품 31 판매', 1);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (32, '2024-09-15 18:17:07', '2024-09-15 18:17:07', '판매중', '급하게 처분합니다. 상태는 양호합니다.', 73000, '물품 32 판매', 4);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (33, '2024-09-16 05:42:50', '2024-09-16 05:42:50', '판매중', '가격을 낮췄습니다. 빠른 거래 원해요.', 45000, '물품 33 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (34, '2024-09-16 17:08:33', '2024-09-16 17:08:33', '판매중', '이 물품은 사용한 지 1년밖에 되지 않았습니다.', 24000, '물품 34 판매', 1);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (35, '2024-09-17 04:34:16', '2024-09-17 07:01:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 40000, '물품 35 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (36, '2024-09-17 15:59:59', '2024-09-17 15:59:59', '판매중', '거의 새것입니다. 관심 있으시면 연락 주세요.', 76000, '물품 36 판매', 2);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (37, '2024-09-18 03:25:41', '2024-09-18 06:03:41', '판매완료', '직거래만 가능합니다. 안전하게 거래해요.', 42000, '물품 37 판매', 3);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (38, '2024-09-18 14:51:24', '2024-09-18 14:51:24', '판매중', '관심 있으신 분은 메시지 주세요.', 72000, '물품 38 판매', 5);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (39, '2024-09-19 02:17:07', '2024-09-19 04:42:07', '판매완료', '이 가격에 이 물건은 정말 저렴합니다.', 88000, '물품 39 판매', 5);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (40, '2024-09-19 13:42:50', '2024-09-19 16:16:50', '판매완료', '관심 있으신 분은 메시지 주세요.', 59000, '물품 40 판매', 4);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (41, '2024-09-20 01:08:33', '2024-09-20 01:08:33', '판매중', '이 물품은 사용한 지 1년밖에 되지 않았습니다.', 18000, '물품 41 판매', 6);
-INSERT INTO board (id, created_at, updated_at, board_status, content, price, title, member_id) VALUES (42, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '판매완료', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (1, '2024-09-01 00:00:00', '2024-09-01 00:00:00', '010', '010', '이 가격에 이 물건은 정말 저렴합니다.', 55000, '물품 1 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (2, '2024-09-01 11:25:42', '2024-09-19 17:01:50', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 83000, '물품 2 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (3, '2024-09-01 22:51:25', '2024-09-02 00:36:25', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 21000, '물품 3 판매', 2);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (4, '2024-09-02 10:17:08', '2024-09-02 12:58:08', '020', '010', '직거래만 가능합니다. 안전하게 거래해요.', 7000, '물품 4 판매', 4);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (5, '2024-09-02 21:42:51', '2024-09-19 16:51:50', '020', '010', '급하게 처분합니다. 상태는 양호합니다.', 79000, '물품 5 판매', 4);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (6, '2024-09-03 09:08:34', '2024-09-03 09:08:34', '010', '010', '이 물품은 사용한 지 1년밖에 되지 않았습니다.', 30000, '물품 6 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (7, '2024-09-03 20:34:16', '2024-09-03 23:00:16', '020', '010', '이 가격에 이 물건은 정말 저렴합니다.', 27000, '물품 7 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (8, '2024-09-04 07:59:59', '2024-09-04 07:59:59', '010', '010', '상태는 매우 좋습니다. 직접 확인 가능합니다.', 75000, '물품 8 판매', 4);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (9, '2024-09-04 19:25:42', '2024-09-04 22:08:42', '020', '010', '직거래만 가능합니다. 안전하게 거래해요.', 66000, '물품 9 판매', 1);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (10, '2024-09-05 06:51:25', '2024-09-05 09:30:25', '020', '010', '급하게 처분합니다. 상태는 양호합니다.', 97000, '물품 10 판매', 5);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (11, '2024-09-05 18:17:08', '2024-09-05 18:17:08', '010', '010', '관심 있으신 분은 메시지 주세요.', 23000, '물품 11 판매', 1);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (12, '2024-09-06 05:42:51', '2024-09-06 08:20:51', '020', '010', '직거래만 가능합니다. 안전하게 거래해요.', 52000, '물품 12 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (13, '2024-09-06 17:08:33', '2024-09-06 17:08:33', '010', '010', '상태는 매우 좋습니다. 직접 확인 가능합니다.', 54000, '물품 13 판매', 1);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (14, '2024-09-07 04:34:16', '2024-09-19 17:06:50', '020', '010', '거의 새것입니다. 관심 있으시면 연락 주세요.', 28000, '물품 14 판매', 1);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (15, '2024-09-07 15:59:59', '2024-09-07 15:59:59', '010', '010', '구매 후 몇 번 쓰지 않았습니다.', 45000, '물품 15 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (16, '2024-09-08 03:25:42', '2024-09-08 03:25:42', '010', '010', '관심 있으신 분은 메시지 주세요.', 39000, '물품 16 판매', 1);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (17, '2024-09-08 14:51:25', '2024-09-08 17:02:25', '020', '010', '상태는 매우 좋습니다. 직접 확인 가능합니다.', 9000, '물품 17 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (18, '2024-09-09 02:17:08', '2024-09-19 16:31:50', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 80000, '물품 18 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (19, '2024-09-09 13:42:50', '2024-09-09 16:17:50', '020', '010', '거의 새것입니다. 관심 있으시면 연락 주세요.', 20000, '물품 19 판매', 2);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (20, '2024-09-10 01:08:33', '2024-09-10 01:08:33', '010', '010', '관심 있으신 분은 메시지 주세요.', 29000, '물품 20 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (21, '2024-09-10 12:34:16', '2024-09-19 16:41:50', '020', '010', '거의 새것입니다. 관심 있으시면 연락 주세요.', 33000, '물품 21 판매', 1);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (22, '2024-09-10 23:59:59', '2024-09-10 23:59:59', '010', '010', '이 가격에 이 물건은 정말 저렴합니다.', 46000, '물품 22 판매', 5);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (23, '2024-09-11 11:25:42', '2024-09-11 11:25:42', '010', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 31000, '물품 23 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (24, '2024-09-11 22:51:25', '2024-09-12 01:18:25', '020', '010', '급하게 처분합니다. 상태는 양호합니다.', 17000, '물품 24 판매', 2);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (25, '2024-09-12 10:17:07', '2024-09-12 10:17:07', '010', '010', '사용감이 있지만, 성능에 문제는 없습니다.', 82000, '물품 25 판매', 1);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (26, '2024-09-12 21:42:50', '2024-09-19 16:36:50', '020', '010', '직거래만 가능합니다. 안전하게 거래해요.', 63000, '물품 26 판매', 4);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (27, '2024-09-13 09:08:33', '2024-09-13 09:08:33', '010', '010', '사용감이 있지만, 성능에 문제는 없습니다.', 62000, '물품 27 판매', 5);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (28, '2024-09-13 20:34:16', '2024-09-13 20:34:16', '010', '010', '거의 새것입니다. 관심 있으시면 연락 주세요.', 19000, '물품 28 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (29, '2024-09-14 07:59:59', '2024-09-14 07:59:59', '010', '010', '이 물품은 사용한 지 1년밖에 되지 않았습니다.', 65000, '물품 29 판매', 2);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (30, '2024-09-14 19:25:42', '2024-09-14 20:39:42', '020', '010', '이 물품은 사용한 지 1년밖에 되지 않았습니다.', 42000, '물품 30 판매', 2);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (31, '2024-09-15 06:51:24', '2024-09-19 16:26:50', '020', '010', '이 가격에 이 물건은 정말 저렴합니다.', 31000, '물품 31 판매', 1);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (32, '2024-09-15 18:17:07', '2024-09-15 18:17:07', '010', '010', '급하게 처분합니다. 상태는 양호합니다.', 73000, '물품 32 판매', 4);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (33, '2024-09-16 05:42:50', '2024-09-16 05:42:50', '010', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 45000, '물품 33 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (34, '2024-09-16 17:08:33', '2024-09-16 17:08:33', '010', '010', '이 물품은 사용한 지 1년밖에 되지 않았습니다.', 24000, '물품 34 판매', 1);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (35, '2024-09-17 04:34:16', '2024-09-17 07:01:16', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 40000, '물품 35 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (36, '2024-09-17 15:59:59', '2024-09-17 15:59:59', '010', '010', '거의 새것입니다. 관심 있으시면 연락 주세요.', 76000, '물품 36 판매', 2);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (37, '2024-09-18 03:25:41', '2024-09-18 06:03:41', '020', '010', '직거래만 가능합니다. 안전하게 거래해요.', 42000, '물품 37 판매', 3);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (38, '2024-09-18 14:51:24', '2024-09-18 14:51:24', '010', '010', '관심 있으신 분은 메시지 주세요.', 72000, '물품 38 판매', 5);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (39, '2024-09-19 02:17:07', '2024-09-19 04:42:07', '020', '010', '이 가격에 이 물건은 정말 저렴합니다.', 88000, '물품 39 판매', 5);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (40, '2024-09-19 13:42:50', '2024-09-19 16:16:50', '020', '010', '관심 있으신 분은 메시지 주세요.', 59000, '물품 40 판매', 4);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (41, '2024-09-20 01:08:33', '2024-09-20 01:08:33', '010', '010', '이 물품은 사용한 지 1년밖에 되지 않았습니다.', 18000, '물품 41 판매', 6);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (42, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (43, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (44, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (45, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (46, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (47, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (48, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (49, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
+INSERT INTO board (id, created_at, updated_at, code, group_code, content, price, title, member_id) VALUES (50, '2024-09-20 12:34:16', '2024-09-20 15:19:16', '020', '010', '가격을 낮췄습니다. 빠른 거래 원해요.', 50000, '물품 42 판매', 6);
 
 -- Insert statements for Comments
 INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) VALUES (1, '2024-09-01 00:22:00', '2024-09-01 00:22:00', '사진 좀 더 올려주세요.', 1, 3);
@@ -171,3 +181,10 @@ INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) V
 INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) VALUES (98, '2024-09-20 14:09:16', '2024-09-20 14:09:16', '예약 가능한가요?', 42, 3);
 INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) VALUES (99, '2024-09-20 14:14:16', '2024-09-20 14:14:16', '상품 상태가 궁금합니다.', 41, 6);
 INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) VALUES (100, '2024-09-20 14:19:16', '2024-09-20 14:19:16', '예약 가능한가요?', 42, 4);
+
+-- code
+
+INSERT INTO group_code (group_code, group_code_desc, group_code_name) VALUES ('010', '판매 상태를 알리는 코드', '판매상태');
+
+INSERT INTO code (order_no, code, code_name, code_name_brief, group_code) VALUES (1, '010', '판매중', 'sale', '010');
+INSERT INTO code (order_no, code, code_name, code_name_brief, group_code) VALUES (2, '020', '판매완료', 'done', '010');

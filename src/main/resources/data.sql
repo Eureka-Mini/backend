@@ -5,6 +5,8 @@ truncate comment;
 truncate address;
 truncate board;
 truncate member;
+truncate group_code;
+truncate code;
 
 -- 외래 키 제약 조건 다시 활성화
 SET FOREIGN_KEY_CHECKS = 1;
