@@ -84,6 +84,11 @@ class BoardServiceTest {
                 softAssertions.assertThat(result.getId()).isEqualTo(response.getId());
                 softAssertions.assertThat(result.getTitle()).isEqualTo(response.getTitle());
                 softAssertions.assertThat(result.getWriter()).isEqualTo(response.getWriter());
+
+                softAssertions.assertThat(result.getCodeKey()).isNotNull();
+                softAssertions.assertThat(result.getCodeKey().getCode()).isEqualTo(board.getCodeKey().getCode());
+                softAssertions.assertThat(result.getCodeKey().getGroupCode()).isEqualTo(board.getCodeKey().getGroupCode());
+
             });
         }
 
@@ -100,6 +105,9 @@ class BoardServiceTest {
             when(board.getComments()).thenReturn(List.of(comment1, comment2));
             when(member.getId()).thenReturn(1L);
             when(board.getMember()).thenReturn(member);
+
+            CodeKey mockCodeKey = new CodeKey("010", "010");
+            when(board.getCodeKey()).thenReturn(mockCodeKey);
 
             given(boardRepository.findById(any())).willReturn(Optional.of(board));
             when(member.getAddress()).thenReturn(address);
