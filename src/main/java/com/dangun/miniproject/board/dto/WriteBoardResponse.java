@@ -1,20 +1,17 @@
 package com.dangun.miniproject.board.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Getter
-@Builder
 public class WriteBoardResponse {
-    private final String code;
-    private final String message;
-    private final BoardData data;
-    private final LocalDateTime timestamp;
+    private Long id;
 
-    @Getter
-    @Builder
-    public static class BoardData {
-        private final Long id;
+    public WriteBoardResponse(Long id) {
+        this.id = id;
     }
 }

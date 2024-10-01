@@ -4,6 +4,7 @@ import static java.util.concurrent.ThreadLocalRandom.*;
 
 import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.board.domain.BoardStatus;
+import com.dangun.miniproject.common.code.CodeKey;
 import com.dangun.miniproject.member.domain.Member;
 
 public class BoardFixture {
@@ -14,12 +15,13 @@ public class BoardFixture {
 		final String content = "Test Content " + current().nextInt(100, 1000);
 		final int price = current().nextInt(5000, 50000);
 		final BoardStatus status = current().nextBoolean() ? BoardStatus.판매중 : BoardStatus.판매완료;
+		final CodeKey codeKey = new CodeKey(status.getGroupId(), status.getCodeId());
 
 		return Board.builder()
 			.title(title)
 			.content(content)
 			.price(price)
-			.boardStatus(status)
+			.codeKey(codeKey)
 			.member(member)
 			.build();
 	}
@@ -28,12 +30,13 @@ public class BoardFixture {
 
 		final int price = current().nextInt(5000, 50000);
 		final BoardStatus status = current().nextBoolean() ? BoardStatus.판매중 : BoardStatus.판매완료;
+		final CodeKey codeKey = new CodeKey(status.getGroupId(), status.getCodeId());
 
 		return Board.builder()
 			.title(title)
 			.content(content)
 			.price(price)
-			.boardStatus(status)
+			.codeKey(codeKey)
 			.member(member)
 			.build();
 	}

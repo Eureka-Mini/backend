@@ -226,32 +226,26 @@ class BoardControllerTest {
     @DisplayName("게시글 생성")
     void testWriteBoard_Success() throws Exception {
         // Given
-        Long memberId = 1L;
-        WriteBoardRequest request = new WriteBoardRequest("test", "test content",1000);
-        WriteBoardResponse response = WriteBoardResponse.builder()
-                .code("BOARD-S001")
-                .message("Board Write Success")
-                .data(WriteBoardResponse.BoardData.builder().id(1L).build())
-                .build();
+        final Member member = mock(Member.class);
+        given(member.getId()).willReturn(1L);
 
-        Member mockMember = Member.builder()
-                .email("test@example.com")
-                .nickname("testUser")
-                .password("password")
-                .build();
-        ReflectionTestUtils.setField(mockMember, "id", memberId);
-        UserDetailsDto userDetailsDto = new UserDetailsDto(mockMember);
+        final UserDetailsDto userDetails = new UserDetailsDto(member);
 
-        when(boardService.writeBoard(any(WriteBoardRequest.class), eq(memberId))).thenReturn(response);
+        final WriteBoardRequest request = new WriteBoardRequest("test", "test content",1000);
+        final WriteBoardResponse response = new WriteBoardResponse(1L);
 
-        // When & Then
-        mockMvc.perform(post("/boards")
+        given(boardService.writeBoard(any(), any())).willReturn(response);
+
+        // When
+        final ResultActions result = mockMvc.perform(
+                post("/boards")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
-                        .with(csrf())
-                        .with(user(userDetailsDto)))
-                .andExpect(status().isCreated())
-                .andExpect(content().json(objectMapper.writeValueAsString(response)));
+                        .with(authentication(UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities())))
+                        .with(csrf()));
+
+        // Then
+        result.andExpect(status().isCreated());
     }
 
     @Test

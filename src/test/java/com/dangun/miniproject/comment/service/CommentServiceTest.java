@@ -12,6 +12,7 @@ import com.dangun.miniproject.comment.dto.WriteCommentResponse;
 import com.dangun.miniproject.comment.exception.CommentNotFoundException;
 import com.dangun.miniproject.comment.repository.CommentRepository;
 import com.dangun.miniproject.comment.service.impl.CommentServiceImpl;
+import com.dangun.miniproject.common.code.CodeKey;
 import com.dangun.miniproject.member.domain.Member;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,9 +51,12 @@ public class CommentServiceTest {
                     .nickname("test")
                     .password("asdf")
                     .build();
+
+            CodeKey codeKey = new CodeKey(BoardStatus.판매완료.getGroupId(), BoardStatus.판매완료.getCodeId());
+
             Board board = Board.builder()
                     .title("test")
-                    .boardStatus(BoardStatus.판매완료)
+                    .codeKey(codeKey)
                     .member(member)
                     .price(10000)
                     .content("팝니다")
