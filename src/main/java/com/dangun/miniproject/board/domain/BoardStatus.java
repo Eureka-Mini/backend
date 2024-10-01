@@ -1,5 +1,7 @@
 package com.dangun.miniproject.board.domain;
 
+import com.dangun.miniproject.common.code.CodeKey;
+import com.dangun.miniproject.common.exception.InvalidInputException;
 import lombok.Getter;
 
 @Getter
@@ -14,12 +16,12 @@ public enum BoardStatus {
         this.groupId = groupId;
     }
 
-    public static BoardStatus fromCodeId(String codeId) {
+    public static BoardStatus from(CodeKey codeKey) {
         for (BoardStatus status : BoardStatus.values()) {
-            if (status.getCodeId().equals(codeId)) {
+            if (status.getCodeId().equals(codeKey.getCode()) && status.getGroupId().equals(codeKey.getGroupCode())) {
                 return status;
             }
         }
-        throw new IllegalArgumentException("유효하지 않은 codeId : " + codeId);
+        throw new InvalidInputException("유효하지 않은 codeKey : " + codeKey);
     }
 }
