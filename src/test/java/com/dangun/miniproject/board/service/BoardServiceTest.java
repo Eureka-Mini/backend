@@ -7,6 +7,7 @@ import com.dangun.miniproject.board.exception.BoardNotFoundException;
 import com.dangun.miniproject.board.repository.BoardRepository;
 import com.dangun.miniproject.board.service.impl.BoardServiceImpl;
 import com.dangun.miniproject.comment.domain.Comment;
+import com.dangun.miniproject.common.code.CodeKey;
 import com.dangun.miniproject.fixture.BoardFixture;
 import com.dangun.miniproject.fixture.CommentFixture;
 import com.dangun.miniproject.member.domain.Address;
@@ -82,6 +83,11 @@ class BoardServiceTest {
                 softAssertions.assertThat(result.getId()).isEqualTo(response.getId());
                 softAssertions.assertThat(result.getTitle()).isEqualTo(response.getTitle());
                 softAssertions.assertThat(result.getWriter()).isEqualTo(response.getWriter());
+
+                softAssertions.assertThat(result.getCodeKey()).isNotNull();
+                softAssertions.assertThat(result.getCodeKey().getCode()).isEqualTo(board.getCodeKey().getCode());
+                softAssertions.assertThat(result.getCodeKey().getGroupCode()).isEqualTo(board.getCodeKey().getGroupCode());
+
             });
         }
 
@@ -98,6 +104,9 @@ class BoardServiceTest {
             when(board.getComments()).thenReturn(List.of(comment1, comment2));
             when(member.getId()).thenReturn(1L);
             when(board.getMember()).thenReturn(member);
+
+            CodeKey mockCodeKey = new CodeKey("010", "010");
+            when(board.getCodeKey()).thenReturn(mockCodeKey);
 
             given(boardRepository.findById(any())).willReturn(Optional.of(board));
             when(member.getAddress()).thenReturn(address);
