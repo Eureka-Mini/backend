@@ -13,4 +13,13 @@ public enum BoardStatus {
         this.codeId = codeId;
         this.groupId = groupId;
     }
+
+    public static BoardStatus fromCodeId(String codeId) {
+        for (BoardStatus status : BoardStatus.values()) {
+            if (status.getCodeId().equals(codeId)) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("유효하지 않은 codeId : " + codeId);
+    }
 }

@@ -103,25 +103,19 @@ public class BoardServiceImpl implements BoardService {
     public WriteBoardResponse writeBoard(WriteBoardRequest request, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
+        CodeKey codeKey = new CodeKey(BoardStatus.판매중.getGroupId(), BoardStatus.판매중.getCodeId());
 
         Board board = Board.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .member(member)
-//                .boardStatus(BoardStatus.판매중)
+                .codeKey(codeKey)
                 .price(request.getPrice())
                 .build();
 
         Board savedBoard = boardRepository.save(board);
 
-        return WriteBoardResponse.builder()
-                .code("BOARD-S001")
-                .message("Board Write Success")
-                .data(WriteBoardResponse.BoardData.builder()
-                        .id(savedBoard.getId())
-                        .build())
-                .timestamp(LocalDateTime.now())
-                .build();
+        return new WriteBoardResponse(savedBoard.getId());
     }
 
     /**

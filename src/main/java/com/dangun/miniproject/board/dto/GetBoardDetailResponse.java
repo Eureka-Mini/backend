@@ -3,6 +3,7 @@ package com.dangun.miniproject.board.dto;
 import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.board.domain.BoardStatus;
 import com.dangun.miniproject.comment.dto.GetCommentResponse;
+import com.dangun.miniproject.common.code.CodeKey;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,7 +20,8 @@ public class GetBoardDetailResponse {
     private String writer;
     private String writerStreetAddress;
     private Integer price;
-    private BoardStatus boardStatus;
+//    private BoardStatus boardStatus;
+    private CodeKey codeKey;
     private LocalDateTime createdAt;
     private List<GetCommentResponse> comments = new ArrayList<>();
 
@@ -32,6 +34,7 @@ public class GetBoardDetailResponse {
         boardResponse.writer = board.getMember().getNickname();
         boardResponse.writerStreetAddress = board.getMember().getAddress().getStreet();
         boardResponse.price = board.getPrice();
+        boardResponse.codeKey=board.getCodeKey();
 //        boardResponse.boardStatus = board.getBoardStatus();
         boardResponse.createdAt = board.getCreatedAt();
 

@@ -27,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -80,6 +81,11 @@ class BoardServiceTest {
                 softAssertions.assertThat(result.getId()).isEqualTo(response.getId());
                 softAssertions.assertThat(result.getTitle()).isEqualTo(response.getTitle());
                 softAssertions.assertThat(result.getWriter()).isEqualTo(response.getWriter());
+
+                softAssertions.assertThat(result.getCodeKey()).isNotNull();
+                softAssertions.assertThat(result.getCodeKey().getCode()).isEqualTo(board.getCodeKey().getCode());
+                softAssertions.assertThat(result.getCodeKey().getGroupCode()).isEqualTo(board.getCodeKey().getGroupCode());
+
             });
         }
 
@@ -96,6 +102,9 @@ class BoardServiceTest {
             when(board.getComments()).thenReturn(List.of(comment1, comment2));
             when(member.getId()).thenReturn(1L);
             when(board.getMember()).thenReturn(member);
+
+            CodeKey mockCodeKey = new CodeKey("010", "010");
+            when(board.getCodeKey()).thenReturn(mockCodeKey);
 
             given(boardRepository.findById(any())).willReturn(Optional.of(board));
             when(member.getAddress()).thenReturn(address);
@@ -153,7 +162,7 @@ class BoardServiceTest {
             assertSoftly(softAssertions -> {
                 // board
                 softAssertions.assertThat(result.getContent().get(0).getTitle()).isEqualTo(response.getContent().get(0).getTitle());
-//                softAssertions.assertThat(result.getContent().get(0).getBoardStatus()).isEqualTo(response.getContent().get(0).getBoardStatus());
+                // softAssertions.assertThat(result.getContent().get(0).getBoardStatus().getCodeId()).isEqualTo(response.getContent().get(0).getCodeKey().getCode());
 
                 // page
                 softAssertions.assertThat(result.getTotalPages()).isEqualTo(response.getTotalPages());
@@ -226,41 +235,34 @@ class BoardServiceTest {
         }
     }
 
-
     @Test
     @DisplayName("게시글 생성")
     public void testWriteBoard() {
         // Given
-        Long memberId = 1L;
-        Long boardId = 1L;
+        final Member member = mock(Member.class);
 
-        Member member = new Member();
-        ReflectionTestUtils.setField(member, "id", memberId);
+        given(memberRepository.findById(any())).willReturn(Optional.of(member));
 
-        WriteBoardRequest request = new WriteBoardRequest("제목", "내용", 1000);
+        final WriteBoardRequest request = new WriteBoardRequest("제목", "내용", 1000);
+        final CodeKey codeKey = new CodeKey(BoardStatus.판매중.getGroupId(), BoardStatus.판매중.getCodeId());
 
-        Board board = Board.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .price(request.getPrice())
-                .build();
-        ReflectionTestUtils.setField(board, "id", boardId);
+        final Board board = Board.builder()
+            .title(request.getTitle())
+            .content(request.getContent())
+            .member(member)
+            .codeKey(codeKey)
+            .price(request.getPrice())
+            .build();
 
-        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-        when(boardRepository.save(any(Board.class))).thenReturn(board);
+        given(boardRepository.save(any())).willReturn(board);
+
+        final WriteBoardResponse response = new WriteBoardResponse(board.getId());
 
         // When
-        WriteBoardResponse response = boardService.writeBoard(request, memberId);
+        final WriteBoardResponse result = boardService.writeBoard(request, 1L);
 
         // Then
-        assertNotNull(response);
-        assertEquals("BOARD-S001", response.getCode());
-        assertEquals("Board Write Success", response.getMessage());
-        assertEquals(boardId, response.getData().getId());
-        assertNotNull(response.getTimestamp());
-
-        verify(memberRepository).findById(memberId);
-        verify(boardRepository).save(any(Board.class));
+        assertThat(result.getId()).isEqualTo(response.getId());
     }
 
     @Test
