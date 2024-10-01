@@ -8,11 +8,13 @@ import com.dangun.miniproject.board.repository.BoardRepository;
 import com.dangun.miniproject.board.service.impl.BoardServiceImpl;
 import com.dangun.miniproject.comment.domain.Comment;
 import com.dangun.miniproject.common.code.CodeKey;
+import com.dangun.miniproject.common.exception.InvalidInputException;
 import com.dangun.miniproject.fixture.BoardFixture;
 import com.dangun.miniproject.fixture.CommentFixture;
 import com.dangun.miniproject.member.domain.Address;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.repository.MemberRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -250,12 +252,12 @@ class BoardServiceTest {
         final CodeKey codeKey = new CodeKey(BoardStatus.판매중.getGroupId(), BoardStatus.판매중.getCodeId());
 
         final Board board = Board.builder()
-            .title(request.getTitle())
-            .content(request.getContent())
-            .member(member)
-            .codeKey(codeKey)
-            .price(request.getPrice())
-            .build();
+                .title(request.getTitle())
+                .content(request.getContent())
+                .member(member)
+                .codeKey(codeKey)
+                .price(request.getPrice())
+                .build();
 
         given(boardRepository.save(any())).willReturn(board);
 
@@ -281,215 +283,291 @@ class BoardServiceTest {
         assertThrows(RuntimeException.class, () -> boardService.writeBoard(request, memberId), "Member not found");
     }
 
-    // @Test
-    // @DisplayName("게시글 수정")
-    // public void testUpdateBoard() {
-    //     // Given
-    //     Member member = mock(Member.class);
-    //     Board existingBoard = BoardFixture.instanceOf(member);
-    //
-    //     when(boardRepository.findById(any())).thenReturn(Optional.of(existingBoard));
-    //
-    //     UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
-    //
-    //     // When
-    //     UpdateBoardResponse response = boardService.updateBoard(1L, request, 1L);
-    //
-    //     // Then
-    //     assertNotNull(response);
-    //     assertEquals("BOARD-S003", response.getCode());
-    //     assertEquals("Board Update Success", response.getMessage());
-    //     assertNotNull(response.getData());
-    //     assertEquals("새 내용", response.getData().getContent());
-    //     assertNotNull(response.getTimestamp());
-    //
-    //     assertEquals("새 제목", existingBoard.getTitle());
-    //     assertEquals("새 내용", existingBoard.getContent());
-    //     assertEquals(1000, existingBoard.getPrice());
-    //
-    //     verify(boardRepository, times(1)).findById(1L);
-    //     verifyNoInteractions(memberRepository);
-    // }
-    //
-    // @Test
-    // @DisplayName("존재하지 않는 회원이 수정")
-    // public void testUpdateBoardWithNonExistentMember() {
-    //     // Given
-    //     Long boardId = 1L;
-    //     Long nonExistentMemberId = 999L;
-    //     UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
-    //
-    //     Member existingMember = new Member();
-    //     ReflectionTestUtils.setField(existingMember, "id", 1L);
-    //
-    //     Board existingBoard = Board.builder()
-    //             .content("기존 내용")
-    //             .member(existingMember)
-    //             .price(1000)
-    //             .boardStatus(BoardStatus.판매중)
-    //             .title("기존 제목")
-    //             .build();
-    //     ReflectionTestUtils.setField(existingBoard, "id", boardId);
-    //
-    //     when(boardRepository.findById(boardId)).thenReturn(Optional.of(existingBoard));
-    //
-    //     // When & Then
-    //     RuntimeException thrown = assertThrows(RuntimeException.class, () ->
-    //             boardService.updateBoard(boardId, request, nonExistentMemberId)
-    //     );
-    //     assertEquals("Is not writer", thrown.getMessage());
-    // }
-    //
-    //
-    // @Test
-    // @DisplayName("토큰이 없을 때 수정 요청")
-    // public void testUpdateBoardWithNoToken() {
-    //     // Given
-    //     Long boardId = 1L;
-    //     Long memberId = 0L; // 인증되지 않은 사용자 (토큰이 없음)
-    //     UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
-    //
-    //     // When
-    //     RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
-    //         boardService.updateBoard(boardId, request, memberId);
-    //     });
-    //     // Then
-    //     assertEquals("Token Not Exist", thrown.getMessage());
-    // }
-    //
-    // @Test
-    // @DisplayName("존재하지 않는 게시글에 대한 수정")
-    // public void testUpdateNonExistentBoard() {
-    //     // Given
-    //     Long nonExistentBoardId = 999L;
-    //     UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
-    //
-    //     when(boardRepository.findById(nonExistentBoardId)).thenReturn(Optional.empty());
-    //
-    //     // When
-    //     RuntimeException thrown = assertThrows(BoardNotFoundException.class, () -> {
-    //         boardService.updateBoard(nonExistentBoardId, request, 1L);
-    //     });
-    //     // Then
-    //     assertEquals("Board not found", thrown.getMessage());
-    // }
-    //
-    //
-    // @Test
-    // public void testUpdateBoard_withNullValues() {
-    //     // given
-    //     Long boardId = 1L;
-    //     Long memberId = 1L;
-    //     UpdateBoardRequest request = new UpdateBoardRequest(
-    //             null,  // Title을 null로 설정
-    //             null,  // Content을 null로 설정
-    //             null,  // Price를 null로 설정
-    //             "판매중"  // BoardStatus는 null이 아닌 값으로 설정
-    //     );
-    //
-    //     Member member = new Member();
-    //     ReflectionTestUtils.setField(member, "id", memberId);
-    //
-    //     Board existingBoard = Board.builder()
-    //             .title("Existing Title")
-    //             .content("Existing Content")
-    //             .price(1000)
-    //             .boardStatus(BoardStatus.판매중)
-    //             .member(member)
-    //             .build();
-    //     ReflectionTestUtils.setField(existingBoard, "id", boardId);
-    //
-    //     when(boardRepository.findById(eq(boardId))).thenReturn(Optional.of(existingBoard));
-    //
-    //     // when
-    //     UpdateBoardResponse response = boardService.updateBoard(boardId, request, memberId);
-    //
-    //     // then
-    //     assertNotNull(response);
-    //     assertEquals("BOARD-S003", response.getCode());
-    //     assertEquals("Board Update Success", response.getMessage());
-    //
-    //     // 변경되지 않아야 할 필드들 확인
-    //     assertEquals("Existing Title", existingBoard.getTitle());
-    //     assertEquals("Existing Content", existingBoard.getContent());
-    //     assertEquals(1000, existingBoard.getPrice());
-    //
-    //     // BoardStatus는 변경되어야 함 (request에서 null이 아닌 값으로 제공됨)
-    //     assertEquals(BoardStatus.판매중, existingBoard.getBoardStatus());
-    //
-    //     // boardRepository의 findById 메소드가 호출되었는지 확인
-    //     verify(boardRepository, times(1)).findById(eq(boardId));
-    //
-    //     // memberRepository 관련 검증 제거
-    // }
-    //
-    //
-    //
-    //
-    // @Test
-    // @DisplayName("게시글 삭제 성공")
-    // public void testDeleteBoard() {
-    //     // Given
-    //     Long boardId = 1L;
-    //     Long memberId = 1L;
-    //
-    //     Member member = Member.builder()
-    //             .email("test@example.com")
-    //             .nickname("테스트닉네임")
-    //             .password("password")
-    //             .build();
-    //     ReflectionTestUtils.setField(member, "id", memberId);
-    //
-    //     Board board = Board.builder()
-    //             .title("제목")
-    //             .content("내용")
-    //             .price(1000)
-    //             .boardStatus(BoardStatus.판매중)
-    //             .member(member)
-    //             .build();
-    //     ReflectionTestUtils.setField(board, "id", boardId);
-    //
-    //     when(boardRepository.findById(boardId)).thenReturn(Optional.of(board));
-    //
-    //     // When
-    //     DeleteBoardResponse response = boardService.deleteBoard(boardId, memberId);
-    //
-    //     // Then
-    //     verify(boardRepository).findById(boardId);
-    //     verify(boardRepository).delete(board);
-    //
-    //     assertNotNull(response);
-    //     assertEquals("BOARD-S004", response.getCode());
-    //     assertEquals("Board Delete Success", response.getMessage());
-    // }
-    //
-    // @Test
-    // @DisplayName("존재하지 않는 회원이 게시글 삭제 시도")
-    // public void testDeleteBoardByNonExistentMember() {
-    //     // Given
-    //     Long boardId = 999L;
-    //     Long nonExistentMemberId = 999L;
-    //
-    //     Member existingMember = new Member();
-    //     ReflectionTestUtils.setField(existingMember, "id", 1L);
-    //
-    //     Board board = Board.builder()
-    //             .title("제목")
-    //             .content("내용")
-    //             .price(1000)
-    //             .boardStatus(BoardStatus.판매중)
-    //             .member(existingMember)
-    //             .build();
-    //     ReflectionTestUtils.setField(board, "id", boardId);
-    //
-    //     when(boardRepository.findById(boardId)).thenReturn(Optional.of(board));
-    //
-    //     // When & Then
-    //     assertThrows(RuntimeException.class, () ->
-    //             boardService.deleteBoard(boardId, nonExistentMemberId)
-    //     );
-    //
-    //     verify(boardRepository).findById(boardId);
-    //     verify(boardRepository, never()).delete(any(Board.class));
-    // }
+
+    @Test
+    @DisplayName("게시글 수정")
+    public void testUpdateBoard() {
+        // Given
+        Long boardId = 1L;
+        Long memberId = 1L;
+
+        Member member = new Member();
+        ReflectionTestUtils.setField(member, "id", memberId);
+
+        Board existingBoard = Board.builder()
+                .title("기존 제목")
+                .content("기존 내용")
+                .price(500)
+                .codeKey(new CodeKey(BoardStatus.판매중.getCodeId(), BoardStatus.판매중.getGroupId()))
+                .member(member)
+                .build();
+        ReflectionTestUtils.setField(existingBoard, "id", boardId);
+
+        UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매완료");
+
+        when(boardRepository.findById(boardId)).thenReturn(Optional.of(existingBoard));
+
+        // When
+        UpdateBoardResponse response = boardService.updateBoard(boardId, request, memberId);
+
+        // Then
+        assertNotNull(response);
+        assertEquals("새 내용", response.getContent());
+        assertEquals("새 제목", existingBoard.getTitle());
+        assertEquals("새 내용", existingBoard.getContent());
+        assertEquals(1000, existingBoard.getPrice());
+        assertEquals(BoardStatus.판매완료.getCodeId(), existingBoard.getCodeKey().getCode());
+        assertEquals(BoardStatus.판매완료.getGroupId(), existingBoard.getCodeKey().getGroupCode());
+
+        verify(boardRepository, times(1)).findById(boardId);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 회원이 수정")
+    public void testUpdateBoardWithNonExistentMember() {
+        // Given
+        Long boardId = 1L;
+        Long nonExistentMemberId = 999L;
+        UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
+
+        Member existingMember = new Member();
+        ReflectionTestUtils.setField(existingMember, "id", 1L);
+
+        Board existingBoard = Board.builder()
+                .content("기존 내용")
+                .member(existingMember)
+                .price(1000)
+                .codeKey(new CodeKey(BoardStatus.판매중.getCodeId(), BoardStatus.판매중.getGroupId()))
+                .title("기존 제목")
+                .build();
+        ReflectionTestUtils.setField(existingBoard, "id", boardId);
+
+        when(boardRepository.findById(boardId)).thenReturn(Optional.of(existingBoard));
+
+        // When & Then
+        RuntimeException thrown = assertThrows(RuntimeException.class, () ->
+                boardService.updateBoard(boardId, request, nonExistentMemberId)
+        );
+        assertEquals("Is not writer", thrown.getMessage());
+    }
+
+
+    @Test
+    @DisplayName("토큰이 없을 때 수정 요청")
+    public void testUpdateBoardWithNoToken() {
+        // Given
+        Long boardId = 1L;
+        Long memberId = 0L; // 인증되지 않은 사용자 (토큰이 없음)
+        UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
+
+        // When
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+            boardService.updateBoard(boardId, request, memberId);
+        });
+        // Then
+        assertEquals("Token Not Exist", thrown.getMessage());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글에 대한 수정")
+    public void testUpdateNonExistentBoard() {
+        // Given
+        Long nonExistentBoardId = 999L;
+        UpdateBoardRequest request = new UpdateBoardRequest("새 제목", "새 내용", 1000, "판매중");
+
+        when(boardRepository.findById(nonExistentBoardId)).thenReturn(Optional.empty());
+
+        // When
+        RuntimeException thrown = assertThrows(BoardNotFoundException.class, () -> {
+            boardService.updateBoard(nonExistentBoardId, request, 1L);
+        });
+        // Then
+        assertEquals("Board not found", thrown.getMessage());
+    }
+
+
+    @Test
+    public void testUpdateBoard_withNullValues() {
+        // given
+        Long boardId = 1L;
+        Long memberId = 1L;
+        UpdateBoardRequest request = new UpdateBoardRequest(
+                null,  // Title을 null로 설정
+                null,  // Content을 null로 설정
+                null,  // Price를 null로 설정
+                "판매완료"  // BoardStatus는 null이 아닌 값으로 설정
+        );
+
+        Member member = mock(Member.class);
+
+        Board existingBoard = spy(Board.builder()
+                .title("Existing Title")
+                .content("Existing Content")
+                .price(1000)
+                .codeKey(new CodeKey(BoardStatus.판매중.getCodeId(), BoardStatus.판매중.getGroupId()))
+                .member(member)
+                .build());
+
+        when(member.getId()).thenReturn(memberId);
+        when(boardRepository.findById(eq(boardId))).thenReturn(Optional.of(existingBoard));
+
+        // when
+        UpdateBoardResponse response = boardService.updateBoard(boardId, request, memberId);
+
+        // then
+        assertNotNull(response);
+
+        // 변경되지 않아야 할 필드들 확인
+        assertEquals("Existing Title", existingBoard.getTitle());
+        assertEquals("Existing Content", existingBoard.getContent());
+        assertEquals(1000, existingBoard.getPrice());
+
+        // BoardStatus는 변경되어야 함 (request에서 null이 아닌 값으로 제공됨)
+        assertEquals(BoardStatus.판매완료.getCodeId(), existingBoard.getCodeKey().getCode());
+        assertEquals(BoardStatus.판매완료.getGroupId(), existingBoard.getCodeKey().getGroupCode());
+
+        // boardRepository의 findById 메소드가 호출되었는지 확인
+        verify(boardRepository, times(1)).findById(eq(boardId));
+    }
+
+    @Test
+    public void 게시글_수정_요청_시_boardStatus_null() {
+        // given
+        Long boardId = 1L;
+        Long memberId = 1L;
+        UpdateBoardRequest request = new UpdateBoardRequest(
+                "updated title",
+                "updated content",
+                10000,
+                null
+        );
+
+        Member member = mock(Member.class);
+
+        Board existingBoard = spy(Board.builder()
+                .title("Existing Title")
+                .content("Existing Content")
+                .price(1000)
+                .codeKey(new CodeKey(BoardStatus.판매중.getCodeId(), BoardStatus.판매중.getGroupId()))
+                .member(member)
+                .build());
+
+        when(member.getId()).thenReturn(memberId);
+        when(boardRepository.findById(eq(boardId))).thenReturn(Optional.of(existingBoard));
+
+        // when
+        UpdateBoardResponse response = boardService.updateBoard(boardId, request, memberId);
+
+        // then
+        assertNotNull(response);
+
+        assertEquals(request.getTitle(), existingBoard.getTitle());
+        assertEquals(request.getContent(), existingBoard.getContent());
+        assertEquals(request.getPrice(), existingBoard.getPrice());
+
+        assertEquals(BoardStatus.판매중.getCodeId(), existingBoard.getCodeKey().getCode());
+        assertEquals(BoardStatus.판매중.getGroupId(), existingBoard.getCodeKey().getGroupCode());
+
+        verify(boardRepository, times(1)).findById(eq(boardId));
+    }
+
+    @Test
+    void 유효하지_않은_게시판_상태_수정_요청_시도() {
+        // given
+        Long boardId = 1L;
+        Long memberId = 1L;
+        String wrongBoardState = "잘못된게시판상태";
+        UpdateBoardRequest request = new UpdateBoardRequest(
+                null,
+                null,
+                null,
+                wrongBoardState
+        );
+
+        Member member = mock(Member.class);
+
+        Board existingBoard = spy(Board.builder()
+                .title("Existing Title")
+                .content("Existing Content")
+                .price(1000)
+                .codeKey(new CodeKey(BoardStatus.판매중.getCodeId(), BoardStatus.판매중.getGroupId()))
+                .member(member)
+                .build());
+
+        when(member.getId()).thenReturn(memberId);
+        when(boardRepository.findById(eq(boardId))).thenReturn(Optional.of(existingBoard));
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> boardService.updateBoard(boardId, request, memberId))
+                .isInstanceOf(InvalidInputException.class)
+                .hasMessage("Invalid Board Status");
+    }
+
+
+    @Test
+    @DisplayName("게시글 삭제 성공")
+    public void testDeleteBoard() {
+        // Given
+        Long boardId = 1L;
+        Long memberId = 1L;
+
+        Member member = Member.builder()
+                .email("test@example.com")
+                .nickname("테스트닉네임")
+                .password("password")
+                .build();
+        ReflectionTestUtils.setField(member, "id", memberId);
+
+        Board board = Board.builder()
+                .title("제목")
+                .content("내용")
+                .price(1000)
+                .codeKey(mock(CodeKey.class))
+                .member(member)
+                .build();
+        ReflectionTestUtils.setField(board, "id", boardId);
+
+        when(boardRepository.findById(boardId)).thenReturn(Optional.of(board));
+
+        // When
+        DeleteBoardResponse response = boardService.deleteBoard(boardId, memberId);
+
+        // Then
+        verify(boardRepository).findById(boardId);
+        verify(boardRepository).delete(board);
+
+        assertNotNull(response);
+        assertEquals("BOARD-S004", response.getCode());
+        assertEquals("Board Delete Success", response.getMessage());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 회원이 게시글 삭제 시도")
+    public void testDeleteBoardByNonExistentMember() {
+        // Given
+        Long boardId = 999L;
+        Long nonExistentMemberId = 999L;
+
+        Member existingMember = new Member();
+        ReflectionTestUtils.setField(existingMember, "id", 1L);
+
+        Board board = Board.builder()
+                .title("제목")
+                .content("내용")
+                .price(1000)
+                .codeKey(mock(CodeKey.class))
+                .member(existingMember)
+                .build();
+        ReflectionTestUtils.setField(board, "id", boardId);
+
+        when(boardRepository.findById(boardId)).thenReturn(Optional.of(board));
+
+        // When & Then
+        assertThrows(RuntimeException.class, () ->
+                boardService.deleteBoard(boardId, nonExistentMemberId)
+        );
+
+        verify(boardRepository).findById(boardId);
+        verify(boardRepository, never()).delete(any(Board.class));
+    }
 }

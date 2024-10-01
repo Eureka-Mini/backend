@@ -9,6 +9,7 @@ import com.dangun.miniproject.board.service.BoardService;
 import com.dangun.miniproject.comment.domain.Comment;
 import com.dangun.miniproject.comment.dto.GetCommentResponse;
 import com.dangun.miniproject.common.code.CodeKey;
+import com.dangun.miniproject.common.exception.InvalidInputException;
 import com.dangun.miniproject.member.domain.Member;
 import com.dangun.miniproject.member.exception.MemberNotFoundException;
 import com.dangun.miniproject.member.repository.MemberRepository;
@@ -134,25 +135,16 @@ public class BoardServiceImpl implements BoardService {
             throw new AccessDeniedException("Is not writer");
         }
 
-        // 부분 업데이트 로직
-        //null이면 그 필드는 업데이트하지 않고 기존 값을 유지
         board.updateDetails(
                 request.getTitle() != null ? request.getTitle() : board.getTitle(),
                 request.getContent() != null ? request.getContent() : board.getContent(),
-                request.getPrice() != null ? request.getPrice() : board.getPrice(), null
-                //request.getBoardStatus() != null ? BoardStatus.valueOf(request.getBoardStatus()) : board.getBoardStatus()
-//                BoardStatus.valueOf(request.getBoardStatus())
+                request.getPrice() != null ? request.getPrice() : board.getPrice(),
+                request.getBoardStatus() != null
+                        ? tryParseBoardStatus(request.getBoardStatus()) : board.getCodeKey()
         );
 
         // 응답 생성
-        return UpdateBoardResponse.builder()
-                .code("BOARD-S003")
-                .message("Board Update Success")
-                .data(UpdateBoardResponse.Data.builder()
-                        .content(board.getContent())
-                        .build())
-                .timestamp(LocalDateTime.now())
-                .build();
+        return new UpdateBoardResponse(board.getContent());
     }
 
 
@@ -177,4 +169,14 @@ public class BoardServiceImpl implements BoardService {
                 .timestamp(LocalDateTime.now())
                 .build();
     }
+
+    private CodeKey tryParseBoardStatus(String status) {
+        try {
+            BoardStatus boardStatus = BoardStatus.valueOf(status);
+            return new CodeKey(boardStatus.getGroupId(), boardStatus.getCodeId());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidInputException("Invalid Board Status");
+        }
+    }
+
 }

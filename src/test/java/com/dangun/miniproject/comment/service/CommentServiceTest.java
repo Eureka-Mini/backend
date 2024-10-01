@@ -1,7 +1,6 @@
 package com.dangun.miniproject.comment.service;
 
 import com.dangun.miniproject.board.domain.Board;
-import com.dangun.miniproject.board.domain.BoardStatus;
 import com.dangun.miniproject.board.exception.BoardNotFoundException;
 import com.dangun.miniproject.board.repository.BoardRepository;
 import com.dangun.miniproject.comment.domain.Comment;
@@ -51,12 +50,9 @@ public class CommentServiceTest {
                     .nickname("test")
                     .password("asdf")
                     .build();
-
-            CodeKey codeKey = new CodeKey(BoardStatus.판매완료.getGroupId(), BoardStatus.판매완료.getCodeId());
-
             Board board = Board.builder()
                     .title("test")
-                    .codeKey(codeKey)
+                    .codeKey(mock(CodeKey.class))
                     .member(member)
                     .price(10000)
                     .content("팝니다")
@@ -173,20 +169,20 @@ public class CommentServiceTest {
         }
 
         @Test
-        void 존재하지_않는_댓글을_수정한다_400(){
-                // given
-                Long commentId = 10L;
-                Long boardId = 20L;
-                UpdateCommentRequest request = mock(UpdateCommentRequest.class);
-                Member member = mock(Member.class);
+        void 존재하지_않는_댓글을_수정한다_400() {
+            // given
+            Long commentId = 10L;
+            Long boardId = 20L;
+            UpdateCommentRequest request = mock(UpdateCommentRequest.class);
+            Member member = mock(Member.class);
 
-                when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+            when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
-                // when & then
+            // when & then
             assertThatThrownBy(() -> commentService.updateComment(boardId, commentId, member, request))
                     .isInstanceOf(CommentNotFoundException.class)
                     .hasMessage("Comment not found");
-            }
+        }
     }
 
     @Nested

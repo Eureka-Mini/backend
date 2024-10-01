@@ -40,8 +40,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = BoardController.class)
 @WithMockUser
@@ -231,7 +230,7 @@ class BoardControllerTest {
 
         final UserDetailsDto userDetails = new UserDetailsDto(member);
 
-        final WriteBoardRequest request = new WriteBoardRequest("test", "test content",1000);
+        final WriteBoardRequest request = new WriteBoardRequest("test", "test content", 1000);
         final WriteBoardResponse response = new WriteBoardResponse(1L);
 
         given(boardService.writeBoard(any(), any())).willReturn(response);
@@ -252,7 +251,7 @@ class BoardControllerTest {
     @DisplayName("존재하지 않는 회원으로 게시글 생성 요청")
     void testCreateBoard_MemberNotFound() throws Exception {
         // Given
-        WriteBoardRequest request = new WriteBoardRequest("Test Title", "Test Content",1000);
+        WriteBoardRequest request = new WriteBoardRequest("Test Title", "Test Content", 1000);
         when(boardService.writeBoard(any(WriteBoardRequest.class), any(Long.class)))
                 .thenThrow(new UsernameNotFoundException("Member not found"));
 
@@ -272,20 +271,16 @@ class BoardControllerTest {
         Long boardId = 1L;
         Long memberId = 1L;
         UpdateBoardRequest request = new UpdateBoardRequest("Updated Title", "Updated Content", 1000, "판매중");
-        UpdateBoardResponse response = UpdateBoardResponse.builder()
-                .code("BOARD-S002")
-                .message("Board Update Success")
-                .data(UpdateBoardResponse.Data.builder().content("test content").build())
-                .build();
+        UpdateBoardResponse response = new UpdateBoardResponse("Updated Content");
 
-        Member mockMember = Member.builder()
+        Member mockMember = spy(Member.builder()
                 .email("test@example.com")
                 .nickname("testUser")
                 .password("password")
-                .build();
-        ReflectionTestUtils.setField(mockMember, "id", memberId);
+                .build());
         UserDetailsDto userDetailsDto = new UserDetailsDto(mockMember);
 
+        when(mockMember.getId()).thenReturn(memberId);
         when(boardService.updateBoard(eq(boardId), any(UpdateBoardRequest.class), eq(memberId)))
                 .thenReturn(response);
 
@@ -296,9 +291,8 @@ class BoardControllerTest {
                         .with(csrf())
                         .with(user(userDetailsDto)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(response)));
+                .andExpect(jsonPath("$.data.content").value(response.getContent()));
     }
-
 
 
     @Test
@@ -352,9 +346,9 @@ class BoardControllerTest {
                 .andReturn();
 
         String responseContent = result.getResponse().getContentAsString();
-            DocumentContext context = JsonPath.parse(responseContent);
-            assertThat(context.read("$.code", String.class)).isEqualTo("AUTH-F101");
-            assertThat(context.read("$.message", String.class)).isEqualTo("Token Not Exist");
+        DocumentContext context = JsonPath.parse(responseContent);
+        assertThat(context.read("$.code", String.class)).isEqualTo("AUTH-F101");
+        assertThat(context.read("$.message", String.class)).isEqualTo("Token Not Exist");
     }
 
     @Test

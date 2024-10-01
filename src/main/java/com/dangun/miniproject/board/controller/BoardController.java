@@ -1,7 +1,10 @@
 package com.dangun.miniproject.board.controller;
 
 import com.dangun.miniproject.auth.dto.UserDetailsDto;
-import com.dangun.miniproject.board.dto.*;
+import com.dangun.miniproject.board.dto.DeleteBoardResponse;
+import com.dangun.miniproject.board.dto.UpdateBoardRequest;
+import com.dangun.miniproject.board.dto.UpdateBoardResponse;
+import com.dangun.miniproject.board.dto.WriteBoardRequest;
 import com.dangun.miniproject.board.service.BoardService;
 import com.dangun.miniproject.common.ApiResponse;
 import com.dangun.miniproject.member.domain.Member;
@@ -83,13 +86,17 @@ public class BoardController {
 
 	// 게시글 수정
 	@PutMapping("/{boardId}")
-	public ResponseEntity<UpdateBoardResponse> updateBoard(
+	public ResponseEntity<?> updateBoard(
 			@AuthenticationPrincipal UserDetailsDto userDetailsDto,
 			@PathVariable Long boardId,
 			@RequestBody UpdateBoardRequest updateBoardRequest) {
 		Long memberId = userDetailsDto.getMember().getId();
 		UpdateBoardResponse response = boardService.updateBoard(boardId, updateBoardRequest, memberId);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		return ApiResponse.ok(
+				"BOARD-S003",
+				response,
+				"Board Update Success"
+		);
 	}
 
 	// 게시글 삭제
