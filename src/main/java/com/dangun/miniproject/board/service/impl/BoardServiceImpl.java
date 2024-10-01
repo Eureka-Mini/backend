@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -123,7 +122,7 @@ public class BoardServiceImpl implements BoardService {
      */
     @Override
     @Transactional
-    public Map<String, String> updateBoard(Long boardId, UpdateBoardRequest request, Long memberId) {
+    public UpdateBoardResponse updateBoard(Long boardId, UpdateBoardRequest request, Long memberId) {
         if (memberId == 0) {
             throw new InternalAuthenticationServiceException("Token Not Exist") {
             };
@@ -149,7 +148,7 @@ public class BoardServiceImpl implements BoardService {
         );
 
         // 응답 생성
-        return Map.of("content", board.getContent());
+        return new UpdateBoardResponse(board.getContent());
     }
 
 

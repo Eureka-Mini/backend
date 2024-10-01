@@ -25,9 +25,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -247,12 +250,12 @@ class BoardServiceTest {
         final CodeKey codeKey = new CodeKey(BoardStatus.판매중.getGroupId(), BoardStatus.판매중.getCodeId());
 
         final Board board = Board.builder()
-            .title(request.getTitle())
-            .content(request.getContent())
-            .member(member)
-            .codeKey(codeKey)
-            .price(request.getPrice())
-            .build();
+                .title(request.getTitle())
+                .content(request.getContent())
+                .member(member)
+                .codeKey(codeKey)
+                .price(request.getPrice())
+                .build();
 
         given(boardRepository.save(any())).willReturn(board);
 
@@ -303,11 +306,11 @@ class BoardServiceTest {
         when(boardRepository.findById(boardId)).thenReturn(Optional.of(existingBoard));
 
         // When
-        Map<String, String> response = boardService.updateBoard(boardId, request, memberId);
+        UpdateBoardResponse response = boardService.updateBoard(boardId, request, memberId);
 
         // Then
         assertNotNull(response);
-        assertEquals("새 내용", response.get("content"));
+        assertEquals("새 내용", response.getContent());
         assertEquals("새 제목", existingBoard.getTitle());
         assertEquals("새 내용", existingBoard.getContent());
         assertEquals(1000, existingBoard.getPrice());
@@ -407,7 +410,7 @@ class BoardServiceTest {
         when(boardRepository.findById(eq(boardId))).thenReturn(Optional.of(existingBoard));
 
         // when
-        Map<String, String> response = boardService.updateBoard(boardId, request, memberId);
+        UpdateBoardResponse response = boardService.updateBoard(boardId, request, memberId);
 
         // then
         assertNotNull(response);
@@ -424,8 +427,6 @@ class BoardServiceTest {
         // boardRepository의 findById 메소드가 호출되었는지 확인
         verify(boardRepository, times(1)).findById(eq(boardId));
     }
-
-
 
 
     @Test

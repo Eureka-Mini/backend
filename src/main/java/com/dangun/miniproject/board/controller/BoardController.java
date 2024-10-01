@@ -1,7 +1,10 @@
 package com.dangun.miniproject.board.controller;
 
 import com.dangun.miniproject.auth.dto.UserDetailsDto;
-import com.dangun.miniproject.board.dto.*;
+import com.dangun.miniproject.board.dto.DeleteBoardResponse;
+import com.dangun.miniproject.board.dto.UpdateBoardRequest;
+import com.dangun.miniproject.board.dto.UpdateBoardResponse;
+import com.dangun.miniproject.board.dto.WriteBoardRequest;
 import com.dangun.miniproject.board.service.BoardService;
 import com.dangun.miniproject.common.ApiResponse;
 import com.dangun.miniproject.member.domain.Member;
@@ -11,8 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -90,7 +91,7 @@ public class BoardController {
 			@PathVariable Long boardId,
 			@RequestBody UpdateBoardRequest updateBoardRequest) {
 		Long memberId = userDetailsDto.getMember().getId();
-		Map<String, String> response = boardService.updateBoard(boardId, updateBoardRequest, memberId);
+		UpdateBoardResponse response = boardService.updateBoard(boardId, updateBoardRequest, memberId);
 		return ApiResponse.ok(
 				"BOARD-S003",
 				response,
