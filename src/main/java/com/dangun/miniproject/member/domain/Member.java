@@ -2,6 +2,7 @@ package com.dangun.miniproject.member.domain;
 
 import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.comment.domain.Comment;
+import com.dangun.miniproject.common.code.CodeKey;
 import com.dangun.miniproject.member.dto.GetMemberDto;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -26,6 +27,9 @@ public class Member {
 
     private String nickname;
 
+    @Embedded
+    private CodeKey codeKey;
+
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
     private Address address;
 
@@ -36,10 +40,11 @@ public class Member {
     private List<Comment> comments = new ArrayList<>();
 
     @Builder
-    private Member(String email, String nickname, String password) {
+    private Member(String email, String nickname, String password, CodeKey codeKey) {
         this.email = email;
         this.nickname = nickname;
         this.password = password;
+        this.codeKey = codeKey;
     }
 
     public void updateMember(GetMemberDto getMemberDto) {
