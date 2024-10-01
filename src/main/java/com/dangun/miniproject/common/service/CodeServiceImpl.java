@@ -83,14 +83,6 @@ public class CodeServiceImpl implements CodeService{
 	}
 
 	@Override
-	public CodeResultDto countCode() {
-		CodeResultDto codeResultDto = new CodeResultDto();
-		long count = codeRepository.count();
-		codeResultDto.setCount(count);
-		return codeResultDto;
-	}
-
-	@Override
 	public CodeResultDto detailCode(CodeKey codeKey) {
 		CodeResultDto codeResultDto = new CodeResultDto();
 		Optional<Code> optionalCode = codeRepository.findById(codeKey);
