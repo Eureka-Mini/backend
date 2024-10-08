@@ -182,8 +182,12 @@ INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) V
 INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) VALUES (99, '2024-09-20 14:14:16', '2024-09-20 14:14:16', '상품 상태가 궁금합니다.', 41, 6);
 INSERT INTO comment (id, created_at, updated_at, content, board_id, member_id) VALUES (100, '2024-09-20 14:19:16', '2024-09-20 14:19:16', '예약 가능한가요?', 42, 4);
 
--- code
+-- Insert statements for Like
+INSERT INTO `like` (board_id, member_id) VALUE (48, 6);
+INSERT INTO `like` (board_id, member_id) VALUE (49, 6);
+INSERT INTO `like` (board_id, member_id) VALUE (50, 6);
 
+-- code
 INSERT INTO group_code (group_code, group_code_desc, group_code_name) VALUES ('010', '판매 상태를 알리는 코드', '판매상태');
 
 INSERT INTO code (order_no, code, code_name, code_name_brief, group_code) VALUES (1, '010', '판매중', 'sale', '010');

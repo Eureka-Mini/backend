@@ -3,6 +3,7 @@ package com.dangun.miniproject.member.domain;
 import com.dangun.miniproject.board.domain.Board;
 import com.dangun.miniproject.comment.domain.Comment;
 import com.dangun.miniproject.common.code.CodeKey;
+import com.dangun.miniproject.like.domain.Like;
 import com.dangun.miniproject.member.dto.GetMemberDto;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -10,7 +11,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -38,6 +41,9 @@ public class Member {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private Set<Like> likes = new HashSet<>();
 
     @Builder
     private Member(String email, String nickname, String password, CodeKey codeKey) {
