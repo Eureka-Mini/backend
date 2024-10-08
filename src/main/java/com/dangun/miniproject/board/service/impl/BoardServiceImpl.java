@@ -95,6 +95,16 @@ public class BoardServiceImpl implements BoardService {
     }
 
     /**
+     * 본인이 좋아요 누른 게시판 조회
+     */
+    @Override
+    public Page<GetBoardResponse> getMyBoardLikeList(Long memberId, final Pageable pageable) {
+        final Page<Board> boards = boardRepository.findBoardsLikeListByMember(memberId, pageable);
+
+        return boards.map(GetBoardResponse::from);
+    }
+
+    /**
      * 게시글 생성
      */
     @Override
