@@ -69,7 +69,7 @@ public class BoardController {
     }
 
     // 본인이 좋아요 누른 게시판 조회
-    @GetMapping("/board/like")
+    @GetMapping("/likes")
     public ResponseEntity<?> getMyBoardLikeList(
             @AuthenticationPrincipal(expression = "member") final Member member,
             final Pageable pageable
