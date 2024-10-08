@@ -1,13 +1,12 @@
 package com.dangun.miniproject.board.repository;
 
+import com.dangun.miniproject.board.domain.Board;
+import com.dangun.miniproject.board.dto.GetBoardDetailResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import com.dangun.miniproject.board.domain.Board;
-import com.dangun.miniproject.board.dto.GetBoardDetailResponse;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
@@ -53,4 +52,13 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 	""")
 	Page<Board> findAllByMyBoard(final Long memberId, final Pageable pageable);
 
+    // 본인이 좋아요 누른 게시판 조회
+    @Query(value = """
+            SELECT b
+            FROM Board b
+            JOIN FETCH b.likes l
+            WHERE l.member.id = :memberId
+            ORDER BY b.createdAt DESC
+            """)
+    Page<Board> findBoardsLikeListByMember(final Long memberId, final Pageable pageable);
 }

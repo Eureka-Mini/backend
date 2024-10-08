@@ -61,12 +61,26 @@ public class BoardController {
 			final Pageable pageable
 	) {
 
-		return ApiResponse.ok(
-			"BOARD-S002",
-			boardService.getMyBoardList(member.getId(), pageable),
-			"My Board List Success"
-		);
-	}
+        return ApiResponse.ok(
+                "BOARD-S002",
+                boardService.getMyBoardList(member.getId(), pageable),
+                "My Board List Success"
+        );
+    }
+
+    // 본인이 좋아요 누른 게시판 조회
+    @GetMapping("/board/like")
+    public ResponseEntity<?> getMyBoardLikeList(
+            @AuthenticationPrincipal(expression = "member") final Member member,
+            final Pageable pageable
+    ) {
+
+        return ApiResponse.ok(
+                "BOARD-S002",
+                boardService.getMyBoardLikeList(member.getId(), pageable),
+                "My Like Board List Success"
+        );
+    }
 
 	// 게시글 생성
 	@PostMapping
